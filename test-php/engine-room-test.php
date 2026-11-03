@@ -6,6 +6,7 @@ require_once __DIR__ . '/../app/Game/Scoring.php';
 require_once __DIR__ . '/../app/Game/Rules.php';
 require_once __DIR__ . '/../app/Game/Purchase.php';
 require_once __DIR__ . '/../app/Game/Bot.php';
+require_once __DIR__ . '/../app/Game/TurnClock.php';
 require_once __DIR__ . '/../app/Game/Qaid.php';
 require_once __DIR__ . '/../app/Game/Engine.php';
 use Baloot\Game\Engine;
