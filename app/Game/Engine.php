@@ -89,7 +89,7 @@ final class Engine
                 $room['lastAction'] = 'أُغلق كشف القيد.';
                 break;
             case 'next':
-                if ($seat !== 0) throw new DomainException('صاحب الغرفة فقط يبدأ التوزيعة التالية');
+                if (!hash_equals((string) ($room['ownerGuestId'] ?? ''), (string) ($room['players'][$seat]['guestId'] ?? ''))) throw new DomainException('صاحب الغرفة فقط يبدأ التوزيعة التالية');
                 Rules::nextRound($g);
                 $room['lastAction'] = 'بدأت توزيعة جديدة.';
                 break;
