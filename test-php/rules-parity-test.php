@@ -14,6 +14,9 @@ function parity(bool $ok, string $message): void { if (!$ok) throw new RuntimeEx
 function cards(string $suit, array $ranks): array { return array_map(fn($rank) => ['suit'=>$suit,'rank'=>$rank,'id'=>$suit.$rank], $ranks); }
 
 // Golden expectations are taken from game/rules.js, game/projects.js and game/scoring.js.
+$seatAudit = Rules::create(['A','B','C','D']);
+Rules::deal($seatAudit);
+parity($seatAudit['auctionOrder'] === [3,2,1,0], 'auction order follows dealer-right counterclockwise seat progression');
 $deck = Rules::deck();
 parity(count($deck) === 32 && count(array_unique(array_column($deck,'id'))) === 32, 'reference deck has 32 unique cards');
 parity(array_sum(array_map(fn($c)=>Rules::points($c,['type'=>'sun']),$deck)) === 120, 'sun card points total 120 before last trick');
