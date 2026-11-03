@@ -106,14 +106,7 @@ final class Bot
         }
         if (($g['phase'] ?? '') === 'projectDeclaration') {
             if (!empty($g['projectDeclared'][$seat])) return false;
-            $project = self::project($g, $seat);
-            if ($project !== 'pass') {
-                foreach ($g['projectOptions'][$seat] as $candidate) {
-                    if ($candidate['type'] === $project) { $g['projectClaims'][$seat] = [$candidate]; break; }
-                }
-            }
-            $g['projectDeclared'][$seat] = true;
-            if (!in_array(false, $g['projectDeclared'], true)) $g['phase'] = 'playing';
+            Projects::declare($g, $seat, self::project($g, $seat));
             return true;
         }
         if (($g['phase'] ?? '') === 'playing') {
