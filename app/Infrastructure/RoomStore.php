@@ -161,6 +161,26 @@ final class RoomStore
     }
 
 
+
+    public function allowRate(string $scope, string $clientKey, int $maximum, int $windowSeconds): bool
+    {
+        $maximum = max(1, min(10000, $maximum));
+        $windowSeconds = max(1, min(86400, $windowSeconds));
+        $key = hash('sha256', $scope . '|' . $clientKey);
+        $now = time();
+        return Database::transaction(function (PDO $pdo) use ($key, $maximum, $windowSeconds, $now): bool {
+            $sql = "INSERT INTO baloot_api_limits (limit_key, window_started_at, hit_count) VALUES (?, ?, 1)
+                    ON DUPLICATE KEY UPDATE
+                    hit_count = IF(window_started_at + ? <= ?, 1, hit_count + 1),
+                    window_started_at = IF(window_started_at + ? <= ?, ?, window_started_at)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$key, $now, $windowSeconds, $now, $windowSeconds, $now, $now]);
+            $read = $pdo->prepare('SELECT hit_count FROM baloot_api_limits WHERE limit_key = ?');
+            $read->execute([$key]);
+            return (int) $read->fetchColumn() <= $maximum;
+        });
+    }
+
     public function advanceDueRooms(int $limit = 100): int
     {
         $limit = max(1, min(500, $limit));
