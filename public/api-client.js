@@ -71,6 +71,7 @@
         }
 
         if (result.code) this.code = result.code;
+        if (result.guestId) localStorage.setItem('baloot400Guest', result.guestId);
         if (result.snapshot) this.acceptSnapshot(result.snapshot);
         if (result.seat !== undefined) result.seat = Number(result.seat);
         ack({ ...result, ok: true });
