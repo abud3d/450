@@ -40,7 +40,7 @@ final class Engine
     {
         if (!isset($room['game']) || !is_array($room['game'])) throw new DomainException('اللعبة لم تبدأ بعد');
         if (!isset($room['players'][$seat]) || !is_array($room['players'][$seat])) throw new DomainException('المقعد غير معروف');
-        if (!empty($room['players'][$seat]['botControl'])) throw new DomainException('البوت يدير هذا المقعد حالياً');
+        if (!empty($room['players'][$seat]['botControl']) && $action !== 'timeout_return') throw new DomainException('البوت يدير هذا المقعد حالياً');
         $g =& $room['game'];
 
         switch ($action) {
@@ -92,6 +92,24 @@ final class Engine
                 if ($seat !== 0) throw new DomainException('صاحب الغرفة فقط يبدأ التوزيعة التالية');
                 Rules::nextRound($g);
                 $room['lastAction'] = 'بدأت توزيعة جديدة.';
+                break;
+            case 'continue':
+                if (($g['phase'] ?? '') !== 'roundEnd' || time() < (int) ($room['roundResultReadyAt'] ?? 0)) throw new DomainException('النشرة غير جاهزة للمتابعة');
+                Rules::nextRound($g);
+                $room['roundResultReadyAt'] = 0;
+                $room['lastAction'] = 'بدأت التوزيعة التالية.';
+                break;
+            case 'timeout_return':
+                if (($room['timeoutSeat'] ?? $seat) !== $seat && empty($room['players'][$seat]['botControl'])) throw new DomainException('لا يوجد طلب عودة لهذا المقعد');
+                $room['players'][$seat]['botControl'] = false;
+                unset($room['timeoutSeat']);
+                $room['lastAction'] = 'عاد اللاعب لمقعده.';
+                break;
+            case 'timeout_bot':
+                if (($room['timeoutSeat'] ?? -1) !== $seat) throw new DomainException('انتهت مهلة الاختيار أو لم يحن وقتها');
+                $room['players'][$seat]['botControl'] = true;
+                unset($room['timeoutSeat']);
+                $room['lastAction'] = 'البوت يكمل اللعب بدلاً من اللاعب.';
                 break;
             case 'replay':
                 if (($g['phase'] ?? '') !== 'gameEnd') throw new DomainException('إعادة اللعب متاحة بعد انتهاء الصكة فقط');
