@@ -1,4 +1,4 @@
-const socket=io(),$=id=>document.getElementById(id);
+const socket=new BalootHttpClient(),$=id=>document.getElementById(id);
 let roomCode=null,mySeat=null,latest=null,account=null,selectedCardId=null,qaidState=null,qaidTimer=null,lastSeenPlayCount=null,dismissedResultRound=null;
 let guestId=localStorage.getItem('baloot400Guest')||crypto.randomUUID();localStorage.setItem('baloot400Guest',guestId);
 const ROOM_TTL=60*60*1000;
