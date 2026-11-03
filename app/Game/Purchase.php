@@ -11,9 +11,14 @@ final class Purchase
 {
     public static function order(array $g): array
     {
-        return count($g['auctionOrder'] ?? []) === 4
-            ? array_values($g['auctionOrder'])
-            : array_map(fn($i) => Rules::next((int) $g['dealer']) + $i, range(0, 3));
+        if (count($g['auctionOrder'] ?? []) === 4) return array_values($g['auctionOrder']);
+        $order = [];
+        $seat = Rules::next((int) $g['dealer']);
+        for ($i = 0; $i < 4; $i++) {
+            $order[] = $seat;
+            $seat = Rules::next($seat);
+        }
+        return $order;
     }
 
     private static function normalizedOrder(array $g): array
