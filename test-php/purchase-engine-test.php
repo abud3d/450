@@ -11,6 +11,8 @@ require_once __DIR__ . '/../app/Game/Qaid.php';
 use Baloot\Game\Rules;
 use Baloot\Game\Purchase;
 use Baloot\Game\Qaid;
+use Baloot\Game\Bot;
+use Baloot\Game\TurnClock;
 function ok(bool $v,string $m):void{if(!$v)throw new RuntimeException($m);}
 
 $g=Rules::create(['A','B','C','D']); Rules::deal($g);
