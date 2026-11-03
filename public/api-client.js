@@ -49,6 +49,7 @@
         } else {
           const actions = {
             'room:start': 'start',
+            'room:move-seat': 'move-seat',
             'room:bid': 'bid',
             'room:post-purchase': 'post-purchase',
             'room:double': 'double',
