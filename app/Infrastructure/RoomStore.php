@@ -160,6 +160,90 @@ final class RoomStore
         });
     }
 
+
+    public function advanceDueRooms(int $limit = 100): int
+    {
+        $limit = max(1, min(500, $limit));
+        $query = Database::connection()->query("SELECT room_code FROM baloot_rooms WHERE status = 'active' ORDER BY last_activity_at ASC LIMIT " . $limit);
+        $codes = $query->fetchAll(PDO::FETCH_COLUMN);
+        $advanced = 0;
+        foreach ($codes as $code) {
+            $changed = Database::transaction(function (PDO $pdo) use ($code): bool {
+                $room = $this->lockedRoom($pdo, (string) $code);
+                $state = $this->decode((string) $room['state_json']);
+                $now = time();
+                $game =& $state['game'];
+                if (!is_array($game ?? null)) return false;
+                $didChange = false;
+
+                if (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? 0) <= $now) {
+                    unset($state['qaidWindow']);
+                    $state['lastAction'] = 'انتهت مهلة كشف أوراق القيد.';
+                    $didChange = true;
+                }
+
+                if (($game['phase'] ?? '') === 'roundEnd'
+                    && (int) ($state['roundResultReadyAt'] ?? 0) > 0
+                    && $now >= (int) $state['roundResultReadyAt'] + 10
+                    && !isset($state['qaidWindow'])) {
+                    \Baloot\Game\Rules::nextRound($game);
+                    unset($state['roundResultReadyAt'], $state['timeoutSeat'], $state['timeoutGraceUntil']);
+                    \Baloot\Game\Engine::advanceBots($state);
+                    $state['lastAction'] = 'بدأت التوزيعة التالية تلقائياً.';
+                    $didChange = true;
+                } elseif (isset($state['qaidWindow'])) {
+                    // A qaid review pauses game timers until it is claimed or expires.
+                } elseif (\Baloot\Game\TurnClock::expired($state, $now)) {
+                    $phase = $game['phase'] ?? '';
+                    if ($phase === 'postPurchase') {
+                        \Baloot\Game\Purchase::expire($game);
+                        \Baloot\Game\Engine::advanceBots($state);
+                        $state['lastAction'] = 'انتهت مهلة الرد على الشراء.';
+                        $didChange = true;
+                    } elseif ($phase === 'projectDeclaration') {
+                        foreach ($state['players'] as $seat => $player) {
+                            if (empty($game['projectDeclared'][$seat])) {
+                                if (!empty($player['bot']) || !empty($player['botControl'])) {
+                                    \Baloot\Game\Bot::act($game, (int) $seat);
+                                } else {
+                                    \Baloot\Game\Projects::declare($game, (int) $seat, 'pass');
+                                }
+                                $didChange = true;
+                            }
+                        }
+                        \Baloot\Game\Engine::advanceBots($state);
+                        $state['lastAction'] = 'انتهت مهلة إعلان المشاريع.';
+                    } elseif (in_array($phase, ['auction1','auction2','playing'], true)) {
+                        $seat = (int) ($game['turn'] ?? -1);
+                        $player = $state['players'][$seat] ?? null;
+                        if ($seat >= 0 && (is_array($player)) && (!empty($player['bot']) || !empty($player['botControl']))) {
+                            \Baloot\Game\Engine::advanceBots($state);
+                            $didChange = true;
+                        } elseif ($seat >= 0 && (int) ($state['timeoutSeat'] ?? -1) === $seat
+                            && (int) ($state['timeoutGraceUntil'] ?? PHP_INT_MAX) <= $now) {
+                            $state['players'][$seat]['botControl'] = true;
+                            unset($state['timeoutSeat'], $state['timeoutGraceUntil']);
+                            \Baloot\Game\Engine::advanceBots($state);
+                            $state['lastAction'] = 'انتهت مهلة اللاعب؛ البوت يكمل اللعب.';
+                            $didChange = true;
+                        } elseif ($seat >= 0 && (int) ($state['timeoutSeat'] ?? -1) !== $seat) {
+                            $state['timeoutSeat'] = $seat;
+                            $state['timeoutGraceUntil'] = $now + 2;
+                            \Baloot\Game\TurnClock::arm($state, 2, $now);
+                            $state['lastAction'] = 'تأخر اللاعب؛ سيُعرض خيار تولي البوت للمقعد.';
+                            $didChange = true;
+                        }
+                    }
+                }
+
+                if ($didChange) $this->saveState($pdo, $room, $state);
+                return $didChange;
+            });
+            if ($changed) $advanced++;
+        }
+        return $advanced;
+    }
+
     public function read(string $code): ?array
     {
         $stmt = Database::connection()->prepare('SELECT room_code, status, phase, state_json, version, qaid_enabled, last_activity_at FROM baloot_rooms WHERE room_code = ? LIMIT 1');
