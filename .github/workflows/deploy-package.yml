@@ -1,0 +1,49 @@
+name: Build CWP deployment ZIP
+
+on:
+  push:
+    branches:
+      - php-native-engine
+    paths:
+      - 'app/**'
+      - 'database/**'
+      - 'public/**'
+      - 'DEPLOY_CWP.md'
+      - '.github/workflows/deploy-package.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deployment branch
+        uses: actions/checkout@v4
+        with:
+          ref: php-native-engine
+      - name: Build clean deployment archive
+        run: |
+          set -euo pipefail
+          mkdir -p package/baloot450
+          cp -a app database public DEPLOY_CWP.md package/baloot450/
+          cat > package/baloot450/UPLOAD-README.txt <<'EOF'
+          Baloot 450 - CWP deployment package
+          1. Extract this folder outside public_html.
+          2. Set the domain document root to baloot450/public.
+          3. Create a dedicated MySQL database and user in CWP.
+          4. Import database/schema.mysql.sql into that database.
+          5. Configure the environment variables listed in DEPLOY_CWP.md.
+          6. Enable HTTPS and configure the cron task.
+          This package contains no secrets and performs no automatic database changes.
+          EOF
+          cd package
+          zip -qr ../baloot450-cwp.zip baloot450
+      - name: Upload deployment ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: baloot450-cwp
+          path: baloot450-cwp.zip
+          if-no-files-found: error
+          retention-days: 30
