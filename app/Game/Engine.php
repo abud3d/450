@@ -89,6 +89,7 @@ final class Engine
             case 'qaid_cancel':
                 if (($room['qaidWindow']['seat'] ?? -1) !== $seat) throw new DomainException('لا يوجد طلب قيد لهذا المقعد');
                 unset($room['qaidWindow']);
+                if (($g['phase'] ?? '') === 'roundEnd') $room['roundResultReadyAt'] = time();
                 $room['lastAction'] = 'أُغلق كشف القيد.';
                 break;
             case 'next':
