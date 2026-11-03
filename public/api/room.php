@@ -82,6 +82,7 @@ try {
     if ($method === 'GET' && in_array($action, ['state','resume'], true)) {
         if (!$store->allowRate('state', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 90, 60)) apiReply(429, ['ok' => false, 'error' => 'طلبات كثيرة؛ حاول بعد قليل']);
         $code = apiRoomCode($_GET['code'] ?? '');
+        $store->touchPlayer($code, $guestId);
         $room = $store->read($code);
         if (!$room) apiReply(404, ['ok' => false, 'error' => 'الغرفة غير موجودة']);
         $seat = null;
