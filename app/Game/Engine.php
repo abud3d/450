@@ -157,6 +157,16 @@ final class Engine
             return ['code' => $room['code'] ?? '', 'players' => $players, 'phase' => 'lobby', 'lastAction' => $room['lastAction'] ?? ''];
         }
         $history = [];
+        $runningRaw = [0,0];
+        $tricksWonBySeat = [0,0,0,0];
+        foreach ($g['tricks'] ?? [] as $trickRecord) {
+            $runningRaw[$trickRecord['team']] += (int) ($trickRecord['points'] ?? 0);
+            $tricksWonBySeat[$trickRecord['winner']]++;
+        }
+        $currentTrickPoints = array_sum(array_map(fn($play) => Rules::points($play['card'], $g['contract'] ?? ['type'=>'sun']), $g['trick'] ?? []));
+        $lastLandTeam = isset($g['lastWinner']) ? Rules::team((int) $g['lastWinner']) : null;
+        $resultReadyAt = (int) ($room['roundResultReadyAt'] ?? 0);
+        $trickVisible = (int) ($room['trickVisibleUntil'] ?? 0) > time();
         foreach ($g['history'] ?? [] as $index => $play) {
             $history[] = [
                 'historyIndex' => $index, 'seat' => $play['seat'],
