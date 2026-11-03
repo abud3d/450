@@ -5,28 +5,34 @@ const ROOM_TTL=60*60*1000;
 function saveRoomCode(code){localStorage.setItem('baloot400Room',code);localStorage.setItem('baloot400RoomAt',String(Date.now()));}
 function getRecentRoom(){const code=localStorage.getItem('baloot400Room'),at=Number(localStorage.getItem('baloot400RoomAt')||0);if(!code||!at||Date.now()-at>ROOM_TTL){localStorage.removeItem('baloot400Room');localStorage.removeItem('baloot400RoomAt');return '';}return code;}
 const savedName=localStorage.getItem('baloot400PlayerName');if(savedName)$('playerName').value=savedName;
-let authToken=localStorage.getItem('baloot400Token')||'';
 const name=()=> $('playerName').value.trim()||'ضيف';
 $('playerName').addEventListener('input',()=>localStorage.setItem('baloot400PlayerName',$('playerName').value));
 const status=m=>{$('status').textContent=m;};
 const emit=(event,data)=>transport.emit(event,data,r=>{if(!r?.ok)status(r?.error||'تعذر الطلب');else status('تم');});
-async function authRequest(url,body){
- const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
- const data=await r.json();if(!r.ok||!data.ok)throw new Error(data.error||'تعذر تنفيذ الطلب');return data;
+async function authRequest(url,body={}){
+ const r=await fetch(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ const data=await r.json();if(!r.ok||!data.ok)throw new Error(data.message||data.error||'تعذر تنفيذ الطلب');return data;
+}
+function showAccount(account){
+ account=account||null;
+ if(account?.guestId){guestId=account.guestId;localStorage.setItem('baloot400Guest',guestId);}
+ if(account?.displayName)$('playerName').value=account.displayName;
+ $('accountStatus').textContent=account?'مسجل الدخول: '+account.email+' · هويتك مرتبطة بمقعد الضيف.':'تلعب كضيف. يمكنك إنشاء حساب اختياري لحفظ هوية الضيف واستعادتها على جهاز آخر.';
+ $('logoutAccount').classList.toggle('hidden',!account);
+ $('registerAccount').classList.toggle('hidden',!!account);
+ $('loginAccount').classList.toggle('hidden',!!account);
 }
 async function applyAuth(data){
- authToken=data.token;localStorage.setItem('baloot400Token',authToken);account=data.account;
- if(account.guestId&&account.guestId!==guestId){guestId=account.guestId;localStorage.setItem('baloot400Guest',guestId);}
- if(account.displayName)$('playerName').value=account.displayName;
- $('accountStatus').textContent='مسجل الدخول: '+account.email+' · حسابك مرتبط بمعرف الضيف.';
- $('logoutAccount').classList.remove('hidden');$('registerAccount').classList.add('hidden');$('loginAccount').classList.add('hidden');
- await fetch('/api/auth/link-guest',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify({guestId})});
+ showAccount(data.user);
  if(roomCode)transport.emit('room:resume',{code:roomCode,guestId},r=>{if(r.ok){mySeat=r.seat;status('تم استعادة مقعدك من حسابك.');}});
 }
-$('registerAccount').onclick=async()=>{try{const d=await authRequest('/api/auth/register',{email:$('accountEmail').value,password:$('accountPassword').value,displayName:$('accountName').value||name(),guestId});await applyAuth(d);}catch(e){$('accountStatus').textContent=e.message;}};
-$('loginAccount').onclick=async()=>{try{const d=await authRequest('/api/auth/login',{email:$('accountEmail').value,password:$('accountPassword').value,guestId});await applyAuth(d);}catch(e){$('accountStatus').textContent=e.message;}};
-$('logoutAccount').onclick=()=>{authToken='';account=null;localStorage.removeItem('baloot400Token');$('accountStatus').textContent='تلعب كضيف. أنشئ حساباً لحفظ هويتك وربط تقدمك.';$('logoutAccount').classList.add('hidden');$('registerAccount').classList.remove('hidden');$('loginAccount').classList.remove('hidden');};
-async function restoreAccount(){if(!authToken)return;try{const r=await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+authToken}});const d=await r.json();if(!r.ok)throw Error();account=d.account;if(account.guestId){guestId=account.guestId;localStorage.setItem('baloot400Guest',guestId);} $('accountStatus').textContent='مسجل الدخول: '+account.email;$('logoutAccount').classList.remove('hidden');$('registerAccount').classList.add('hidden');$('loginAccount').classList.add('hidden');}catch{localStorage.removeItem('baloot400Token');authToken='';}if(roomCode&&authToken)transport.emit('room:resume',{code:roomCode,guestId},r=>{if(r.ok){mySeat=r.seat;status('تم استعادة مقعدك من حسابك.');}});}
+$('registerAccount').onclick=async()=>{try{const d=await authRequest('/api/auth.php?action=register',{email:$('accountEmail').value,password:$('accountPassword').value,displayName:$('accountName').value||name()});$('accountStatus').textContent=d.message;}catch(e){$('accountStatus').textContent=e.message;}};
+$('loginAccount').onclick=async()=>{try{const d=await authRequest('/api/auth.php?action=login',{email:$('accountEmail').value,password:$('accountPassword').value,remember:false});await applyAuth(d);}catch(e){$('accountStatus').textContent=e.message;}};
+$('logoutAccount').onclick=async()=>{try{await authRequest('/api/auth.php?action=logout',{});}catch(e){}showAccount(null);};
+async function restoreAccount(){
+ try{const d=await authRequest('/api/auth.php?action=me',{});showAccount(d.user);if(roomCode)transport.emit('room:resume',{code:roomCode,guestId},r=>{if(r.ok){mySeat=r.seat;status('تم استعادة مقعدك من حسابك.');}});}
+ catch{showAccount(null);}
+}
 $('createRoom').onclick=()=>transport.emit('room:create',{name:name(),guestId,qaidEnabled:!!$('qaidEnabled')?.checked},r=>{if(!r.ok)return status(r.error);roomCode=r.code;saveRoomCode(roomCode);location.href='/table.html?room='+encodeURIComponent(roomCode);});
 $('quickJoin')?.addEventListener('click',()=>{const button=$('quickJoin');button.disabled=true;button.textContent='جارٍ البحث عن غرفة...';transport.emit('room:quick-join',{name:name(),guestId,qaidEnabled:!!$('qaidEnabled')?.checked},r=>{button.disabled=false;button.textContent='دخول غرفة / العب الآن';if(!r?.ok)return status(r?.error||'تعذر العثور على غرفة');roomCode=r.code;mySeat=r.seat;saveRoomCode(roomCode);status(r.created?'لم توجد غرفة مناسبة؛ أنشأنا لك غرفة جديدة.':r.qaidEnabled?'تم إدخالك إلى غرفة مفعّل فيها القيد.':'دخلت غرفة انتظار، لكن قاعدة القيد غير مفعّلة فيها.');location.href='/table.html?room='+encodeURIComponent(roomCode);});});
 $('joinRoom').onclick=()=>transport.emit('room:join',{code:$('roomCode').value,name:name(),guestId},r=>{if(!r.ok)return status(r.error);roomCode=r.code;mySeat=r.seat;saveRoomCode(roomCode);location.href='/table.html?room='+encodeURIComponent(roomCode);});
