@@ -13,6 +13,7 @@ require_once __DIR__ . '/../app/Infrastructure/Database.php';
 require_once __DIR__ . '/../app/Infrastructure/RoomStore.php';
 use Baloot\Game\Engine;
 use Baloot\Infrastructure\RoomStore;
+use Baloot\Infrastructure\Database;
 function verify(bool $condition,string $message):void{if(!$condition)throw new RuntimeException($message);}
 $store=new RoomStore();
 $quickOwner=str_repeat('d',64);$quickGuest=str_repeat('e',64);
@@ -35,7 +36,7 @@ $guest2=str_repeat('c',64);$guest3=str_repeat('d',64);
 $joined2=$store->join($code,$guest2,'Guest Two');
 $joined3=$store->join($code,$guest3,'Guest Three');
 verify($joined2['seat']===1 && $joined3['seat']===2,'four distinct human players occupy all four seats');
-$pdo=\\Baloot\\Infrastructure\\Database::connection();
+$pdo=Database::connection();
 $offline=$pdo->prepare('UPDATE baloot_room_players SET last_seen_at = UTC_TIMESTAMP(6) - INTERVAL 1 MINUTE WHERE guest_id IN (?, ?)');
 $offline->execute([$guest2,$guest3]);
 $presence=$store->read($code);
