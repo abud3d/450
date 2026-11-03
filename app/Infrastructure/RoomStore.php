@@ -178,6 +178,7 @@ final class RoomStore
 
                 if (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? 0) <= $now) {
                     unset($state['qaidWindow']);
+                    if (($game['phase'] ?? '') === 'roundEnd') $state['roundResultReadyAt'] = $now;
                     $state['lastAction'] = 'انتهت مهلة كشف أوراق القيد.';
                     $didChange = true;
                 }
