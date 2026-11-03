@@ -59,6 +59,15 @@ function setauthcookie(string $token,int $expires): void {
 function clearcookie(): void {
  setcookie('b450_session','',['expires'=>1,'path'=>'/','secure'=>true,'httponly'=>true,'samesite'=>'Lax']);
 }
+function setguestcookie(string $guestId): void {
+ setcookie('baloot_guest',$guestId,['expires'=>time()+15552000,'path'=>'/','secure'=>true,'httponly'=>true,'samesite'=>'Lax']);
+}
+function currentguestid(): string {
+ $guestId=$_COOKIE['baloot_guest']??'';
+ if (!is_string($guestId)||!preg_match('/^[a-f0-9]{64}$/',$guestId)) $guestId=bin2hex(random_bytes(32));
+ setguestcookie($guestId);
+ return $guestId;
+}
 function session_current(array &$d): ?array {
  $raw=$_COOKIE['b450_session']??'';
  if (!is_string($raw)||strlen($raw)!==64) return null;
@@ -66,7 +75,7 @@ function session_current(array &$d): ?array {
  if (!$s||(int)$s['expires']<time()) { unset($d['sessions'][$key]); return null; }
  $u=$d['users'][$s['uid']]??null;
  if (!$u||empty($u['verified'])) return null;
- return ['uid'=>$u['uid'],'email'=>$u['email'],'csrf'=>$s['csrf']];
+ return ['uid'=>$u['uid'],'email'=>$u['email'],'csrf'=>$s['csrf'],'guestId'=>$u['guestId']??null,'displayName'=>$u['displayName']??''];
 }
 function mailtoken(string $email,string $subject,string $url): bool {
  $from=(string)getenv('MAIL_FROM');
@@ -93,36 +102,38 @@ if ($action==='verify'&&$method==='GET') {
  done($ok?200:400,['ok'=>$ok,'message'=>$ok?'تم تفعيل الحساب':'الرابط منتهي أو غير صالح']);
 }
 if ($method!=='POST') done(405,['ok'=>false,'message'=>'طريقة الطلب غير مدعومة']);
-origin_guard(); $in=body();
+origin_guard(); $in=body(); $guestId=currentguestid();
 
 if ($action==='register') {
- $email=strtolower(trim((string)($in['email']??''))); $password=(string)($in['password']??'');
+ $email=strtolower(trim((string)($in['email']??''))); $password=(string)($in['password']??''); $displayName=trim(strip_tags((string)($in['displayName']??''))); $displayName=mb_substr($displayName,0,40,'UTF-8');
  if (!filter_var($email,FILTER_VALIDATE_EMAIL)||strlen($email)>190) done(422,['ok'=>false,'message'=>'البريد الإلكتروني غير صحيح']);
  if (strlen($password)<12||strlen($password)>200) done(422,['ok'=>false,'message'=>'كلمة المرور يجب ألا تقل عن 12 حرفاً']);
  $v=randtoken(); $uid=bin2hex(random_bytes(16));
- $state=db(function (&$d) use ($email,$password,$v,$uid) {
+ $state=db(function (&$d) use ($email,$password,$v,$uid,$guestId,$displayName) {
   if (limited($d,'register',5,3600)) return 'limit';
   foreach ($d['users'] as $u) if (hash_equals($u['email'],$email)) return 'exists';
-  $d['users'][$uid]=['uid'=>$uid,'email'=>$email,'password'=>password_hash($password,PASSWORD_DEFAULT),'verified'=>false,'verify_hash'=>hash('sha256',$v),'verify_exp'=>time()+1800,'created'=>time()];
+  $d['users'][$uid]=['uid'=>$uid,'email'=>$email,'password'=>password_hash($password,PASSWORD_DEFAULT),'displayName'=>$displayName,'guestId'=>$guestId,'verified'=>false,'verify_hash'=>hash('sha256',$v),'verify_exp'=>time()+1800,'created'=>time()];
   return 'created';
  });
  if ($state==='limit') done(429,['ok'=>false,'message'=>'محاولات كثيرة، حاول لاحقاً']);
  if ($state==='exists') done(409,['ok'=>false,'message'=>'تعذر إنشاء حساب بهذا البريد']);
  $link=baseurl().'/api/auth.php?action=verify&token='.rawurlencode($v);
  if (!mailtoken($email,'Activate Baloot 450 account',$link)) done(503,['ok'=>false,'message'=>'تعذر إرسال رسالة التفعيل؛ راجع إعداد البريد']);
- done(201,['ok'=>true,'message'=>'أرسلنا رابط تفعيل الحساب إلى بريدك']);
+ done(201,['ok'=>true,'message'=>'أرسلنا رابط تفعيل الحساب إلى بريدك. بعد التفعيل سجّل الدخول بنفس المتصفح لاستعادة هوية ضيفك.']);
 }
 if ($action==='login') {
  $email=strtolower(trim((string)($in['email']??''))); $password=(string)($in['password']??''); $remember=($in['remember']??false)===true;
- $r=db(function (&$d) use ($email,$password,$remember) {
+ $r=db(function (&$d) use ($email,$password,$remember,$guestId) {
   if (limited($d,'login',10,900)) return ['error'=>'limit'];
   $u=null; foreach ($d['users'] as $x) if (hash_equals($x['email'],$email)) {$u=$x;break;}
   if (!$u||!password_verify($password,$u['password'])) return ['error'=>'invalid'];
   if (empty($u['verified'])) return ['error'=>'verify'];
   if (password_needs_rehash($u['password'],PASSWORD_DEFAULT)) $d['users'][$u['uid']]['password']=password_hash($password,PASSWORD_DEFAULT);
+  if (empty($u['guestId'])) $d['users'][$u['uid']]['guestId']=$guestId;
+  $storedGuestId=(string)($d['users'][$u['uid']]['guestId']??$guestId);
   $t=randtoken(); $csrf=randtoken(); $expires=time()+($remember?2592000:43200);
   $d['sessions'][hash('sha256',$t)]=['uid'=>$u['uid'],'csrf'=>$csrf,'expires'=>$expires,'created'=>time()];
-  return ['token'=>$t,'expires'=>$expires,'uid'=>$u['uid'],'email'=>$u['email'],'csrf'=>$csrf];
+  return ['token'=>$t,'expires'=>$expires,'uid'=>$u['uid'],'email'=>$u['email'],'csrf'=>$csrf,'guestId'=>$storedGuestId,'displayName'=>(string)($u['displayName']??'')];
  });
  if (isset($r['error'])) {
   if ($r['error']==='limit') done(429,['ok'=>false,'message'=>'محاولات كثيرة، حاول لاحقاً']);
@@ -130,11 +141,12 @@ if ($action==='login') {
   done(401,['ok'=>false,'message'=>'البريد أو كلمة المرور غير صحيحة']);
  }
  setauthcookie($r['token'],$r['expires']);
- done(200,['ok'=>true,'user'=>['id'=>$r['uid'],'email'=>$r['email']],'csrf'=>$r['csrf']]);
+ setguestcookie($r['guestId']);
+ done(200,['ok'=>true,'user'=>['id'=>$r['uid'],'email'=>$r['email'],'guestId'=>$r['guestId'],'displayName'=>$r['displayName']],'csrf'=>$r['csrf']]);
 }
 if ($action==='me') {
  $u=db(function (&$d) { return session_current($d); });
- done($u?200:401,['ok'=>(bool)$u,'user'=>$u?['id'=>$u['uid'],'email'=>$u['email']]:null,'csrf'=>$u['csrf']??null]);
+ done($u?200:401,['ok'=>(bool)$u,'user'=>$u?['id'=>$u['uid'],'email'=>$u['email'],'guestId'=>$u['guestId'],'displayName'=>$u['displayName']]:null,'csrf'=>$u['csrf']??null]);
 }
 if ($action==='logout'||$action==='logout_all') {
  $raw=(string)($_COOKIE['b450_session']??'');
