@@ -13,8 +13,8 @@ async function authRequest(url,body={}){
  const r=await fetch(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
  const data=await r.json();if(!r.ok||!data.ok)throw new Error(data.message||data.error||'تعذر تنفيذ الطلب');return data;
 }
-function showAccount(account){
- account=account||null;
+function showAccount(user){
+ account=user||null;
  if(account?.guestId){guestId=account.guestId;localStorage.setItem('baloot400Guest',guestId);}
  if(account?.displayName)$('playerName').value=account.displayName;
  $('accountStatus').textContent=account?'مسجل الدخول: '+account.email+' · هويتك مرتبطة بمقعد الضيف.':'تلعب كضيف. يمكنك إنشاء حساب اختياري لحفظ هوية الضيف واستعادتها على جهاز آخر.';
