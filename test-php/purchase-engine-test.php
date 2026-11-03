@@ -13,6 +13,7 @@ ok($g['phase']==='auction1','first auction'); ok(array_sum(array_map('count',$g[
 $buyer=$g['turn']; Purchase::choose($g,$buyer,'take');
 while($g['phase']==='postPurchase' && $g['postPurchase']['stage']==='responses'){ $s=$g['turn']; Purchase::respond($g,$s,'pass'); }
 ok($g['phase']==='buyerConfirm','buyer confirmation'); Purchase::respond($g,$buyer,'confirmHukm');
+while($g['phase']==='postPurchase' && $g['postPurchase']['stage']==='doubleResponse'){ $s=$g['turn']; Purchase::respond($g,$s,'pass'); }
 ok(in_array($g['phase'],['playing','projectDeclaration'],true),'first purchase complete');
 ok(array_sum(array_map('count',$g['hands']))===32,'32 cards');
 ok(count(array_filter($g['hands'],fn($h)=>count($h)!==8))===0,'eight each');
