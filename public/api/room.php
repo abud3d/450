@@ -106,6 +106,22 @@ try {
         apiReply(201, ['ok' => true, 'code' => $room['code'], 'seat' => 0, 'guestId' => $guestId, 'created' => true, 'qaidEnabled' => $room['state']['qaidEnabled'], 'snapshot' => $snapshot]);
     }
 
+    if ($action === 'quick-join') {
+        if (!$store->allowRate('quick-join', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 8, 900)) apiReply(429, ['ok' => false, 'error' => 'محاولات الدخول السريع كثيرة؛ حاول لاحقاً']);
+        $quick = $store->quickJoin($guestId, apiName($input['name'] ?? ''), ($input['qaidEnabled'] ?? true) === true);
+        $snapshot = Engine::snapshot($quick['state'], $quick['seat']);
+        $snapshot['version'] = $quick['version'];
+        apiReply(200, [
+            'ok' => true,
+            'code' => $quick['code'],
+            'seat' => $quick['seat'],
+            'guestId' => $guestId,
+            'created' => $quick['created'],
+            'qaidEnabled' => $quick['qaidEnabled'],
+            'snapshot' => $snapshot,
+        ]);
+    }
+
     if ($action === 'join') {
         if (!$store->allowRate('join', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 900)) apiReply(429, ['ok' => false, 'error' => 'محاولات الانضمام كثيرة؛ حاول لاحقاً']);
         $joined = $store->join(apiRoomCode($input['code'] ?? ''), $guestId, apiName($input['name'] ?? ''));
