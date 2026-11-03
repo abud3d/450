@@ -31,7 +31,19 @@ $moved=$store->moveSeat($code,$guest,3,$moveId);
 verify($moved['seat']===3,'player moves to free seat');
 $afterMove=$store->read($code);
 verify(($afterMove['state']['players'][3]['guestId']??'')===$guest,'seat movement persists');
-$version=(int)$afterMove['version'];
+$guest2=str_repeat('c',64);$guest3=str_repeat('d',64);
+$joined2=$store->join($code,$guest2,'Guest Two');
+$joined3=$store->join($code,$guest3,'Guest Three');
+verify($joined2['seat']===1 && $joined3['seat']===2,'four distinct human players occupy all four seats');
+$pdo=Baloot\\Infrastructure\\Database::connection();
+$offline=$pdo->prepare('UPDATE baloot_room_players SET last_seen_at = UTC_TIMESTAMP(6) - INTERVAL 1 MINUTE WHERE guest_id IN (?, ?)');
+$offline->execute([$guest2,$guest3]);
+$presence=$store->read($code);
+verify(empty($presence['state']['players'][1]['connected']) && empty($presence['state']['players'][2]['connected']),'stale player heartbeat marks disconnected seats offline');
+verify($store->touchPlayer($code,$guest2),'heartbeat updates the returning player');
+$presence=$store->read($code);
+verify(!empty($presence['state']['players'][1]['connected']),'fresh heartbeat marks the returning player online');
+$version=(int)$presence['version'];
 $actionId='22222222-2222-4222-8222-222222222222';
 $first=$store->mutate($code,$owner,$actionId,'test_change',function(array &$state,int $seat):array{$state['testMarker']='once';return ['value'=>42];},$version);
 $duplicate=$store->mutate($code,$owner,$actionId,'test_change',function(array &$state,int $seat):array{throw new RuntimeException('duplicate action was executed twice');});
@@ -45,6 +57,20 @@ $startId='33333333-3333-4333-8333-333333333333';
 $store->mutate($code,$owner,$startId,'start',function(array &$state,int $seat):array{Engine::start($state,$seat);return ['ok'=>true];});
 $started=$store->read($code);
 verify(($started['state']['game']['phase']??'')==='auction1','game state persisted in MySQL');
+$expectedGuests=[$owner,$guest2,$guest3,$guest];
+$privateHands=[];
+foreach($expectedGuests as $expectedGuest){
+    $seat=null;
+    foreach($started['state']['players'] as $index=>$player){
+        if(is_array($player)&&hash_equals((string)($player['guestId']??''),$expectedGuest)){$seat=(int)$index;break;}
+    }
+    verify($seat!==null,'reconnected player retains a seat by guest identity');
+    $snapshot=Engine::snapshot($started['state'],$seat);
+    verify($snapshot['mySeat']===$seat && count($snapshot['hand'])===5,'reconnected player receives their own persisted hand');
+    verify(!array_key_exists('hands',$snapshot),'snapshot never exposes every player hand');
+    $privateHands[$seat]=array_column($snapshot['hand'],'id');
+}
+for($a=0;$a<4;$a++)for($b=$a+1;$b<4;$b++)verify(!array_intersect($privateHands[$a],$privateHands[$b]),'private player hands do not overlap');
 $deadlineId='44444444-4444-4444-8444-444444444444';
 $store->mutate($code,$owner,$deadlineId,'test_deadline',function(array &$state,int $seat):array{$state['game']['turn']=0;$state['turnDeadlineAt']=time()-1;return ['ok'=>true];});
 verify($store->advanceDueRooms(20)>=1,'cron advances an expired room');
