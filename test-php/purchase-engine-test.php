@@ -45,7 +45,8 @@ ok($qaid['phase']==='roundEnd' && $qaid['scores'][0]>0,'qaid resolves and scores
 $clock=['turn'=>1]; TurnClock::arm($clock,30,100);
 ok(!TurnClock::expired($clock,129),'clock before deadline');
 ok(TurnClock::expired($clock,130),'clock expires at deadline');
-$botChoice=Bot::bid($h,$h['turn']);
-ok(in_array($botChoice,['pass','sun','takeSecond','S','H','D','C'],true),'bot auction choice is valid');
+$bid=Rules::create(['A','B','C','D']); Rules::deal($bid); for($i=0;$i<4;$i++) Purchase::choose($bid,$bid['turn'],'pass');
+$botChoice=Bot::bid($bid,$bid['turn']);
+ok(in_array($botChoice,['pass','takeSecond'],true),'bot second-round auction choice is valid');
 
 echo "PHP purchase, qaid, bot and clock tests passed\n";
