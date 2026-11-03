@@ -16,7 +16,7 @@ final class RoomStore
             for ($attempt = 0; $attempt < 5; $attempt++) {
                 $code = strtoupper(bin2hex(random_bytes(3)));
                 try {
-                    $state = ['phase' => 'lobby', 'players' => array_fill(0, 4, null), 'game' => null];
+                    $state = ['code' => $code, 'phase' => 'lobby', 'ownerGuestId' => $ownerGuestId, 'qaidEnabled' => $qaidEnabled, 'players' => array_fill(0, 4, null), 'game' => null];
                     $state['players'][0] = ['name' => $name, 'guestId' => $ownerGuestId, 'seat' => 0, 'bot' => false];
                     $stmt = $pdo->prepare(
                         "INSERT INTO baloot_rooms (room_code, owner_guest_id, status, phase, state_json, qaid_enabled) VALUES (?, ?, 'lobby', 'lobby', ?, ?)"
