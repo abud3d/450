@@ -39,7 +39,11 @@ jobs:
         run: php test-php/purchase-engine-test.php
       - name: Run PHP room engine tests
         run: php test-php/engine-room-test.php
-      - name: Run complete four-player match simulation\n        run: php test-php/full-match-test.php\n      - name: Run JavaScript reference parity fixtures\n        run: php test-php/rules-parity-test.php\n      - name: Apply MySQL schema
+      - name: Run complete four-player match simulation
+        run: php test-php/full-match-test.php
+      - name: Run JavaScript reference parity fixtures
+        run: php test-php/rules-parity-test.php
+      - name: Apply MySQL schema
         run: mysql --protocol=TCP -h127.0.0.1 -uroot -proot baloot_test < database/schema.mysql.sql
       - name: Run MySQL room store integration tests
         run: php test-php/mysql-room-store-test.php
