@@ -5,8 +5,8 @@ require_once __DIR__ . '/../app/Game/Projects.php';
 require_once __DIR__ . '/../app/Game/Scoring.php';
 require_once __DIR__ . '/../app/Game/Rules.php';
 require_once __DIR__ . '/../app/Game/Purchase.php';
-use Baloot\\Game\\Rules;
-use Baloot\\Game\\Purchase;
+use Baloot\Game\Rules;
+use Baloot\Game\Purchase;
 function ok(bool $v,string $m):void{if(!$v)throw new RuntimeException($m);}
 $g=Rules::create(['A','B','C','D']); Rules::deal($g);
 ok($g['phase']==='auction1','first auction'); ok(array_sum(array_map('count',$g['hands']))===20,'initial deal');
