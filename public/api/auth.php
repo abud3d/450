@@ -20,11 +20,15 @@ function body(): array {
 function db(callable $fn): mixed {
  $dir=(string)getenv('BALOUT_DATA_DIR');
  if (!$dir||!is_dir($dir)||!is_writable($dir)) done(503,['ok'=>false,'message'=>'خدمة الحسابات غير مهيأة']);
- $dir=realpath($dir); $lock=fopen($dir.'/accounts.lock','c');
+ $dir=realpath($dir);
+ $web=realpath(dirname(__DIR__));
+ if (!$dir || ($web && ($dir===$web || str_starts_with($dir,$web.DIRECTORY_SEPARATOR)))) done(503,['ok'=>false,'message'=>'يجب حفظ بيانات الحسابات خارج مجلد الموقع']);
+ $lock=fopen($dir.'/accounts.lock','c');
  if (!$lock||!flock($lock,LOCK_EX)) done(503,['ok'=>false,'message'=>'الخدمة مشغولة']);
  try {
   $path=$dir.'/accounts.json'; $raw=is_file($path)?file_get_contents($path):'';
   $data=$raw?json_decode($raw,true):null;
+  if ($raw !== '' && !is_array($data)) throw new RuntimeException('corrupt account store');
   if (!is_array($data)) $data=['users'=>[],'sessions'=>[],'limits'=>[]];
   $result=$fn($data);
   $json=json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
