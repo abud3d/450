@@ -41,9 +41,10 @@
         if (event === 'room:resume') {
           this.code = String(data.code || '').toUpperCase();
           result = await this.request('/api/room.php?action=resume&code=' + encodeURIComponent(this.code));
-        } else if (event === 'room:create' || event === 'room:quick-join') {
+        } else if (event === 'room:create') {
           result = await this.post('create', { name: data.name, qaidEnabled: data.qaidEnabled === true, guestId: data.guestId });
-          result.created = true;
+        } else if (event === 'room:quick-join') {
+          result = await this.post('quick-join', { name: data.name, qaidEnabled: data.qaidEnabled === true, guestId: data.guestId });
         } else if (event === 'room:join') {
           result = await this.post('join', { code: data.code, name: data.name, guestId: data.guestId });
         } else {
