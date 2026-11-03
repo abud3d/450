@@ -63,4 +63,47 @@ $bid=Rules::create(['A','B','C','D']); Rules::deal($bid); for($i=0;$i<4;$i++) Pu
 $botChoice=Bot::bid($bid,$bid['turn']);
 ok(in_array($botChoice,['pass','takeSecond'],true),'bot second-round auction choice is valid');
 
+$sun=Rules::create(['A','B','C','D']); Rules::deal($sun);
+Purchase::choose($sun,$sun['turn'],'pass');
+$sunBuyer=$sun['turn']; Purchase::choose($sun,$sunBuyer,'sun');
+ok($sun['phase']==='postPurchase' && $sun['postPurchase']['stage']==='sunChallenge','first-round sun opens the challenge queue');
+$sunResponder=$sun['turn'];
+ok(in_array('pass',Purchase::options($sun,$sunResponder),true),'sun challenge exposes pass to the correct seat');
+Purchase::respond($sun,$sunResponder,'pass');
+ok($sun['contract']['type']==='sun' && in_array($sun['phase'],['playing','projectDeclaration'],true),'first-round sun completes after challenge pass');
+ok(count(array_filter($sun['hands'],fn($h)=>count($h)!==8))===0,'sun purchase deals eight cards to every player');
+
+$takeBefore=Rules::create(['A','B','C','D']); Rules::deal($takeBefore);
+Purchase::choose($takeBefore,$takeBefore['turn'],'pass');
+$takeBeforeBuyer=$takeBefore['turn']; Purchase::choose($takeBefore,$takeBeforeBuyer,'sun');
+$lastResponder=$takeBefore['turn'];
+ok(Purchase::options($takeBefore,$lastResponder)===['pass','takeBefore'],'last sun challenger receives take-before option');
+Purchase::respond($takeBefore,$lastResponder,'takeBefore');
+ok(($takeBefore['contract']['buyer']??-1)===$lastResponder && $takeBefore['contract']['type']==='sun','take-before assigns the contract to the accepting player');
+
+$ashkal=Rules::create(['A','B','C','D']); Rules::deal($ashkal);
+$ashkalBuyer=$ashkal['turn']; Purchase::choose($ashkal,$ashkalBuyer,'take');
+$firstReply=$ashkal['turn']; Purchase::respond($ashkal,$firstReply,'pass');
+$ashkalCaller=$ashkal['turn'];
+ok(in_array('ashkal',Purchase::options($ashkal,$ashkalCaller),true),'eligible response seat can call ashkal');
+Purchase::respond($ashkal,$ashkalCaller,'ashkal');
+while($ashkal['phase']==='postPurchase' && $ashkal['postPurchase']['stage']==='ashkalReplies'){
+    Purchase::respond($ashkal,$ashkal['turn'],'pass');
+}
+ok(($ashkal['contract']['purchaseType']??'')==='ashkal','ashkal is retained as the purchase type');
+ok(($ashkal['contract']['buyer']??-1)===$ashkalCaller && ($ashkal['contract']['cardReceiver']??-1)===($ashkalCaller+2)%4,'ashkal buyer and card receiver are assigned correctly');
+ok(in_array($ashkal['upCard']['id'],array_column($ashkal['hands'][$ashkal['contract']['cardReceiver']],'id'),true),'up card is delivered to the ashkal receiver');
+ok(count(array_filter($ashkal['hands'],fn($h)=>count($h)!==8))===0,'ashkal still deals eight cards to every player');
+
+$projectGame=Rules::create(['A','B','C','D']);
+$projectGame['phase']='projectDeclaration';
+$projectGame['projectOptions']=[[['type'=>'20']],[],[],[]];
+$projectGame['projectDeclared']=[false,true,true,true];
+Projects::declare($projectGame,0,'20');
+ok($projectGame['projectDeclared'][0]===true && $projectGame['projectClaims'][0][0]['type']==='20','project declaration records only an owned project');
+ok($projectGame['phase']==='playing','all project declarations move the game into play');
+$duplicateProjectRejected=false;
+try { Projects::declare($projectGame,0,'pass'); } catch (DomainException $e) { $duplicateProjectRejected=true; }
+ok($duplicateProjectRejected,'player cannot declare projects twice');
+
 echo "PHP purchase, qaid, bot and clock tests passed\n";
