@@ -295,6 +295,35 @@ final class Purchase
         elseif ($p['stage'] === 'doubleBuyerCoffee') { $g['contract']['level'] = 4; $g['contract']['restricted'] = true; self::finish($g, (int) $p['buyer']); }
     }
 
+
+    public static function doubleOptions(array $g, int $seat): array
+    {
+        if (($g['phase'] ?? '') !== 'playing' || empty($g['contract']) || !empty($g['history']) || ($g['doubleWindow'] ?? true) === false) return [];
+        $c = $g['contract'];
+        if (!empty($c['purchaseRound']) || ($c['type'] ?? '') === 'sun') return [];
+        $team = Rules::team($seat);
+        $original = isset($c['originalBuyerTeam']) ? (int) $c['originalBuyerTeam'] : Rules::team((int) $c['buyer']);
+        $level = (int) ($c['level'] ?? 1);
+        if ($level === 1 && $team !== $original) return ['double'];
+        if ($level === 2 && $team === $original) return ['three'];
+        if ($level === 3 && $team === (int) ($c['doubleTeam'] ?? -1)) return ['four'];
+        if ($level === 4 && $team === $original) return ['coffee'];
+        return [];
+    }
+
+    public static function callDouble(array &$g, int $seat, string $call): void
+    {
+        if (!in_array($call, self::doubleOptions($g, $seat), true)) {
+            throw new \\DomainException('هذا التصعيد غير متاح لفريقك الآن');
+        }
+        $team = Rules::team($seat);
+        if ($call === 'double') { $g['contract']['level'] = 2; $g['contract']['doubleTeam'] = $team; $g['contract']['buyerTeam'] = $team; }
+        elseif ($call === 'three') { $g['contract']['level'] = 3; $g['contract']['buyerTeam'] = $team; }
+        elseif ($call === 'four') { $g['contract']['level'] = 4; $g['contract']['buyerTeam'] = $team; }
+        elseif ($call === 'coffee') { $g['contract']['level'] = 5; $g['contract']['buyerTeam'] = $team; }
+        $g['contract']['lastCallerSeat'] = $seat;
+    }
+
     private static function finishDeal(array &$g): void
     {
         $buyer = (int) $g['contract']['buyer'];
