@@ -34,7 +34,7 @@ final class Bot
         }
         $sun = self::sunStrength($hand);
         if ($sun > $bestValue) { $bestValue = $sun; $bestSuit = 'sun'; }
-        return $bestValue >= 5 ? (($g['phase'] ?? '') === 'auction2' && $bestSuit !== 'sun' ? $bestSuit : (($g['phase'] ?? '') === 'auction2' ? 'takeSecond' : $bestSuit)) : 'pass';
+        return $bestValue >= 5 ? ((($g['phase'] ?? '') === 'auction2') ? 'takeSecond' : $bestSuit) : 'pass';
     }
 
     private static function sunStrength(array $hand): float
