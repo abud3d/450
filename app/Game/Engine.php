@@ -152,7 +152,10 @@ final class Engine
                 if ($seat < 0 || (empty($room['players'][$seat]['bot']) && empty($room['players'][$seat]['botControl']))) break;
             } else break;
 
+            $beforeTricks = count($g['tricks'] ?? []);
             if (!Bot::act($g, $seat)) break;
+            if (count($g['tricks'] ?? []) > $beforeTricks) $room['trickVisibleUntil'] = time() + (in_array($g['phase'], ['roundEnd','gameEnd'], true) ? 6 : 2);
+            if (in_array($g['phase'], ['roundEnd','gameEnd'], true)) $room['roundResultReadyAt'] = time() + 6;
             $count++;
         }
         if ($count > 0) $room['lastAction'] = 'اتخذ البوت قراراً تلقائياً.';
