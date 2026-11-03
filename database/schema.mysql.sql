@@ -48,3 +48,12 @@ CREATE TABLE IF NOT EXISTS baloot_room_actions (
   KEY ix_room_actions_created (room_id, created_at),
   CONSTRAINT fk_baloot_actions_room FOREIGN KEY (room_id) REFERENCES baloot_rooms(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS baloot_api_limits (
+  limit_key CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  window_started_at BIGINT UNSIGNED NOT NULL,
+  hit_count INT UNSIGNED NOT NULL DEFAULT 0,
+  updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (limit_key),
+  KEY ix_baloot_api_limits_updated (updated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
