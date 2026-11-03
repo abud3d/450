@@ -80,6 +80,7 @@ $action = (string) ($_GET['action'] ?? '');
 
 try {
     if ($method === 'GET' && in_array($action, ['state','resume'], true)) {
+        if (!$store->allowRate('state', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 90, 60)) apiReply(429, ['ok' => false, 'error' => 'طلبات كثيرة؛ حاول بعد قليل']);
         $code = apiRoomCode($_GET['code'] ?? '');
         $room = $store->read($code);
         if (!$room) apiReply(404, ['ok' => false, 'error' => 'الغرفة غير موجودة']);
@@ -98,6 +99,7 @@ try {
     $input = apiBody();
 
     if ($action === 'create') {
+        if (!$store->allowRate('create', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 5, 3600)) apiReply(429, ['ok' => false, 'error' => 'تجاوزت حد إنشاء الغرف مؤقتاً']);
         $room = $store->create($guestId, apiName($input['name'] ?? ''), ($input['qaidEnabled'] ?? true) === true);
         $room['state']['code'] = $room['code'];
         $snapshot = Engine::snapshot($room['state'], 0); $snapshot['version'] = $room['version'];
@@ -105,11 +107,13 @@ try {
     }
 
     if ($action === 'join') {
+        if (!$store->allowRate('join', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 900)) apiReply(429, ['ok' => false, 'error' => 'محاولات الانضمام كثيرة؛ حاول لاحقاً']);
         $joined = $store->join(apiRoomCode($input['code'] ?? ''), $guestId, apiName($input['name'] ?? ''));
         $snapshot = Engine::snapshot($joined['state'], $joined['seat']); $snapshot['version'] = $joined['version'];
         apiReply(200, ['ok' => true, 'code' => $joined['code'], 'seat' => $joined['seat'], 'guestId' => $guestId, 'snapshot' => $snapshot]);
     }
 
+    if (!$store->allowRate('action', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 180, 60)) apiReply(429, ['ok' => false, 'error' => 'طلبات كثيرة؛ حاول بعد قليل']);
     $code = apiRoomCode($input['code'] ?? '');
     $actionId = (string) ($input['actionId'] ?? '');
     if ($actionId === '') apiReply(422, ['ok' => false, 'error' => 'معرّف العملية مطلوب لمنع تكرار الحركة']);
