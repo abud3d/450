@@ -118,7 +118,14 @@ if ($action==='register') {
  if ($state==='limit') done(429,['ok'=>false,'message'=>'محاولات كثيرة، حاول لاحقاً']);
  if ($state==='exists') done(409,['ok'=>false,'message'=>'تعذر إنشاء حساب بهذا البريد']);
  $link=baseurl().'/api/auth.php?action=verify&token='.rawurlencode($v);
- if (!mailtoken($email,'Activate Baloot 450 account',$link)) done(503,['ok'=>false,'message'=>'تعذر إرسال رسالة التفعيل؛ راجع إعداد البريد']);
+ if (!mailtoken($email,'Activate Baloot 450 account',$link)) {
+  db(function (&$d) use ($uid) {
+   $pending=$d['users'][$uid]??null;
+   if (is_array($pending)&&empty($pending['verified'])) unset($d['users'][$uid]);
+   return true;
+  });
+  done(503,['ok'=>false,'message'=>'تعذر إرسال رسالة التفعيل؛ راجع إعداد البريد ويمكنك إعادة المحاولة']);
+ }
  done(201,['ok'=>true,'message'=>'أرسلنا رابط تفعيل الحساب إلى بريدك. بعد التفعيل سجّل الدخول بنفس المتصفح لاستعادة هوية ضيفك.']);
 }
 if ($action==='login') {
