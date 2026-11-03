@@ -7,6 +7,7 @@ require_once __DIR__ . '/../app/Game/Rules.php';
 require_once __DIR__ . '/../app/Game/Purchase.php';
 require_once __DIR__ . '/../app/Game/Bot.php';
 require_once __DIR__ . '/../app/Game/TurnClock.php';
+require_once __DIR__ . '/../app/Game/Qaid.php';
 use Baloot\Game\Rules;
 use Baloot\Game\Purchase;
 function ok(bool $v,string $m):void{if(!$v)throw new RuntimeException($m);}
