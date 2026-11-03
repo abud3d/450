@@ -37,6 +37,18 @@ ok(in_array($second['phase'],['playing','projectDeclaration'],true),'second purc
 ok($second['contract']['trump']===$available[0],'second-round trump retained');
 ok(count(array_filter($second['hands'],fn($h)=>count($h)!==8))===0,'second purchase deals eight cards each');
 
+
+$doubleGame=['phase'=>'playing','history'=>[],'doubleWindow'=>true,'contract'=>['type'=>'hokum','buyer'=>0,'originalBuyerTeam'=>0,'buyerTeam'=>0,'level'=>1,'doubleTeam'=>null]];
+ok(Purchase::doubleOptions($doubleGame,1)===['double'],'opposing team can double');
+Purchase::callDouble($doubleGame,1,'double');
+ok(Purchase::doubleOptions($doubleGame,0)===['three'],'original team can call three');
+Purchase::callDouble($doubleGame,0,'three');
+ok(Purchase::doubleOptions($doubleGame,1)===['four'],'double caller team can call four');
+Purchase::callDouble($doubleGame,1,'four');
+ok(Purchase::doubleOptions($doubleGame,0)===['coffee'],'original team can call coffee');
+Purchase::callDouble($doubleGame,0,'coffee');
+ok($doubleGame['contract']['level']===5,'coffee escalation level');
+
 $qaid=['phase'=>'playing','qaidEnabled'=>true,'history'=>[['seat'=>1,'violation'=>true]],'contract'=>['type'=>'sun','buyer'=>1,'buyerTeam'=>1,'originalBuyerTeam'=>1],'projectClaims'=>[[],[],[],[]],'balotClaims'=>[],'dealer'=>0,'scores'=>[0,0]];
 $result=Qaid::claim($qaid,0,0,0);
 ok($result['success']===true && $result['winnerTeam']===0,'valid qaid claim awards claimant team');
