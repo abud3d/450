@@ -55,7 +55,7 @@ function setauthcookie(string $token,int $expires): void {
 function clearcookie(): void {
  setcookie('b450_session','',['expires'=>1,'path'=>'/','secure'=>true,'httponly'=>true,'samesite'=>'Lax']);
 }
-function current(array &$d): ?array {
+function session_current(array &$d): ?array {
  $raw=$_COOKIE['b450_session']??'';
  if (!is_string($raw)||strlen($raw)!==64) return null;
  $key=hash('sha256',$raw); $s=$d['sessions'][$key]??null;
@@ -129,7 +129,7 @@ if ($action==='login') {
  done(200,['ok'=>true,'user'=>['id'=>$r['uid'],'email'=>$r['email']],'csrf'=>$r['csrf']]);
 }
 if ($action==='me') {
- $u=db(function (&$d) { return current($d); });
+ $u=db(function (&$d) { return session_current($d); });
  done($u?200:401,['ok'=>(bool)$u,'user'=>$u?['id'=>$u['uid'],'email'=>$u['email']]:null,'csrf'=>$u['csrf']??null]);
 }
 if ($action==='logout'||$action==='logout_all') {
