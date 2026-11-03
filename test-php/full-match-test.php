@@ -47,6 +47,7 @@ while (($room['game']['phase'] ?? '') !== 'gameEnd' && $actions < $maxActions) {
         $g =& $room['game'];
         checkMatch(count($g['tricks']) === 8, 'a completed deal contains eight tricks');
         checkMatch(count($g['history']) === 32, 'a completed deal contains 32 played cards');
+        checkMatch(($g['lastLandPoints'] ?? 0) === 10 && ($g['lastLandTeam'] ?? -1) === (($g['lastWinner'] ?? -2) % 2), 'last-trick award is recorded for the winning team');
         checkMatch(array_sum(array_map('count', $g['hands'])) === 0, 'all hands are empty at deal end');
         $expectedRaw = ($g['contract']['type'] ?? '') === 'sun' ? 130 : 162;
         checkMatch(array_sum($g['lastRaw']) === $expectedRaw, 'raw card points plus last trick match the reference total');
