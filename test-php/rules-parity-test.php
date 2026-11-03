@@ -17,6 +17,12 @@ function cards(string $suit, array $ranks): array { return array_map(fn($rank) =
 $seatAudit = Rules::create(['A','B','C','D']);
 Rules::deal($seatAudit);
 parity($seatAudit['auctionOrder'] === [3,2,1,0], 'auction order follows dealer-right counterclockwise seat progression');
+$resetAudit = Rules::create(['A','B','C','D']);
+Rules::deal($resetAudit);
+$resetAudit['lastWinner']=2;$resetAudit['lastLandTeam']=0;$resetAudit['lastLandPoints']=10;
+$resetAudit['phase']='roundEnd';
+Rules::nextRound($resetAudit);
+parity($resetAudit['lastWinner']===null && $resetAudit['lastLandTeam']===null && $resetAudit['lastLandPoints']===0, 'new deal clears previous trick winner and last-land markers');
 $deck = Rules::deck();
 parity(count($deck) === 32 && count(array_unique(array_column($deck,'id'))) === 32, 'reference deck has 32 unique cards');
 parity(array_sum(array_map(fn($c)=>Rules::points($c,['type'=>'sun']),$deck)) === 120, 'sun card points total 120 before last trick');
