@@ -120,6 +120,46 @@ final class RoomStore
         });
     }
 
+
+    public function moveSeat(string $code, string $guestId, int $targetSeat, string $actionId): array
+    {
+        $this->assertGuestId($guestId);
+        if ($targetSeat < 0 || $targetSeat > 3 || !preg_match('/^[a-f0-9-]{36}$/i', $actionId)) {
+            throw new RuntimeException('طلب نقل المقعد غير صالح.');
+        }
+        return Database::transaction(function (PDO $pdo) use ($code, $guestId, $targetSeat, $actionId): array {
+            $room = $this->lockedRoom($pdo, $code);
+            $check = $pdo->prepare('SELECT result_json FROM baloot_room_actions WHERE room_id = ? AND action_id = ?');
+            $check->execute([(int) $room['id'], $actionId]);
+            $prior = $check->fetchColumn();
+            if (is_string($prior)) return $this->decode($prior);
+            $state = $this->decode((string) $room['state_json']);
+            if (!empty($state['game'])) throw new RuntimeException('تغيير المقاعد متاح قبل بدء اللعبة فقط.');
+            $players = $state['players'] ?? [];
+            $seat = null;
+            foreach ($players as $i => $player) {
+                if (is_array($player) && hash_equals((string) ($player['guestId'] ?? ''), $guestId)) { $seat = (int) $i; break; }
+            }
+            if ($seat === null) throw new RuntimeException('لا يوجد مقعد لهذا اللاعب.');
+            if ($seat === $targetSeat) return ['seat' => $seat];
+            $target = $players[$targetSeat] ?? null;
+            if (is_array($target) && empty($target['bot'])) throw new RuntimeException('لا يمكن نقل لاعب آخر من مقعده.');
+            $current = $players[$seat];
+            if (is_array($target)) { $target['seat'] = $seat; $players[$seat] = $target; }
+            else $players[$seat] = null;
+            $current['seat'] = $targetSeat;
+            $players[$targetSeat] = $current;
+            $state['players'] = $players;
+            $this->saveState($pdo, $room, $state);
+            $update = $pdo->prepare('UPDATE baloot_room_players SET seat = ? WHERE room_id = ? AND guest_id = ?');
+            $update->execute([$targetSeat, (int) $room['id'], $guestId]);
+            $result = ['seat' => $targetSeat];
+            $insert = $pdo->prepare('INSERT INTO baloot_room_actions (room_id, action_id, guest_id, action_type, result_json) VALUES (?, ?, ?, ?, ?)');
+            $insert->execute([(int) $room['id'], $actionId, $guestId, 'move_seat', $this->encode($result)]);
+            return $result;
+        });
+    }
+
     public function read(string $code): ?array
     {
         $stmt = Database::connection()->prepare('SELECT room_code, status, phase, state_json, version, qaid_enabled, last_activity_at FROM baloot_rooms WHERE room_code = ? LIMIT 1');
