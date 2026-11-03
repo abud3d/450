@@ -124,6 +124,9 @@ try {
         'qaid-cancel' => 'qaid_cancel',
         'claim' => 'qaid_claim',
         'next' => 'next',
+        'result-continue' => 'continue',
+        'timeout-return' => 'timeout_return',
+        'timeout-bot' => 'timeout_bot',
         'replay' => 'replay',
         default => '',
     };
