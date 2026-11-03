@@ -146,6 +146,7 @@ if ($action==='login') {
 }
 if ($action==='me') {
  $u=db(function (&$d) { return session_current($d); });
+ if ($u && !empty($u['guestId'])) setguestcookie((string)$u['guestId']);
  done($u?200:401,['ok'=>(bool)$u,'user'=>$u?['id'=>$u['uid'],'email'=>$u['email'],'guestId'=>$u['guestId'],'displayName'=>$u['displayName']]:null,'csrf'=>$u['csrf']??null]);
 }
 if ($action==='logout'||$action==='logout_all') {
