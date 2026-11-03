@@ -81,4 +81,23 @@ parity($score['buyerFailed'] === false && $score['awarded'] === [13,13], 'sun 65
 $score = Scoring::score([81,81],['type'=>'hokum','buyer'=>0,'buyerTeam'=>0,'originalBuyerTeam'=>0],[],0,[4,4]);
 parity($score['buyerFailed'] === false && $score['awarded'] === [8,8], 'hokum 81-81 boundary matches reference scoring');
 
-echo "PHP rule/project/scoring parity fixtures passed\\n";
+// Qaid violation history must be recorded only when the option is enabled, matching game/rules.js.
+$qaidGame = [
+ 'phase'=>'playing','turn'=>1,'qaidEnabled'=>true,
+ 'hands'=>[[],[...cards('H',['7']),...cards('C',['7'])],[],[]],
+ 'trick'=>[['seat'=>0,'card'=>['suit'=>'H','rank'=>'A','id'=>'HA']]],
+ 'contract'=>['type'=>'sun','buyer'=>0],'history'=>[],'balotClaims'=>[],
+ 'doubleWindow'=>true,'lastWinner'=>null,'tricks'=>[],'tricksWon'=>[0,0],
+];
+Rules::play($qaidGame,1,'C7');
+parity(($qaidGame['history'][0]['violation'] ?? false) === true, 'enabled qaid records a failure to follow suit');
+$noQaidGame = $qaidGame;
+$noQaidGame['phase']='playing';$noQaidGame['turn']=1;$noQaidGame['qaidEnabled']=false;
+$noQaidGame['hands'][1]=[...cards('H',['7']),...cards('C',['7'])];
+$noQaidGame['trick']=[['seat'=>0,'card'=>['suit'=>'H','rank'=>'A','id'=>'HA']]];
+$noQaidGame['history']=[];$noQaidGame['tricks']=[];$noQaidGame['tricksWon']=[0,0];
+$rejected=false;
+try { Rules::play($noQaidGame,1,'C7'); } catch (DomainException $e) { $rejected=true; }
+parity($rejected && $noQaidGame['history']===[], 'without qaid, illegal off-suit play is rejected and not marked as a qaid violation');
+
+echo "PHP rule/project/scoring/qaid parity fixtures passed\\n";
