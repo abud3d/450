@@ -19,3 +19,5 @@ jobs:
         run: php test-php/game-engine-test.php
       - name: Run PHP purchase engine tests
         run: php test-php/purchase-engine-test.php
+      - name: Run PHP room engine tests
+        run: php test-php/engine-room-test.php
