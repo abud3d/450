@@ -2,7 +2,7 @@
  * Polling is adaptive and no persistent Node process or port is required.
  */
 (() => {
-  class BalootHttpSocket {
+  class BalootHttpClient {
     constructor() {
       this.listeners = new Map();
       this.code = '';
@@ -131,5 +131,5 @@
     }
   }
 
-  window.io = () => new BalootHttpSocket();
+  window.BalootHttpClient = BalootHttpClient;
 })();
