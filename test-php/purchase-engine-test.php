@@ -9,6 +9,7 @@ require_once __DIR__ . '/../app/Game/Bot.php';
 require_once __DIR__ . '/../app/Game/TurnClock.php';
 require_once __DIR__ . '/../app/Game/Qaid.php';
 use Baloot\Game\Rules;
+use Baloot\Game\Projects;
 use Baloot\Game\Purchase;
 use Baloot\Game\Qaid;
 use Baloot\Game\Bot;
