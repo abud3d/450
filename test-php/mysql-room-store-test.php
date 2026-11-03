@@ -15,6 +15,12 @@ use Baloot\Game\Engine;
 use Baloot\Infrastructure\RoomStore;
 function verify(bool $condition,string $message):void{if(!$condition)throw new RuntimeException($message);}
 $store=new RoomStore();
+$quickOwner=str_repeat('d',64);$quickGuest=str_repeat('e',64);
+$waiting=$store->create($quickOwner,'Waiting Room',true);
+$quick=$store->quickJoin($quickGuest,'Quick Guest',true);
+verify($quick['code']===$waiting['code'] && $quick['seat']===1 && $quick['created']===false,'quick join selects a compatible lobby');
+$solo=$store->quickJoin(str_repeat('f',64),'Solo Guest',false);
+verify($solo['created']===true && $solo['qaidEnabled']===false,'quick join creates a room when no compatible lobby exists');
 $owner=str_repeat('a',64);$guest=str_repeat('b',64);
 $created=$store->create($owner,'Host',true);$code=$created['code'];
 verify(strlen($code)===6,'room code format');
