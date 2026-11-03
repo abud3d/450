@@ -88,7 +88,9 @@ try {
             if (is_array($player) && hash_equals((string) ($player['guestId'] ?? ''), $guestId)) { $seat = (int) $i; break; }
         }
         if ($seat === null) apiReply(403, ['ok' => false, 'error' => 'لا يوجد مقعد محفوظ لهذا اللاعب']);
-        apiReply(200, ['ok' => true, 'snapshot' => Engine::snapshot($room['state'], $seat)]);
+        $snapshot = Engine::snapshot($room['state'], $seat);
+        $snapshot['version'] = $room['version'];
+        apiReply(200, ['ok' => true, 'seat' => $seat, 'snapshot' => $snapshot]);
     }
 
     if ($method !== 'POST') apiReply(405, ['ok' => false, 'error' => 'طريقة الطلب غير مدعومة']);
@@ -98,12 +100,14 @@ try {
     if ($action === 'create') {
         $room = $store->create($guestId, apiName($input['name'] ?? ''), ($input['qaidEnabled'] ?? true) === true);
         $room['state']['code'] = $room['code'];
-        apiReply(201, ['ok' => true, 'code' => $room['code'], 'seat' => 0, 'snapshot' => Engine::snapshot($room['state'], 0)]);
+        $snapshot = Engine::snapshot($room['state'], 0); $snapshot['version'] = $room['version'];
+        apiReply(201, ['ok' => true, 'code' => $room['code'], 'seat' => 0, 'guestId' => $guestId, 'created' => true, 'qaidEnabled' => $room['state']['qaidEnabled'], 'snapshot' => $snapshot]);
     }
 
     if ($action === 'join') {
         $joined = $store->join(apiRoomCode($input['code'] ?? ''), $guestId, apiName($input['name'] ?? ''));
-        apiReply(200, ['ok' => true, 'code' => $joined['code'], 'seat' => $joined['seat'], 'snapshot' => Engine::snapshot($joined['state'], $joined['seat'])]);
+        $snapshot = Engine::snapshot($joined['state'], $joined['seat']); $snapshot['version'] = $joined['version'];
+        apiReply(200, ['ok' => true, 'code' => $joined['code'], 'seat' => $joined['seat'], 'guestId' => $guestId, 'snapshot' => $snapshot]);
     }
 
     $code = apiRoomCode($input['code'] ?? '');
@@ -147,7 +151,8 @@ try {
         if (is_array($player) && hash_equals((string) ($player['guestId'] ?? ''), $guestId)) { $seat = (int) $i; break; }
     }
     if ($seat === null) apiReply(403, ['ok' => false, 'error' => 'المقعد غير معروف']);
-    apiReply(200, ['ok' => true, 'result' => $result, 'snapshot' => Engine::snapshot($room['state'], $seat)]);
+    $snapshot = Engine::snapshot($room['state'], $seat); $snapshot['version'] = $room['version'];
+    apiReply(200, ['ok' => true, 'result' => $result, 'snapshot' => $snapshot]);
 } catch (DomainException $e) {
     apiReply(422, ['ok' => false, 'error' => $e->getMessage()]);
 } catch (RuntimeException $e) {
