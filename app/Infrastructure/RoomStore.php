@@ -147,6 +147,8 @@ final class RoomStore
                 throw new RuntimeException('استجابة العملية غير صالحة.');
             }
             $this->saveState($pdo, $room, $state);
+            $touch = $pdo->prepare('UPDATE baloot_room_players SET last_seen_at = UTC_TIMESTAMP(6), connected_at = COALESCE(connected_at, UTC_TIMESTAMP(6)) WHERE room_id = ? AND guest_id = ?');
+            $touch->execute([(int) $room['id'], $guestId]);
             $insert = $pdo->prepare('INSERT INTO baloot_room_actions (room_id, action_id, guest_id, action_type, result_json) VALUES (?, ?, ?, ?, ?)');
             $insert->execute([(int) $room['id'], $actionId, $guestId, $actionType, $this->encode($response)]);
             return $response;
@@ -298,9 +300,23 @@ final class RoomStore
         return $advanced;
     }
 
+    public function touchPlayer(string $code, string $guestId): bool
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE baloot_room_players p
+             INNER JOIN baloot_rooms r ON r.id = p.room_id
+             SET p.last_seen_at = UTC_TIMESTAMP(6),
+                 p.connected_at = COALESCE(p.connected_at, UTC_TIMESTAMP(6))
+             WHERE r.room_code = ? AND p.guest_id = ?'
+        );
+        $stmt->execute([strtoupper($code), $guestId]);
+        return $stmt->rowCount() > 0;
+    }
+
     public function read(string $code): ?array
     {
-        $stmt = Database::connection()->prepare('SELECT room_code, status, phase, state_json, version, qaid_enabled, last_activity_at FROM baloot_rooms WHERE room_code = ? LIMIT 1');
+        $pdo = Database::connection();
+        $stmt = $pdo->prepare('SELECT id, room_code, status, phase, state_json, version, qaid_enabled, last_activity_at FROM baloot_rooms WHERE room_code = ? LIMIT 1');
         $stmt->execute([strtoupper($code)]);
         $room = $stmt->fetch();
         if (!$room) {
@@ -308,6 +324,19 @@ final class RoomStore
         }
         $room['state'] = $this->decode((string) $room['state_json']);
         unset($room['state_json']);
+        $presence = $pdo->prepare(
+            'SELECT seat, guest_id, (last_seen_at >= UTC_TIMESTAMP(6) - INTERVAL 20 SECOND) AS is_connected
+             FROM baloot_room_players WHERE room_id = ?'
+        );
+        $presence->execute([(int) $room['id']]);
+        foreach ($presence->fetchAll() as $player) {
+            $seat = (int) $player['seat'];
+            if (isset($room['state']['players'][$seat])
+                && hash_equals((string) ($room['state']['players'][$seat]['guestId'] ?? ''), (string) $player['guest_id'])) {
+                $room['state']['players'][$seat]['connected'] = (bool) $player['is_connected'];
+            }
+        }
+        unset($room['id']);
         $room['version'] = (int) $room['version'];
         $room['qaid_enabled'] = (bool) $room['qaid_enabled'];
         return $room;
