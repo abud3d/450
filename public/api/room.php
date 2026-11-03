@@ -113,6 +113,15 @@ try {
     $code = apiRoomCode($input['code'] ?? '');
     $actionId = (string) ($input['actionId'] ?? '');
     if ($actionId === '') apiReply(422, ['ok' => false, 'error' => 'معرّف العملية مطلوب لمنع تكرار الحركة']);
+
+    if ($action === 'move-seat') {
+        $moved = $store->moveSeat($code, $guestId, (int) ($input['targetSeat'] ?? -1), $actionId);
+        $room = $store->read($code);
+        if (!$room) apiReply(404, ['ok' => false, 'error' => 'الغرفة غير موجودة']);
+        $snapshot = Engine::snapshot($room['state'], (int) $moved['seat']);
+        $snapshot['version'] = $room['version'];
+        apiReply(200, ['ok' => true, 'seat' => (int) $moved['seat'], 'snapshot' => $snapshot]);
+    }
     $operation = match ($action) {
         'start' => 'start',
         'bid' => 'bid',
