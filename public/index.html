@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#123f32"><title>بلوت 450</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="shell">
+    <header><div class="brand">♠ <span>بلوت</span> <b>450</b></div><span class="tag">البلوت السعودي</span></header>
+    <section class="intro"><p class="eyebrow">طاولتك جاهزة</p><h1>العب بلوت مع أصحابك</h1><p>ادخل كضيف، أنشئ غرفة أو انضم إلى أصحابك. يمكن إكمال المقاعد ببوتات.</p></section>
+    <section class="panel">
+      <label for="playerName">اسم اللاعب</label><input id="playerName" maxlength="24" placeholder="اكتب اسمك" value="ضيف">
+      <div class="actions"><button id="createRoom">إنشاء غرفة</button><div class="join"><input id="roomCode" maxlength="6" placeholder="رمز الغرفة"><button id="joinRoom" class="secondary">انضمام</button></div></div>
+      <p id="status" role="status">متصل بالخادم عند تشغيل المشروع.</p>
+    </section>
+    <section id="table" class="table hidden">
+      <div class="table-head"><strong>الغرفة <span id="code"></span></strong><button id="startGame">ابدأ واملأ المقاعد بالبوتات</button><button id="nextDeal" class="secondary">التوزيعة التالية</button></div>
+      <div class="seats" id="seats"></div>
+      <div id="controls" class="controls"></div>
+      <div class="game-info"><span id="phase">بانتظار بدء اللعب</span><span id="score">0 — 0</span></div>
+      <div class="upcard" id="upcard"></div>
+      <div class="trick" id="trick">تظهر الأوراق التي لُعبت هنا</div>
+      <div class="hand" id="hand"></div>
+      <div id="roundResult" class="round-result"></div><small>نسخة تطوير مبكرة؛ المشاريع والحساب النهائي ما زالا قيد التدقيق.</small>
+    </section>
+    <footer>بلوت 450 · نسخة التطوير الأولى</footer>
+  </main>
+  <script src="/socket.io/socket.io.js"></script><script src="/app.js"></script>
+</body></html>
