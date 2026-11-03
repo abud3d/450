@@ -90,16 +90,10 @@ final class Bot
             if (!$options) return false;
             if (($g['phase'] ?? '') === 'buyerConfirm') $choice = 'confirmHukm';
             elseif (($g['phase'] ?? '') === 'buyerSelectHukm') {
-                $scores = [];
+                $choice = 'sun';
                 foreach (Rules::SUITS as $suit) {
-                    if ($suit === ($g['upCard']['suit'] ?? null)) continue;
-                    $scores[$suit] = 0.0;
-                    foreach ($g['hands'][$seat] as $card) {
-                        if ($card['suit'] === $suit) $scores[$suit] += ['A'=>2,'10'=>1.4,'K'=>0.7,'Q'=>0.4,'J'=>0.5][$card['rank']] ?? 0;
-                    }
+                    if ($suit !== ($g['upCard']['suit'] ?? null)) { $choice = $suit; break; }
                 }
-                arsort($scores);
-                $choice = array_key_first($scores) ?? 'sun';
             } else $choice = 'pass';
             Purchase::respond($g, $seat, $choice);
             return true;
