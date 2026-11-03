@@ -75,8 +75,6 @@ final class Purchase
             'doubleTeam' => $merged['doubleTeam'] ?? null,
             'buyerTeam' => $merged['buyerTeam'] ?? null,
             'restricted' => !empty($merged['restricted']),
-            'purchaseType' => $merged['purchaseType'] ?? null,
-            'cardReceiver' => $merged['cardReceiver'] ?? null,
             'originalBuyerTeam' => Rules::team($buyer),
         ];
         $g['contract'] = $merged;
@@ -86,8 +84,8 @@ final class Purchase
         $g['contract']['level'] = $pending['level'];
         $g['contract']['doubleTeam'] = $pending['doubleTeam'];
         $g['contract']['restricted'] = $pending['restricted'];
-        $g['contract']['purchaseType'] = $pending['purchaseType'];
-        if (is_int($pending['cardReceiver'])) $g['contract']['cardReceiver'] = $pending['cardReceiver'];
+        if (array_key_exists('purchaseType', $merged)) $g['contract']['purchaseType'] = $merged['purchaseType'];
+        if (is_int($merged['cardReceiver'] ?? null)) $g['contract']['cardReceiver'] = $merged['cardReceiver'];
         if (is_int($pending['buyerTeam'])) $g['contract']['buyerTeam'] = $pending['buyerTeam'];
         $g['contract']['originalBuyerTeam'] = $pending['originalBuyerTeam'];
     }
@@ -136,7 +134,7 @@ final class Purchase
                 return;
             }
             if (in_array($choice, ['take', 'hokum'], true)) {
-                $g['contract'] = ['type' => 'hokum', 'trump' => $g['upCard']['suit'], 'buyer' => $seat, 'purchaseRound' => 1, 'purchaseType' => 'hokum'];
+                $g['contract'] = ['type' => 'hokum', 'trump' => $g['upCard']['suit'], 'buyer' => $seat, 'purchaseRound' => 1];
                 self::begin($g, $seat, 'responses');
                 return;
             }
@@ -161,7 +159,7 @@ final class Purchase
             return;
         }
         if (in_array($choice, ['takeSecond', 'hokum', 'take', 'S', 'H', 'D', 'C'], true)) {
-            $g['contract'] = ['type' => 'hokum', 'trump' => null, 'buyer' => $seat, 'purchaseRound' => 2, 'purchaseType' => 'second'];
+            $g['contract'] = ['type' => 'hokum', 'trump' => null, 'buyer' => $seat, 'purchaseRound' => 2];
             self::begin($g, $seat, 'secondPasses');
             return;
         }
