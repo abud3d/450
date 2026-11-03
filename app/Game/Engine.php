@@ -211,6 +211,10 @@ final class Engine
                 'leadSuit' => $play['leadSuit'] ?? null, 'trickIndex' => $play['trickIndex'] ?? 0,
             ];
         }
+        $qaidGroups = [];
+        foreach ($history as $play) $qaidGroups[$play['trickIndex']][] = $play;
+        $qaidHistory = [];
+        foreach ($qaidGroups as $trickIndex => $cards) $qaidHistory[] = ['trickIndex' => (int) $trickIndex, 'cards' => $cards];
         return [
             'code' => $room['code'] ?? '',
             'players' => $players,
@@ -219,7 +223,7 @@ final class Engine
             'contract' => $g['contract'] ?? null,
             'upCard' => $g['upCard'] ?? null,
             'qaidEnabled' => !empty($room['qaidEnabled']),
-            'qaidHistory' => !empty($room['qaidEnabled']) ? $history : [],
+            'qaidHistory' => !empty($room['qaidEnabled']) && empty($g['qaidResult']) && in_array($g['phase'], ['playing','roundEnd','gameEnd'], true) ? $qaidHistory : [],
             'qaidReady' => !empty($room['qaidEnabled']) && in_array($g['phase'], ['playing','roundEnd','gameEnd'], true) && empty($g['qaidResult']),
             'qaidDeadline' => ($room['qaidWindow']['seat'] ?? -1) === $seat ? ($room['qaidWindow']['expiresAt'] ?? null) : null,
             'qaidResult' => $g['qaidResult'] ?? null,
