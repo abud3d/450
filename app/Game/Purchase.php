@@ -314,7 +314,7 @@ final class Purchase
     public static function callDouble(array &$g, int $seat, string $call): void
     {
         if (!in_array($call, self::doubleOptions($g, $seat), true)) {
-            throw new \\DomainException('هذا التصعيد غير متاح لفريقك الآن');
+            throw new \DomainException('هذا التصعيد غير متاح لفريقك الآن');
         }
         $team = Rules::team($seat);
         if ($call === 'double') { $g['contract']['level'] = 2; $g['contract']['doubleTeam'] = $team; $g['contract']['buyerTeam'] = $team; }
