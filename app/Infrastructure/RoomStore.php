@@ -213,8 +213,8 @@ final class RoomStore
                         }
                         \Baloot\Game\Engine::advanceBots($state);
                         $state['lastAction'] = 'انتهت مهلة إعلان المشاريع.';
-                    } elseif (in_array($phase, ['auction1','auction2','playing'], true)) {
-                        $seat = (int) ($game['turn'] ?? -1);
+                    } elseif (in_array($phase, ['auction1','auction2','playing','buyerConfirm','buyerSelectHukm'], true)) {
+                        $seat = in_array($phase, ['buyerConfirm','buyerSelectHukm'], true) ? (int) ($game['postPurchase']['buyer'] ?? -1) : (int) ($game['turn'] ?? -1);
                         $player = $state['players'][$seat] ?? null;
                         if ($seat >= 0 && (is_array($player)) && (!empty($player['bot']) || !empty($player['botControl']))) {
                             \Baloot\Game\Engine::advanceBots($state);
