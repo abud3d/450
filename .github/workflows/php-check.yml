@@ -17,3 +17,5 @@ jobs:
         run: find . -path './.git' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Run PHP game engine tests
         run: php test-php/game-engine-test.php
+      - name: Run PHP purchase engine tests
+        run: php test-php/purchase-engine-test.php
