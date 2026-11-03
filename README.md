@@ -1,18 +1,43 @@
 # Baloot 450 — PHP Native
 
-The 400 repository is preserved as the Node.js reference. This repository is the PHP migration target.
+المستودع 400 محفوظ كمرجع Node.js دون تعديل. هذا المستودع هو مسار الترحيل إلى PHP.
 
-## Approved product requirements
-- Email + password registration and email verification.
-- Secure optional remember-me using HttpOnly cookies; never store passwords or session tokens in browser storage.
-- Independent sessions on multiple devices, with revoke-current and revoke-all.
-- Prevent one account from occupying multiple seats in one match.
-- Elo-based rating, four skill tiers (beginner, intermediate, advanced, excellent), achievements, and leaderboards.
+## المتطلبات المعتمدة
+- التسجيل بالبريد وكلمة المرور مع تفعيل البريد.
+- تذكر الدخول اختيارياً عبر Cookie آمنة؛ لا تخزن كلمة المرور أو رمز الجلسة في تخزين المتصفح.
+- جلسات مستقلة للأجهزة مع إمكانية إلغاء جلسة الجهاز الحالي أو جميع الجلسات.
+- منع الحساب من احتلال أكثر من مقعد في المباراة (يتطلب ربطه بمحرك الغرف قبل تشغيل اللعب).
+- تقييم Elo ومستويات مبتدئ/متوسط/متقدم/ممتاز وإنجازات وترتيب.
 
-## Hosting requirements
-- PHP 8.1+; web document root must point to `public/` only.
-- Private data directory outside the web root, writable only by the PHP service user.
-- HTTPS required; configure the application origin and mail sender before enabling account activation.
+## ما أضيف في هذه الدفعة
+- `public/api/auth.php`: نواة API أولية للتسجيل، تفعيل البريد، الدخول، فحص الجلسة، الخروج من جهاز، والخروج من جميع الأجهزة.
+- تخزين JSON بقفل حصري وكتابة ذرية، مع حفظ ملفات البيانات خارج مجلد الويب.
+- تجزئة كلمات المرور عبر `password_hash`، ورموز تحقق عشوائية، وCookies من نوع HttpOnly/Secure/SameSite.
+- حدود أولية لمحاولات التسجيل والدخول.
 
-## Migration status
-This is a staged migration, not production-ready software. The legacy engine and latest UI must be reviewed before replacing them. JSON storage is only an initial low-volume option; load testing is required before public launch. No production deployment is performed without approval.
+## إعداد الاستضافة (لا تشغل قبل إكماله)
+PHP 8.1+ وHTTPS مطلوبان. اجعل Document Root يشير إلى مجلد `public/` فقط، ولا تكشف جذر المستودع.
+
+اضبط متغيرات البيئة في PHP-FPM/Apache:
+- `BALOUT_DATA_DIR`: مجلد موجود وقابل للكتابة خارج webroot، بصلاحية مقيدة لمستخدم PHP.
+- `APP_URL`: رابط الموقع الكامل الذي يبدأ بـ HTTPS.
+- `APP_ORIGIN`: أصل الموقع فقط، مثال `https://example.com`.
+- `MAIL_FROM`: بريد مرسل صالح ومهيأ على الخادم.
+
+مسارات API (JSON):
+- `POST /api/auth.php?action=register` — `{"email":"...","password":"..." }`
+- `GET /api/auth.php?action=verify&token=...` — رابط تفعيل البريد.
+- `POST /api/auth.php?action=login` — `{"email":"...","password":"...","remember":true}`
+- `POST /api/auth.php?action=me` — يعيد الحساب ورمز CSRF.
+- `POST /api/auth.php?action=logout`
+- `POST /api/auth.php?action=logout_all`
+
+## النواقص قبل الإنتاج
+- استعادة كلمة المرور وإعادة إرسال التفعيل.
+- اختبار CSRF شامل وربط رمز CSRF بكل عمليات الحساب واللعب.
+- تنظيف دوري للجلسات والرموز القديمة، وتحسين حدود المحاولات على مستوى IP والبريد.
+- ربط الهوية بمقاعد الغرف لمنع دخول الحساب نفسه بمقعدين.
+- اختبار PHP lint واختبارات تكامل وأمن وضغط على بيئة معزولة.
+- مراجعة آلية البريد ومجلد التخزين وصلاحياتهما على CWP.
+
+هذا إصدار تأسيسي غير جاهز للإطلاق العام. تخزين JSON مناسب لتجربة محدودة فقط وقد يصبح عنق زجاجة؛ لا يوجد ادعاء بتحمل ضغط كبير قبل الاختبار. لم يتم النشر على السيرفر.
