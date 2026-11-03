@@ -33,6 +33,7 @@ final class Engine
         Rules::deal($game);
         $room['players'] = array_values($players);
         $room['game'] = $game;
+        TurnClock::arm($room, 30);
         $room['lastAction'] = 'وُزعت خمس أوراق لكل لاعب وبدأ الشراء.';
     }
 
@@ -126,6 +127,8 @@ final class Engine
         }
 
         if (!isset($room['qaidWindow'])) self::advanceBots($room);
+        if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 30);
+        else TurnClock::clear($room);
         return ['ok' => true];
     }
 
@@ -136,6 +139,11 @@ final class Engine
         while ($count < max(1, min(32, $limit))) {
             $g =& $room['game'];
             $phase = $g['phase'] ?? '';
+            if ($phase === 'redeal') {
+                Rules::nextRound($g);
+                $count++;
+                continue;
+            }
             if ($phase === 'projectDeclaration') {
                 $seat = null;
                 foreach ($room['players'] as $i => $player) {
@@ -159,6 +167,8 @@ final class Engine
             $count++;
         }
         if ($count > 0) $room['lastAction'] = 'اتخذ البوت قراراً تلقائياً.';
+        if (in_array($room['game']['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 30);
+        else TurnClock::clear($room);
         return $count;
     }
 
