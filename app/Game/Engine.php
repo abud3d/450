@@ -61,7 +61,10 @@ final class Engine
                 $room['lastAction'] = 'تم تسجيل إعلان المشروع.';
                 break;
             case 'play':
+                $beforeTricks = count($g['tricks'] ?? []);
                 Rules::play($g, $seat, (string) ($input['cardId'] ?? ''));
+                if (count($g['tricks'] ?? []) > $beforeTricks) $room['trickVisibleUntil'] = time() + (in_array($g['phase'], ['roundEnd','gameEnd'], true) ? 6 : 2);
+                if (in_array($g['phase'], ['roundEnd','gameEnd'], true)) $room['roundResultReadyAt'] = time() + 6;
                 $room['lastAction'] = 'تم لعب الورقة.';
                 break;
             case 'qaid_claim':
