@@ -14,13 +14,13 @@ final class Projects {
  private static function addRun(array $run,string $s,array &$out,int $seat):void{if(count($run)<3)return;$n=count($run);$t=$n>=5?'100-run':($n===4?'50':'20');$out[]=['type'=>$t,'strength'=>$n>=5?4:($n===4?2:1),'high'=>min(array_map(fn($r)=>array_search($r,self::ORDER,true),$run)),'suit'=>$s,'seat'=>$seat,'team'=>$seat%2,'label'=>$n>=5?'مائة متسلسلة':($n===4?'خمسين':'سرا'),'length'=>$n];}
  public static function compare(array $a,array $b):int{return ($a['strength']<=>$b['strength'])?: (($a['type']==='100-set'&&$b['type']==='100-set')?($b['high']<=>$a['high']):0);}
  public static function declare(array &$game,int $seat,string $projectType):void{
-  if(!in_array($game['phase']??'', ['projectDeclaration','playing'],true)||count($game['history']??[])>0)throw new \\DomainException('مرحلة إعلان المشاريع غير متاحة');
-  if($seat<0||$seat>3)throw new \\DomainException('المقعد غير صحيح');
-  if(!empty($game['projectDeclared'][$seat]))throw new \\DomainException('تم تسجيل إعلان مشروعك مسبقاً');
+  if(!in_array($game['phase']??'', ['projectDeclaration','playing'],true)||count($game['history']??[])>0)throw new \DomainException('مرحلة إعلان المشاريع غير متاحة');
+  if($seat<0||$seat>3)throw new \DomainException('المقعد غير صحيح');
+  if(!empty($game['projectDeclared'][$seat]))throw new \DomainException('تم تسجيل إعلان مشروعك مسبقاً');
   if($projectType!=='pass'){
    $project=null;
    foreach($game['projectOptions'][$seat]??[] as $option)if(($option['type']??'')===$projectType){$project=$option;break;}
-   if(!is_array($project))throw new \\DomainException('المشروع غير موجود في أوراقك');
+   if(!is_array($project))throw new \DomainException('المشروع غير موجود في أوراقك');
    $game['projectClaims'][$seat]=[$project];
   }
   $game['projectDeclared'][$seat]=true;
