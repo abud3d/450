@@ -75,6 +75,39 @@ final class RoomStore
         });
     }
 
+    /** Join the newest compatible lobby, or create a room when none is available. */
+    public function quickJoin(string $guestId, string $displayName, bool $qaidEnabled = true): array
+    {
+        $this->assertGuestId($guestId);
+        $name = $this->cleanName($displayName);
+        $stmt = Database::connection()->prepare(
+            "SELECT r.room_code
+             FROM baloot_rooms r
+             WHERE r.status = 'lobby'
+               AND r.qaid_enabled = ?
+               AND (SELECT COUNT(*) FROM baloot_room_players p WHERE p.room_id = r.id) < 4
+             ORDER BY r.last_activity_at DESC
+             LIMIT 25"
+        );
+        $stmt->execute([$qaidEnabled ? 1 : 0]);
+        foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $code) {
+            try {
+                $joined = $this->join((string) $code, $guestId, $name);
+                $joined['created'] = false;
+                $joined['qaidEnabled'] = $qaidEnabled;
+                return $joined;
+            } catch (RuntimeException $e) {
+                // The lobby may have filled or started between discovery and the locked join.
+                continue;
+            }
+        }
+
+        $created = $this->create($guestId, $name, $qaidEnabled);
+        $created['created'] = true;
+        $created['qaidEnabled'] = $qaidEnabled;
+        return $created;
+    }
+
     /**
      * Idempotent state mutation with row-level serialization and optimistic versioning.
      * The supplied callback receives the decoded state and must return the response to cache.
