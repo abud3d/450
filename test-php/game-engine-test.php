@@ -1,0 +1,26 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/../app/Game/Seating.php';
+require __DIR__.'/../app/Game/Projects.php';
+require __DIR__.'/../app/Game/Scoring.php';
+require __DIR__.'/../app/Game/Rules.php';
+use Baloot\Game\Rules;
+use Baloot\Game\Seating;
+use Baloot\Game\Projects;
+use Baloot\Game\Scoring;
+function check(bool $ok,string $message):void{if(!$ok)throw new RuntimeException($message);}
+check(Seating::counterClockwiseSeat(0)===3,'seat order');
+check(count(Rules::deck())===32,'32-card deck');
+$g=Rules::create();Rules::deal($g);
+check($g['phase']==='auction1','deal phase');
+check(array_sum(array_map('count',$g['hands']))===20,'initial 5-card deal');
+check(count($g['stock'])===11,'remaining stock');
+$hand=[['suit'=>'S','rank'=>'A','id'=>'SA'],['suit'=>'S','rank'=>'K','id'=>'SK'],['suit'=>'S','rank'=>'Q','id'=>'SQ'],['suit'=>'H','rank'=>'7','id'=>'H7']];
+$projects=Projects::detect($hand,['type'=>'hokum','trump'=>'S'],0);
+check(count(array_filter($projects,fn($p)=>$p['type']==='20'))===1,'three-card run detection');
+check(count(array_filter($projects,fn($p)=>$p['type']==='belot'))===1,'belot detection');
+check(Rules::points(['suit'=>'S','rank'=>'J'],['type'=>'hokum','trump'=>'S'])===20,'trump jack points');
+check(Rules::points(['suit'=>'H','rank'=>'A'],['type'=>'hokum','trump'=>'S'])===11,'off-trump ace points');
+check(Scoring::convertRaw(65,'sun')===13,'sun conversion');
+check(Scoring::convertRaw(81,'hokum')===8,'hokum conversion');
+echo "PHP game engine smoke tests passed\n";
