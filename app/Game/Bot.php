@@ -80,7 +80,7 @@ final class Bot
      */
     public static function act(array &$g, int $seat): bool
     {
-        if (($g['turn'] ?? -1) !== $seat) return false;
+        if (($g['phase'] ?? '') !== 'projectDeclaration' && ($g['turn'] ?? -1) !== $seat) return false;
         if (in_array($g['phase'] ?? '', ['auction1', 'auction2'], true)) {
             Purchase::choose($g, $seat, self::bid($g, $seat));
             return true;
