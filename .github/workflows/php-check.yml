@@ -47,3 +47,9 @@ jobs:
         run: mysql --protocol=TCP -h127.0.0.1 -uroot -proot baloot_test < database/schema.mysql.sql
       - name: Run MySQL room store integration tests
         run: php test-php/mysql-room-store-test.php
+      - name: Run four-browser room HTTP and recovery tests
+        run: bash test-php/room-http-test.sh
+      - name: Run concurrent MySQL mutation tests
+        run: php test-php/concurrency-room-test.php
+      - name: Run PHP account and mail HTTP integration tests
+        run: bash test-php/auth-http-test.sh
