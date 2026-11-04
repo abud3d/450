@@ -295,7 +295,28 @@ final class RoomStore
     /** Advance all due timers for one room during its normal state polling. */
     public function advanceRoomBots(string $code): bool
     {
-        return $this->advanceDueRooms(1, $code) > 0;
+        // Avoid taking a row lock and opening a transaction on every poll.
+        // Most polls have no due timer, so inspect the stored deadline first.
+        $stmt = Database::connection()->prepare(
+            "SELECT state_json FROM baloot_rooms
+             WHERE status = 'active' AND room_code = ? LIMIT 1"
+        );
+        $stmt->execute([strtoupper($code)]);
+        $json = $stmt->fetchColumn();
+        if (!is_string($json) || $json === '') return false;
+
+        $state = $this->decode($json);
+        $now = time();
+        $phase = (string) ($state['game']['phase'] ?? 'lobby');
+        $due = (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? PHP_INT_MAX) <= $now)
+            || (isset($state['autoLastCardAt']) && (int) $state['autoLastCardAt'] <= $now)
+            || (isset($state['botActionAt']) && (int) $state['botActionAt'] <= $now)
+            || \Baloot\Game\TurnClock::expired($state, $now)
+            || ($phase === 'roundEnd'
+                && (int) ($state['roundResultReadyAt'] ?? 0) > 0
+                && $now >= (int) $state['roundResultReadyAt'] + 10);
+
+        return $due ? $this->advanceDueRooms(1, $code) > 0 : false;
     }
 
     public function advanceDueRooms(int $limit = 100, ?string $onlyCode = null): int
