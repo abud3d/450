@@ -21,7 +21,7 @@ function roomRequest(string $method,string $path,?array $body=null,string $cooki
 }
 function uuidRoom(int $n):string{return sprintf('bbbbbbbb-bbbb-4bbb-8bbb-%012x',$n);}
 $anonymousCreate=roomRequest('POST','/api/room.php?action=create',['name'=>'Anonymous','qaidEnabled'=>true]);
-roomCheck($anonymousCreate['status']===401,'anonymous room creation is rejected without an identity');
+roomCheck($anonymousCreate['status']===401,'anonymous room creation is rejected without an identity (HTTP '.$anonymousCreate['status'].': '.json_encode($anonymousCreate['data'],JSON_UNESCAPED_UNICODE).')');
 $anonymousState=roomRequest('GET','/api/room.php?action=state&code=ABC123');
 roomCheck($anonymousState['status']===401,'anonymous room state access is rejected without an identity');
 
