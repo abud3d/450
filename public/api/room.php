@@ -47,20 +47,38 @@ function apiOriginGuard(): void
     if (!hash_equals($expected, $origin)) apiReply(403, ['ok' => false, 'error' => 'مصدر الطلب غير مسموح']);
 }
 
-function apiGuestId(): string
+function apiSetGuestCookie(string $id): void
+{
+    setcookie('baloot_guest', $id, [
+        'expires' => time() + 60 * 60 * 24 * 180,
+        'path' => '/',
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+}
+
+function apiGuestId(PDO $pdo): string
 {
     $id = $_COOKIE['baloot_guest'] ?? '';
-    if (!is_string($id) || !preg_match('/^[a-f0-9]{64}$/', $id)) {
-        $id = bin2hex(random_bytes(32));
-        setcookie('baloot_guest', $id, [
-            'expires' => time() + 60 * 60 * 24 * 180,
-            'path' => '/',
-            'secure' => true,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
+    if (is_string($id) && preg_match('/^[a-f0-9]{64}$/', $id)) return $id;
+
+    $session = $_COOKIE['b450_session'] ?? '';
+    if (is_string($session) && preg_match('/^[a-f0-9]{64}$/', $session)) {
+        $query = $pdo->prepare(
+            'SELECT u.guest_id FROM baloot_user_sessions s
+             JOIN baloot_users u ON u.uid = s.uid
+             WHERE s.token_hash = ? AND s.expires_at > UTC_TIMESTAMP() AND u.verified = 1 LIMIT 1'
+        );
+        $query->execute([hash('sha256', $session)]);
+        $userGuestId = $query->fetchColumn();
+        if (is_string($userGuestId) && preg_match('/^[a-f0-9]{64}$/', $userGuestId)) {
+            apiSetGuestCookie($userGuestId);
+            return $userGuestId;
+        }
     }
-    return $id;
+
+    apiReply(401, ['ok' => false, 'error' => 'لا توجد هوية لاعب. أنشئ هوية ضيف أو سجّل الدخول أولاً.']);
 }
 
 function apiRoomCode(mixed $value): string
@@ -77,12 +95,32 @@ function apiName(mixed $value): string
 }
 
 $store = new RoomStore();
-$guestId = apiGuestId();
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = (string) ($_GET['action'] ?? '');
 
 try {
+    if ($method === 'GET' && $action === 'identity') {
+        $id = $_COOKIE['baloot_guest'] ?? '';
+        if (!is_string($id) || !preg_match('/^[a-f0-9]{64}$/', $id)) {
+            $session = $_COOKIE['b450_session'] ?? '';
+            $id = '';
+            if (is_string($session) && preg_match('/^[a-f0-9]{64}$/', $session)) {
+                $query = Database::connection()->prepare(
+                    'SELECT u.guest_id FROM baloot_user_sessions s
+                     JOIN baloot_users u ON u.uid = s.uid
+                     WHERE s.token_hash = ? AND s.expires_at > UTC_TIMESTAMP() AND u.verified = 1 LIMIT 1'
+                );
+                $query->execute([hash('sha256', $session)]);
+                $id = (string) $query->fetchColumn();
+            }
+            if (!preg_match('/^[a-f0-9]{64}$/', $id)) $id = bin2hex(random_bytes(32));
+            apiSetGuestCookie($id);
+        }
+        apiReply(200, ['ok' => true, 'guestId' => $id, 'identityType' => 'guest']);
+    }
+
     if ($method === 'GET' && in_array($action, ['state','resume'], true)) {
+        $guestId = apiGuestId(Database::connection());
         if (!$store->allowRate('state', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 90, 60)) apiReply(429, ['ok' => false, 'error' => 'طلبات كثيرة؛ حاول بعد قليل']);
         $code = apiRoomCode($_GET['code'] ?? '');
         $store->advanceRoomBots($code);
@@ -102,6 +140,7 @@ try {
     if ($method !== 'POST') apiReply(405, ['ok' => false, 'error' => 'طريقة الطلب غير مدعومة']);
     apiOriginGuard();
     $input = apiBody();
+    $guestId = apiGuestId(Database::connection());
 
     if ($action === 'create') {
         if (!$store->allowRate('create', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 5, 3600)) apiReply(429, ['ok' => false, 'error' => 'تجاوزت حد إنشاء الغرف مؤقتاً']);
