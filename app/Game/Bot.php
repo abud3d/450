@@ -75,6 +75,51 @@ final class Bot
     }
 
     /**
+     * Conservative backup policy used when the primary bot cannot complete a turn.
+     * It always prefers a legal, low-risk continuation over leaving the room stalled.
+     */
+    public static function fallbackAct(array &$g, int $seat): bool
+    {
+        $phase = (string) ($g['phase'] ?? '');
+        if (in_array($phase, ['auction1', 'auction2'], true)) {
+            Purchase::choose($g, $seat, 'pass');
+            return true;
+        }
+        if ($phase === 'postPurchase') {
+            $options = Purchase::options($g, $seat);
+            if (!$options) {
+                Purchase::expire($g);
+                return true;
+            }
+            Purchase::respond($g, $seat, in_array('pass', $options, true) ? 'pass' : $options[0]);
+            return true;
+        }
+        if ($phase === 'buyerConfirm' || $phase === 'buyerSelectHukm') {
+            $options = Purchase::options($g, $seat);
+            if (!$options) return false;
+            $choice = $phase === 'buyerConfirm'
+                ? (in_array('confirmHukm', $options, true) ? 'confirmHukm' : $options[0])
+                : (array_values(array_filter($options, static fn($option) => in_array($option, Rules::SUITS, true)))[0] ?? 'sun');
+            Purchase::respond($g, $seat, $choice);
+            return true;
+        }
+        if ($phase === 'projectDeclaration') {
+            if (!empty($g['projectDeclared'][$seat])) return false;
+            Projects::declare($g, $seat, 'pass');
+            return true;
+        }
+        if ($phase === 'playing') {
+            $hand = $g['hands'][$seat] ?? [];
+            if (!$hand) return false;
+            $legal = Rules::legal($hand, $g['trick'] ?? [], $g['contract'], $seat);
+            if (!$legal) return false;
+            Rules::play($g, $seat, (string) $legal[0]['id']);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Apply one automated action. A scheduler should persist the resulting state
      * atomically through RoomStore after this method returns.
      */
