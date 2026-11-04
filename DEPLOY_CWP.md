@@ -51,6 +51,8 @@ mysql -u 'DB_USER' -p 'DB_NAME' < /home/arbim/blout.arb.im/database/schema.mysql
 - `APP_URL=https://blout.arb.im`
 - `MAIL_FROM=no-reply@blout.arb.im`
 
+إذا كانت متغيرات البيئة غير متاحة في CWP، أضف المفتاحين `app_url` و`mail_from` إلى المصفوفة الموجودة في `/home/arbim/baloot450-config.php` مع الإبقاء على مفاتيح قاعدة البيانات و`origin` الحالية. لا تستبدل الملف كاملاً ولا تضعه داخل `public/`.
+
 ## 5) إضافة جداول الحسابات والملف الشخصي
 بعد استيراد المخطط الأساسي الحالي، استورد الملف التالي إلى قاعدة البيانات نفسها من phpMyAdmin:
 `/home/arbim/blout.arb.im/database/migrations/002_accounts_profiles.sql`
