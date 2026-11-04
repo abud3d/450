@@ -6,6 +6,6 @@
 .qaid-proof-label{display:block;font-size:12px;font-weight:800;margin-top:5px}
 .qaid-proof-bad{color:#d92d20}.qaid-proof-good{color:#16834a}
 .qaid-proof-card{border:2px solid #16834a!important;border-radius:10px}
-.qaid-card-choice:has(.qaid-proof-bad){border:2px solid #d92d20!important;border-radius:10px}
+.qaid-violation-card{border:2px solid #d92d20!important;border-radius:10px}
 .qaid-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
 .qaid-selection-summary{flex-basis:100%;text-align:center}
