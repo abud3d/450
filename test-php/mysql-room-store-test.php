@@ -37,6 +37,18 @@ $joined2=$store->join($code,$guest2,'Guest Two');
 $joined3=$store->join($code,$guest3,'Guest Three');
 verify($joined2['seat']===1 && $joined3['seat']===2,'four distinct human players occupy all four seats');
 $pdo=Database::connection();
+$staleOwner=str_repeat('9',64);
+$staleRoom=$store->create($staleOwner,'Stale Lobby',true);
+$age=$pdo->prepare('UPDATE baloot_rooms SET last_activity_at=UTC_TIMESTAMP(6)-INTERVAL 10 MINUTE WHERE room_code=?');
+$age->execute([$staleRoom['code']]);
+$staleHeartbeat=$pdo->prepare('UPDATE baloot_room_players SET last_seen_at=UTC_TIMESTAMP(6)-INTERVAL 10 MINUTE WHERE guest_id=?');
+$staleHeartbeat->execute([$staleOwner]);
+verify($store->expireStaleLobbies()===1,'abandoned lobby expires after five minutes without active heartbeat');
+verify(($store->read($staleRoom['code'])['status']??'')==='expired','expired lobby is no longer joinable');
+try{$store->join($staleRoom['code'],str_repeat('8',64),'Late Guest');throw new RuntimeException('expired lobby accepted a new player');}
+catch(RuntimeException $e){verify(str_contains($e->getMessage(),'صلاحية الغرفة'),'expired lobby returns a clear rejection');}
+$quickAfterExpiry=$store->quickJoin(str_repeat('7',64),'Fresh Quick Guest',true);
+verify($quickAfterExpiry['code']!==$staleRoom['code'],'quick join never selects an expired lobby');
 $offline=$pdo->prepare('UPDATE baloot_room_players SET last_seen_at = UTC_TIMESTAMP(6) - INTERVAL 1 MINUTE WHERE guest_id IN (?, ?)');
 $offline->execute([$guest2,$guest3]);
 $presence=$store->read($code);
