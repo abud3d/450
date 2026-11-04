@@ -1076,7 +1076,7 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
  padding:calc(10px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
  overflow:hidden;border:0;border-radius:0;display:flex;flex-direction:column;gap:7px;
 }
-.table-page #qaidPage .qaid-history-board{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto};touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-behavior:auto}
+.table-page #qaidPage .qaid-history-board{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-behavior:auto}
 html:has(body.table-page.qaid-review-open),body.table-page.qaid-review-open{touch-action:pan-y}
 .table-page .qaid-violation-reason{display:block;color:#8b1d24;font-size:10px;font-weight:800;line-height:1.35;text-align:center}
 @media(max-width:560px){
