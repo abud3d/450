@@ -3,7 +3,7 @@ on:
   push:
     branches: [main, php-native-engine, preview/player-accounts-profile, preview/accounts-bot-combined]
   pull_request:
-    branches: [main]
+    branches: [main, preview/visible-bot-turns]
 jobs:
   lint:
     runs-on: ubuntu-latest
