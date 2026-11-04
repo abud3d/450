@@ -344,7 +344,7 @@ final class RoomStore
                 if (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? 0) <= $now) {
                     $claimantSeat = (int) ($state['qaidWindow']['seat'] ?? -1);
                     if ($claimantSeat >= 0 && $claimantSeat <= 3) {
-                        \\Baloot\\Game\\Qaid::expire($game, $claimantSeat);
+                        \Baloot\Game\Qaid::expire($game, $claimantSeat);
                     }
                     unset($state['qaidWindow']);
                     $state['roundResultReadyAt'] = $now;
