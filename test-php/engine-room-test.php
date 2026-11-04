@@ -10,6 +10,7 @@ require_once __DIR__ . '/../app/Game/TurnClock.php';
 require_once __DIR__ . '/../app/Game/Qaid.php';
 require_once __DIR__ . '/../app/Game/Engine.php';
 use Baloot\Game\Engine;
+use Baloot\Game\TurnClock;
 $gid=str_repeat('a',32);
 $room=['code'=>'ABC123','ownerGuestId'=>$gid,'qaidEnabled'=>true,'players'=>[['name'=>'Host','guestId'=>$gid,'bot'=>false],null,null,null],'game'=>null];
 Engine::start($room,0);
