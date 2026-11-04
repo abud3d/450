@@ -41,7 +41,7 @@ qaidCheck($result['timeout'] === true && $game['phase'] === 'gameEnd' && $game['
 
 $game=qaidGame(false);$game['history']=[['seat'=>0,'violation'=>true]];
 $result=Qaid::decide($game,0);
-qaidCheck($result['winnerTeam']===1,'A claimant who is on the violating team must lose the qaid points.');
+qaidCheck($result['success']===false && $result['actualViolation']===true && $result['winnerTeam']===1,'A claimant who is on the violating team must lose the qaid points and the claim must be marked incorrect.');
 $game=qaidGame(false);$game['history']=[['seat'=>0,'violation'=>true],['seat'=>1,'violation'=>true]];
 $result=Qaid::decide($game,0);
 qaidCheck($result['winnerTeam']===1,'When both teams violated, the claimant team must not receive the qaid points.');
