@@ -31,7 +31,7 @@ roomCheck($identity['status']===200 && preg_match('/^[a-f0-9]{64}$/',(string)($i
 $created=roomRequest('POST','/api/room.php?action=create',['name'=>'API Player 1','qaidEnabled'=>true],'baloot_guest='.($identity['cookies']['baloot_guest']??''));
 roomCheck($created['status']===201 && ($created['data']['ok']??false),'room API creates first player room');
 $code=(string)$created['data']['code'];
-$clients[0]=['cookie'=>'baloot_guest='.($created['cookies']['baloot_guest']??''),'seat'=>0];
+$clients[0]=['cookie'=>'baloot_guest='.($identity['cookies']['baloot_guest']??''),'seat'=>0];
 roomCheck((bool)preg_match('/^[A-F0-9]{6}$/',$code),'room API returns a six-character room code');
 for($seat=1;$seat<4;$seat++){
  $guestIdentity=roomRequest('GET','/api/room.php?action=identity');
@@ -41,7 +41,7 @@ for($seat=1;$seat<4;$seat++){
  roomCheck($joined['status']===200 && ($joined['data']['seat']??-1)===$seat,'separate guest joins expected seat '.$seat);
  $guest=$joined['cookies']['baloot_guest']??'';
  roomCheck((bool)preg_match('/^[a-f0-9]{64}$/',$guest),'each joining browser receives its own guest cookie');
- $clients[$seat]=['cookie'=>'baloot_guest='.$guest,'seat'=>$seat];
+ $clients[$seat]=['cookie'=>$guestCookie,'seat'=>$seat];
 }
 $before=roomRequest('GET','/api/room.php?action=state&code='.$code,null,$clients[0]['cookie']);
 roomCheck($before['status']===200 && ($before['data']['seat']??-1)===0,'room state read returns the owner seat');
