@@ -10,8 +10,8 @@ use Baloot\Game\Rules;
 function qaidCheck(bool $condition,string $message):void{if(!$condition)throw new RuntimeException($message);}
 function qaidGame(bool $violation):array{$game=Rules::create();$game['qaidEnabled']=true;$game['phase']='playing';$game['contract']=['type'=>'sun','trump'=>null,'buyer'=>0,'buyerTeam'=>0,'level'=>1];$game['history']=$violation?[['seat'=>2,'violation'=>true]]:[];return $game;}
 $game=qaidGame(true);$result=Qaid::decide($game,1);
-qaidCheck($result['success']===true&&$result['winnerTeam']===1,'A proven violation should award the claimant team automatically.');
-qaidCheck($game['scores']===[0,26],'Automatic correct qaid should award the claimant team.');
+qaidCheck($result['success']===true&&$result['winnerTeam']===0,'A proven violation awards the team that committed it, not automatically the claimant team.');
+qaidCheck($game['scores']===[26,0],'Automatic correct qaid should award the violating team.');
 $game=qaidGame(false);$result=Qaid::decide($game,0);
 qaidCheck($result['success']===false&&$result['winnerTeam']===1,'No violation should award the opposing team.');
 $game=qaidGame(false);$result=Qaid::expire($game,0);
@@ -38,4 +38,12 @@ $game['lastAwarded'] = [0, 0];
 $game['roundScoresBefore'] = [130, 140];
 $result = Qaid::expire($game, 0);
 qaidCheck($result['timeout'] === true && $game['phase'] === 'gameEnd' && $game['winner'] === 1 && $game['scores'] === [130, 166], 'A timeout opened on the final-score screen must restore the pre-round score and recalculate the winner.');
+
+$game=qaidGame(false);$game['history']=[['seat'=>0,'violation'=>true]];
+$result=Qaid::decide($game,0);
+qaidCheck($result['winnerTeam']===0,'A claimant who is on the violating team still receives the points for that team.');
+$game=qaidGame(false);$game['history']=[['seat'=>0,'violation'=>true],['seat'=>1,'violation'=>true]];
+$result=Qaid::decide($game,0);
+qaidCheck($result['winnerTeam']===0,'When both teams violated, the first claimant team receives the points.');
+
 echo "PHP automatic qaid settlement tests passed\n";
