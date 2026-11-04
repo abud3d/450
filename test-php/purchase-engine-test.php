@@ -70,7 +70,7 @@ ok($doubleGame['contract']['level']===5,'coffee escalation level');
 $qaid=['phase'=>'playing','qaidEnabled'=>true,'history'=>[['seat'=>1,'violation'=>true]],'contract'=>['type'=>'sun','buyer'=>1,'buyerTeam'=>1,'originalBuyerTeam'=>1],'projectClaims'=>[[],[],[],[]],'balotClaims'=>[],'dealer'=>0,'scores'=>[0,0]];
 $result=Qaid::decide($qaid,0);
 ok($result['success']===true && $result['winnerTeam']===1,'valid qaid claim awards the team that committed the violation');
-ok($qaid['phase']==='roundEnd' && $qaid['scores'][0]>0,'qaid resolves and scores');
+ok($qaid['phase']==='roundEnd' && $qaid['scores'][1]>0,'qaid resolves and awards points to the violating team');
 
 $clock=['turn'=>1]; TurnClock::arm($clock,30,100);
 ok(!TurnClock::expired($clock,129),'clock before deadline');
