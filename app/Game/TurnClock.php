@@ -13,11 +13,12 @@ final class TurnClock
     {
         $seconds = max(1, min(300, $seconds));
         $roomState['turnDeadlineAt'] = ($now ?? time()) + $seconds;
+        $roomState['turnDeadlineDuration'] = $seconds;
     }
 
     public static function clear(array &$roomState): void
     {
-        unset($roomState['turnDeadlineAt']);
+        unset($roomState['turnDeadlineAt'], $roomState['turnDeadlineDuration']);
     }
 
     public static function expired(array $roomState, ?int $now = null): bool
