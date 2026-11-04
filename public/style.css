@@ -1122,3 +1122,9 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
 }
 .table-page #qaidPage .qaid-card-choice:not(:disabled){cursor:pointer}
 .table-page #qaidPage .qaid-card-tag-available{background:#a56a18;color:#fff}
+
+
+/* Sequential visual dealing: presentation only, game rules and card order stay unchanged. */
+.hand .playing-card.card-dealing{animation:baloot-card-deal .38s cubic-bezier(.2,.75,.25,1) both;animation-delay:var(--deal-delay,0ms)}
+@keyframes baloot-card-deal{from{opacity:0;transform:translateY(28px) rotate(0deg) scale(.92)}to{opacity:1;transform:translateY(var(--fan-y,0)) rotate(var(--fan-r,0deg)) scale(1)}}
+@media(prefers-reduced-motion:reduce){.hand .playing-card.card-dealing{animation:none;opacity:1}}
