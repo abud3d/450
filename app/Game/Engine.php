@@ -21,13 +21,18 @@ final class Engine
             throw new DomainException('صاحب الغرفة فقط يبدأ اللعبة');
         }
         $botStyles = ['professional', 'aggressive', 'cautious', 'analyst'];
+        $usedBotNumbers = [];
         for ($seat = 0; $seat < 4; $seat++) {
             if (empty($players[$seat])) $players[$seat] = ['name' => 'كمبيوتر', 'seat' => $seat, 'bot' => true, 'guestId' => null];
             $players[$seat]['seat'] = $seat;
             $players[$seat]['bot'] = !empty($players[$seat]['bot']);
             if ($players[$seat]['bot']) {
                 $number = (int) ($players[$seat]['botNumber'] ?? 0);
-                if ($number < 1 || $number > 99) $number = random_int(1, 99);
+                if ($number < 1 || $number > 99 || in_array($number, $usedBotNumbers, true)) {
+                    $number = random_int(1, 99);
+                    for ($attempt = 0; in_array($number, $usedBotNumbers, true) && $attempt < 99; $attempt++) $number = ($number % 99) + 1;
+                }
+                $usedBotNumbers[] = $number;
                 $players[$seat]['botNumber'] = $number;
                 $style = (string) ($players[$seat]['botStyle'] ?? '');
                 if (!in_array($style, $botStyles, true)) $style = $botStyles[random_int(0, 3)];
