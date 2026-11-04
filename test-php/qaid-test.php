@@ -20,6 +20,7 @@ qaidCheck($game['scores']===[0,26],'Qaid timeout should apply the loss score.');
 $game=qaidGame(true);$game['scores']=[140,130];$result=Qaid::decide($game,1);
 qaidCheck($game['phase']==='gameEnd'&&$game['winner']===1,'Qaid settlement must finish the match when the claimant reaches 152.');
 $game = qaidGame(true);
+$game['history'] = [];
 $game['turn'] = 1;
 $game['hands'][1] = [
     ['suit' => 'S', 'rank' => 'A', 'id' => 'SA'],
