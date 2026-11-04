@@ -73,6 +73,40 @@ const roomFromUrl=new URLSearchParams(location.search).get('room');if(roomFromUr
 transport.on('connect',()=>{if($('status'))status('متصل بالخادم.');const target=roomFromUrl?.toUpperCase()||getRecentRoom();if(target){roomCode=target;if($('roomCode'))$('roomCode').value=target;transport.emit('room:resume',{code:target,guestId},r=>{if(r.ok){mySeat=r.seat;if($('status'))status('تم استعادة مقعدك.');}else if($('status'))status(r.error||'تعذر فتح الغرفة.');});}});
 transport.on('disconnect',()=>status('انقطع الاتصال؛ نحاول إعادة الاتصال.'));
 function playCardNow(id){if(playRequestInFlight)return;playRequestInFlight=true;selectedCardId=null;queuedCardId=null;const button=document.querySelector('[data-card="'+CSS.escape(id)+'"]');if(button){button.disabled=true;button.classList.add('is-playing','is-pending');button.setAttribute('aria-busy','true');}status('جارٍ إرسال الورقة...');transport.emit('room:play',{code:roomCode,cardId:id},result=>{playRequestInFlight=false;if(!result?.ok){if(button){button.disabled=false;button.classList.remove('is-playing','is-pending');button.removeAttribute('aria-busy');}status(result?.error||'تعذر لعب الورقة');if(latest)renderControls(latest);}else status('تم استلام الورقة.');});}
+
+function animatePurchasedUpcard(s,previous){
+ if(!previous||!['postPurchase','buyerConfirm','buyerSelectHukm'].includes(previous.phase)||!['projectDeclaration','playing'].includes(s.phase)||!s.contract||!Number.isInteger(s.contract.buyer))return;
+ const cardId=s.upCard?.id||previous.upCard?.id||'card',key=[s.code,s.contract.buyer,cardId].join(':');
+ if(lastPurchaseAnimationKey===key)return;lastPurchaseAnimationKey=key;
+ const relative=(s.contract.buyer-s.mySeat+4)%4,target=$('seat'+relative)?.querySelector('.seat-avatar'),board=$('board');
+ const sourceCard=$('upcard')?.querySelector('.upcard-visible')||$('trick')?.querySelector('.played-card');
+ if(!target||!board)return;
+ const sourceRect=(sourceCard||$('trick')||board).getBoundingClientRect(),targetRect=target.getBoundingClientRect();
+ const width=sourceCard?sourceRect.width:42,height=sourceCard?sourceRect.height:59;
+ const left=sourceRect.left+sourceRect.width/2-width/2,top=sourceRect.top+sourceRect.height/2-height/2;
+ const dx=targetRect.left+targetRect.width/2-(left+width/2),dy=targetRect.top+targetRect.height/2-(top+height/2);
+ const flight=document.createElement('div');flight.className='purchase-flight-card';
+ flight.style.left=left+'px';flight.style.top=top+'px';flight.style.width=width+'px';flight.style.height=height+'px';
+ flight.innerHTML=sourceCard?sourceCard.innerHTML:cardFace(s.upCard||previous.upCard);document.body.appendChild(flight);
+ const animation=flight.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px) scale(.58)',opacity:.92}],{duration:680,easing:'cubic-bezier(.22,.75,.25,1)'});
+ animation.onfinish=()=>flight.remove();animation.oncancel=()=>flight.remove();
+}
+function updateAvatarCountdowns(){
+ document.querySelectorAll('.avatar-countdown').forEach(node=>{
+  const deadline=Number(node.dataset.deadline)*1000,duration=Math.max(1,Number(node.dataset.duration)||10),remaining=deadline-Date.now();
+  const seconds=Math.max(0,Math.ceil(remaining/1000)),progress=Math.max(0,Math.min(1,remaining/(duration*1000)));
+  node.style.setProperty('--progress',(progress*100)+'%');
+  const number=node.querySelector('b');if(number)number.textContent=String(seconds);
+  node.classList.toggle('is-expired',seconds===0);
+ });
+ if(latest?.timeoutPrompt&&latest.timeoutDeadlineAt){
+  const remaining=Number(latest.timeoutDeadlineAt)*1000-Date.now(),seconds=Math.max(0,Math.ceil(remaining/1000));
+  const number=$('timeoutCountdownText'),message=$('timeoutMessage');
+  if(number)number.textContent=String(seconds);
+  if(message)message.textContent=seconds>0?'سيستلم البوت المقعد بعد '+seconds+' ثوانٍ. يمكنك العودة الآن.':'جارٍ تسليم المقعد للبوت...';
+ }
+}
+
 function clearQaidTimer(){if(qaidTimer)clearInterval(qaidTimer);qaidTimer=null;}
 function startQaidTimer(){clearQaidTimer();qaidTimer=setInterval(()=>{if(!qaidState)return;const left=Math.max(0,Math.ceil((qaidState.deadline-Date.now())/1000));const clock=document.querySelector('#qaidPage .qaid-countdown');if(clock)clock.textContent=left>0?'المتبقي: '+left+' ثانية':'انتهت المهلة — جارٍ احتساب النتيجة للمنافس';if(left<=0)document.querySelectorAll('#qaidPage button').forEach(button=>button.disabled=true);},250);}
 function closeQaidView(){qaidState=null;clearQaidTimer();document.body.classList.remove('qaid-review-open');document.documentElement.classList.remove('qaid-review-open');$('qaidPage').classList.add('hidden');$('board').classList.remove('hidden');$('controls').classList.remove('hidden');if(latest&&['roundEnd','gameEnd'].includes(latest.phase)&&latest.resultVisible){$('resultPage').classList.remove('hidden');}else $('resultPage').classList.add('hidden');}
@@ -95,8 +129,8 @@ transport.on('room:update',s=>{if(!$('table'))return;trackAuctionCalls(s);if(s.q
  const resultPage=$('resultPage'),qaidPage=$('qaidPage');const showResult=['roundEnd','gameEnd'].includes(s.phase)&&s.resultVisible;const showQaid=!!qaidState&&!!s.qaidWindowActive&&!s.qaidResult;resultPage.innerHTML=showResult?roundSummary(s):'';resultPage.classList.toggle('hidden',!showResult||showQaid);qaidPage.classList.toggle('hidden',!showQaid);$('board').classList.toggle('hidden',showResult||showQaid);$('controls').classList.toggle('hidden',showResult||showQaid);$('qaidHeaderButton').hidden=!s.qaidEnabled||!['playing','roundEnd','gameEnd'].includes(s.phase);$('qaidHeaderButton').disabled=!!s.qaidWindowActive;$('qaidHeaderButton').title='طلب القيد متاح';
 
  const openQaid=()=>{if(!s.qaidEnabled||!['playing','roundEnd','gameEnd'].includes(s.phase)||(s.phase==='roundEnd'&&!s.resultVisible)||s.qaidWindowActive)return status('طلب القيد غير متاح الآن.');transport.emit('room:qaid-open',{code:roomCode},r=>{if(!r?.ok)return status(r?.error||'تعذر بدء مهلة القيد');const deadline=Number(r.expiresAt);if(!Number.isFinite(deadline)||deadline<=Date.now()){status('وصل وقت انتهاء القيد بصورة غير صحيحة؛ حدّث الصفحة وحاول مجدداً.');return;}qaidState={deadline,submitting:false};startQaidTimer();if(latest)renderControls(latest);});};const qaidSummaryButton=$('resultPage').querySelector('[data-qaid-open]');if(qaidSummaryButton)qaidSummaryButton.onclick=openQaid;$('qaidHeaderButton').onclick=openQaid;
- const replayButton=$('resultPage').querySelector('[data-replay]');if(replayButton)replayButton.onclick=e=>{e.stopPropagation();replayButton.disabled=true;transport.emit('room:replay',{code:roomCode},r=>{if(!r?.ok){replayButton.disabled=false;status(r?.error||'تعذرت إعادة اللعب');}else status('بدأت صكة جديدة.');});};
- const continueButton=$('resultPage').querySelector('[data-continue]');if(continueButton)continueButton.onclick=()=>{continueButton.disabled=true;transport.emit('room:result-continue',{code:roomCode},r=>{if(!r?.ok){continueButton.disabled=false;status(r?.error||'تعذر إكمال التوزيعة');}else status('تم تسجيل طلبك؛ ستبدأ التوزيعة التالية عند اكتمال تأكيد اللاعبين أو انتهاء المهلة.');});};
+ const replayButton=$('resultPage').querySelector('[data-replay]');if(replayButton)replayButton.onclick=e=>{e.stopPropagation();sendButtonAction(replayButton,'room:replay');};
+ const continueButton=$('resultPage').querySelector('[data-continue]');if(continueButton)continueButton.onclick=()=>sendButtonAction(continueButton,'room:result-continue');
  $('pointsLive').textContent='';
  const handCards=s.hand||[];const previousHandIds=new Set(lastRenderedHandIds);const handChanged=handCards.length!==lastRenderedHandIds.length||handCards.some(c=>!previousHandIds.has(c.id));const newHandIds=new Set(handChanged?handCards.filter(c=>!previousHandIds.has(c.id)).map(c=>c.id):[]);if(handChanged){dealAnimationToken++;lastRenderedHandIds=handCards.map(c=>c.id);}const dealToken=dealAnimationToken;$('hand').innerHTML=handCards.map((c,i,arr)=>'<button class="playing-card '+('HD'.includes(c.suit)?'red':'')+(selectedCardId===c.id?' selected':'')+(newHandIds.has(c.id)?' card-dealing':'')+'" style="--fan-y:'+Math.round(Math.abs(i-(arr.length-1)/2)*3.5)+'px;--fan-r:'+((i-(arr.length-1)/2)*5)+'deg;--deal-delay:'+(newHandIds.has(c.id)?[...newHandIds].indexOf(c.id)*150:0)+'ms" data-card="'+c.id+'">'+cardFace(c)+'</button>').join('');
  document.querySelectorAll('.full-card-art').forEach(img=>{img.onerror=()=>{img.hidden=true;const fallback=img.nextElementSibling;if(fallback)fallback.hidden=false;};});
@@ -106,36 +140,34 @@ transport.on('room:update',s=>{if(!$('table'))return;trackAuctionCalls(s);if(s.q
  const timeout=$('turnTimeout');if(timeout)timeout.classList.toggle('hidden',!s.timeoutPrompt);renderControls(s);
 });
 function renderControls(s){const el=$('controls');el.innerHTML='';const top=$('qaidTopControl');if(top)top.innerHTML='';if(qaidState&&s.qaidEnabled&&['playing','roundEnd','gameEnd'].includes(s.phase)&&!s.qaidResult){renderQaidChooser(s,$('qaidPage'));$('board').classList.add('hidden');$('controls').classList.add('hidden');return;}else if(s.qaidResult&&qaidState){qaidState=null;if(qaidTimer)clearInterval(qaidTimer);qaidTimer=null;$('qaidPage').classList.add('hidden');$('resultPage').classList.remove('hidden');}
- if(s.players[s.mySeat]?.botControl){const back=document.createElement('button');back.textContent='العودة للعب';back.className='secondary bot-return';back.onclick=()=>{back.disabled=true;emit('room:timeout-return',{code:roomCode});};el.appendChild(back);return;}
+ if(s.players[s.mySeat]?.botControl){const back=document.createElement('button');back.textContent='العودة للعب';back.className='secondary bot-return';back.onclick=()=>sendButtonAction(back,'room:timeout-return');el.appendChild(back);return;}
  if(s.phase==='lobby')return;
  if(s.phase==='projectDeclaration'&&!s.projectDeclared?.[s.mySeat]){
   const labels={'20':'سرا','50':'خمسين','100-run':'مائة متسلسلة','100-set':'مائة ورق','400':'أربعمائة'};
-  (s.projectOptions||[]).forEach(p=>{const b=document.createElement('button');b.textContent='أعلن '+(labels[p.type]||p.label);b.onclick=()=>emit('room:project',{code:roomCode,projectType:p.type});el.appendChild(b);});
-  const pass=document.createElement('button');pass.textContent='بدون مشروع';pass.className='secondary';pass.onclick=()=>emit('room:project',{code:roomCode,projectType:'pass'});el.appendChild(pass);
+  (s.projectOptions||[]).forEach(p=>{const b=document.createElement('button');b.textContent='أعلن '+(labels[p.type]||p.label);b.onclick=()=>sendButtonAction(b,'room:project',{projectType:p.type});el.appendChild(b);});
+  const pass=document.createElement('button');pass.textContent='بدون مشروع';pass.className='secondary';pass.onclick=()=>sendButtonAction(pass,'room:project',{projectType:'pass'});el.appendChild(pass);
   return;
  }
  if(s.phase==='projectDeclaration'){return;}
  if(s.phase==='postPurchase'||s.phase==='buyerConfirm'||s.phase==='buyerSelectHukm'){
   const labels={pass:'بس',sun:'صن',double:'دبل',ashkal:'أشكل',confirmHukm:'تأكيد الحكم',takeBefore:'قبلك',S:'حكم ♠',H:'حكم ♥',D:'حكم ♦',C:'حكم ♣'};
   const options=s.postPurchaseOptions||[];
-  if(options.length){options.forEach(choice=>{const b=document.createElement('button');b.textContent=labels[choice]||choice;b.className=['pass','confirmHukm'].includes(choice)?'secondary':'';b.onclick=()=>{b.disabled=true;emit('room:post-purchase',{code:roomCode,choice});};el.appendChild(b);});}
+  if(options.length){options.forEach(choice=>{const b=document.createElement('button');b.textContent=labels[choice]||choice;b.className=['pass','confirmHukm'].includes(choice)?'secondary':'';b.onclick=()=>sendButtonAction(b,'room:post-purchase',{choice});el.appendChild(b);});}
   
   return;
  }
  if(['auction1','auction2'].includes(s.phase)&&s.turn===s.mySeat){
-  const add=(v,t,secondary=false)=>{const b=document.createElement('button');b.textContent=t;b.className=secondary?'secondary':'';b.onclick=()=>{b.disabled=true;emit('room:bid',{code:roomCode,choice:v});};el.appendChild(b);};
+  const add=(v,t,secondary=false)=>{const b=document.createElement('button');b.textContent=t;b.className=secondary?'secondary':'';b.onclick=()=>sendButtonAction(b,'room:bid',{choice:v});el.appendChild(b);};
   add('pass',s.phase==='auction2'?'ولا':'بس',true);
   if(s.phase==='auction2'){
    add('takeSecond','حكم ثاني');
    add('sun','صن');
    return;
   }
-  const hukm=document.createElement('button');hukm.textContent='حكم';hukm.onclick=()=>{
-   hukm.disabled=true;emit('room:bid',{code:roomCode,choice:'take'});
-  };el.appendChild(hukm);add('sun','صن');
+  const hukm=document.createElement('button');hukm.textContent='حكم';hukm.onclick=()=>sendButtonAction(hukm,'room:bid',{choice:'take'});el.appendChild(hukm);add('sun','صن');
  }
  if(s.phase==='playing'&&s.doubleOptions?.length){
-  s.doubleOptions.forEach(call=>{const labels={double:'دبل',three:'ثري',four:'فور',coffee:'قهوة'};const b=document.createElement('button');b.textContent=labels[call]||call;b.className='secondary';b.onclick=()=>{b.disabled=true;emit('room:double',{code:roomCode,call});};el.appendChild(b);});
+  s.doubleOptions.forEach(call=>{const labels={double:'دبل',three:'ثري',four:'فور',coffee:'قهوة'};const b=document.createElement('button');b.textContent=labels[call]||call;b.className='secondary';b.onclick=()=>sendButtonAction(b,'room:double',{call});el.appendChild(b);});
  }
  if(s.phase==='roundEnd')return;
  if(s.phase==='gameEnd')return;
@@ -204,14 +236,15 @@ async function loadBuildInfo(){
  try{const r=await fetch('/build.json',{cache:'no-store'});if(!r.ok)throw new Error('build info unavailable');const b=await r.json();$('buildVersion').textContent='نسخة '+b.version+' · Build '+b.commit;}
  catch{$('buildVersion').textContent='نسخة 0.3.0-preview · Build preview-2026-11-02.2 (واجهة)';}
 }
-$('timeoutReturn')?.addEventListener('click',()=>{ $('turnTimeout').classList.add('hidden');emit('room:timeout-return',{code:roomCode});});
-$('timeoutBot')?.addEventListener('click',()=>{ $('turnTimeout').classList.add('hidden');emit('room:timeout-bot',{code:roomCode});});
+$('timeoutReturn')?.addEventListener('click',()=>{ $('turnTimeout').classList.add('hidden');sendButtonAction($('timeoutReturn'),'room:timeout-return');});
+$('timeoutBot')?.addEventListener('click',()=>{ $('turnTimeout').classList.add('hidden');sendButtonAction($('timeoutBot'),'room:timeout-bot');});
 
 // Keep modal layers outside the scrolling table so touch/click targets are never clipped by table ancestors.
 const resultLayer=$('resultPage'),qaidLayer=$('qaidPage');
 if(resultLayer&&resultLayer.parentElement!==document.body)document.body.appendChild(resultLayer);
 if(qaidLayer&&qaidLayer.parentElement!==document.body)document.body.appendChild(qaidLayer);
 
+countdownTicker=setInterval(updateAvatarCountdowns,200);
 loadBuildInfo();
 restoreAccount();
 document.addEventListener('pointerdown',e=>{if(selectedCardId&&!e.target.closest('#hand [data-card]')){selectedCardId=null;document.querySelectorAll('#hand [data-card].selected').forEach(card=>card.classList.remove('selected'));}});
