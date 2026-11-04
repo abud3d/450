@@ -22,9 +22,8 @@
 PHP 8.1+ مع `pdo_mysql` و`mbstring` وHTTPS مطلوب. اجعل Document Root يشير إلى `public/` فقط.
 اضبط في PHP-FPM/Apache:
 - `APP_ORIGIN=https://blout.arb.im`
-- `APP_URL=https://blout.arb.im`
-- `MAIL_FROM` عنوان بريد صالح لإرسال التفعيل والاستعادة.
-- إعداد MySQL الموجود خارج المستودع في `/home/arbim/baloot450-config.php`.
+- إعداد MySQL الموجود خارج المستودع في `/home/arbim/baloot450-config.php` بالمفاتيح `dsn`, `user`, `pass`, `origin`.
+- أضف إلى المصفوفة نفسها `app_url` بقيمة `https://blout.arb.im` و`mail_from` بعنوان بريد صالح، أو عرّف `APP_URL` و`MAIL_FROM` في بيئة PHP-FPM/Apache.
 
 ## مسارات الحسابات
 - `POST /api/auth.php?action=register`
