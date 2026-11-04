@@ -33,6 +33,8 @@ jobs:
           extensions: pdo_mysql, curl, mbstring
       - name: Lint all PHP files
         run: find . -path './.git' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Check browser JavaScript syntax
+        run: node --check public/app.js
       - name: Run PHP game engine tests
         run: php test-php/game-engine-test.php
       - name: Run PHP automatic qaid settlement tests
