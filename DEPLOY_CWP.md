@@ -10,13 +10,13 @@
 
 ## 1) رفع الملفات
 1. أنشئ مجلد المشروع خارج `public_html` مثلاً:
-   `/home/CPUSER/baloot450/`
+   `/home/arbim/blout.arb.im/`
 2. فك ZIP داخله بحيث تظهر المجلدات `app`, `database`, `public`.
 3. اجعل Document Root للنطاق `blout.arb.im` هو:
-   `/home/CPUSER/baloot450/public`
+   `/home/arbim/blout.arb.im/public`
 4. فعّل SSL وتأكد أن الموقع يفتح عبر HTTPS.
 
-استبدل CPUSER باسم مستخدم CWP الحقيقي. لا تضع Document Root على جذر المشروع.
+المسار المعتمد للمشروع على هذا الخادم هو `/home/arbim/blout.arb.im`. لا تضع Document Root على جذر المشروع؛ استخدم مجلد `public` فقط.
 
 ## 2) إعداد PHP
 PHP 8.2+ مطلوب مع:
@@ -33,11 +33,11 @@ PHP 8.2+ مطلوب مع:
 من CWP أنشئ قاعدة بيانات جديدة ومستخدم قاعدة بيانات مستقلين لهذا المشروع، ثم اربط المستخدم بالقاعدة بصلاحياتها. لا تستخدم قاعدة موقع آخر ولا مستخدم root.
 
 من phpMyAdmin اختر قاعدة البيانات الجديدة ثم Import وارفع:
-`/home/CPUSER/baloot450/database/schema.mysql.sql`
+`/home/arbim/blout.arb.im/database/schema.mysql.sql`
 
 أو من SSH بعد استبدال القيم:
 ```bash
-mysql -u 'DB_USER' -p 'DB_NAME' < /home/CPUSER/baloot450/database/schema.mysql.sql
+mysql -u 'DB_USER' -p 'DB_NAME' < /home/arbim/blout.arb.im/database/schema.mysql.sql
 ```
 سيطلب كلمة المرور تفاعلياً. لا تضع كلمة المرور داخل الأمر.
 
@@ -48,23 +48,23 @@ mysql -u 'DB_USER' -p 'DB_NAME' < /home/CPUSER/baloot450/database/schema.mysql.s
 - `BALOUT_DB_DSN=mysql:host=127.0.0.1;dbname=DB_NAME;charset=utf8mb4`
 - `BALOUT_DB_USER=DB_USER`
 - `BALOUT_DB_PASSWORD=DB_PASSWORD`
-- `BALOUT_DATA_DIR=/home/CPUSER/baloot450-private`
+- `APP_URL=https://blout.arb.im`
+- `MAIL_FROM=no-reply@blout.arb.im`
 
-أنشئ مجلد البيانات الخاص خارج public:
-```bash
-mkdir -p /home/CPUSER/baloot450-private
-chmod 700 /home/CPUSER/baloot450-private
-```
-يجب أن يكون المجلد قابلاً للكتابة من مستخدم PHP-FPM الخاص بالحساب، دون جعله عاماً.
+## 5) إضافة جداول الحسابات والملف الشخصي
+بعد استيراد المخطط الأساسي الحالي، استورد الملف التالي إلى قاعدة البيانات نفسها من phpMyAdmin:
+`/home/arbim/blout.arb.im/database/migrations/002_accounts_profiles.sql`
 
-## 5) مهمة cron
+تضيف الترقية جداول الحسابات والجلسات واستعادة كلمة المرور ونتائج المباريات فقط، ولا تحذف جداول الغرف أو بياناتها.
+
+## 6) مهمة cron
 بعد التأكد من مسار PHP CLI ومتغيرات البيئة ضمن cron، شغّل كل دقيقة:
 ```bash
-/usr/local/bin/php /home/CPUSER/baloot450/public/api/cron.php
+/usr/local/bin/php /home/arbim/blout.arb.im/public/api/cron.php
 ```
 قد يختلف مسار PHP في CWP؛ تحقق باستخدام `which php` و`php -v`. لا تفتح cron.php للعامة دون سر مخصص.
 
-## 6) فحص أولي قبل مشاركة الرابط
+## 7) فحص أولي قبل مشاركة الرابط
 - افتح الصفحة عبر HTTPS.
 - اختبر إنشاء غرفة ثم الانضمام من أربعة متصفحات/أجهزة مستقلة.
 - اختبر استعادة اللاعب بعد تحديث الصفحة وانقطاع الاتصال.
