@@ -378,9 +378,9 @@ final class RoomStore
                 }
 
                 if (!$didChange && !isset($state['qaidWindow']) && ($game['phase'] ?? '') === 'redeal') {
-                    \\Baloot\\Game\\Rules::nextRound($game);
+                    \Baloot\Game\Rules::nextRound($game);
                     unset($state['roundResultReadyAt'], $state['timeoutSeat'], $state['timeoutGraceUntil']);
-                    \\Baloot\\Game\\Engine::advanceBots($state);
+                    \Baloot\Game\Engine::advanceBots($state);
                     $state['lastAction'] = 'استُعيدت التوزيعة وبدأت الجولة التالية تلقائياً.';
                     $didChange = true;
                 }
