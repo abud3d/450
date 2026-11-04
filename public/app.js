@@ -71,7 +71,7 @@ transport.on('room:update',s=>{if(!$('table'))return;if(s.phase!=='roundEnd')dis
  const visibleTrick=s.trick.length?s.trick:(s.lastTrick||[]);const announcement=['roundEnd','gameEnd'].includes(s.phase)&&!s.trickClearing?(s.lastScoring?.buyerSucceeded?'مشتري ناجح':(s.contract?.level>=2?'دبل ناجح':'المشتري خسر')):'';const totalWon=(s.tricksWonBySeat||[]).reduce((sum,n)=>sum+(n||0),0);const pileCount=Math.min(52,totalWon*4);const wonBackdrop=pileCount?'<div class="won-backdrop" aria-hidden="true">'+Array.from({length:pileCount},(_,i)=>'<i class="back-card" style="transform:translate('+((i-(pileCount-1)/2)*1.1)+'px,'+((i%5)*.45)+'px) rotate('+((i-(pileCount-1)/2)*.28)+'deg)"></i>').join('')+'</div>':'';$('trick').innerHTML=wonBackdrop+(announcement&&s.resultVisible?'<div class="center-announcement">'+announcement+'</div>':visibleTrick.length?visibleTrick.map((x,i)=>'<span class="played-card '+(s.trickClearing?'clearing ':'')+(newPlay&&i===visibleTrick.length-1?'card-arriving ':'')+'at-'+((x.seat-s.mySeat+4)%4)+' '+('HD'.includes(x.card.suit)?'red':'')+'">'+cardFace(x.card)+'</span>').join(''):(['auction1','auction2'].includes(s.phase)&&s.upCard?'<span class="played-card '+('HD'.includes(s.upCard.suit)?'red':'')+'">'+cardFace(s.upCard)+'</span>':''));
  const resultPage=$('resultPage'),qaidPage=$('qaidPage');const showResult=['roundEnd','gameEnd'].includes(s.phase)&&s.resultVisible;resultPage.innerHTML=showResult?roundSummary(s):'';resultPage.classList.toggle('hidden',!showResult);$('board').classList.toggle('hidden',showResult||!!qaidState);$('controls').classList.toggle('hidden',showResult||!!qaidState);$('qaidHeaderButton').hidden=!s.qaidEnabled||!['playing','roundEnd','gameEnd'].includes(s.phase);$('qaidHeaderButton').disabled=!!s.qaidWindowActive;$('qaidHeaderButton').title='طلب القيد متاح';
 
- const openQaid=()=>{if(!s.qaidEnabled||!['playing','roundEnd','gameEnd'].includes(s.phase)||(s.phase==='roundEnd'&&!s.resultVisible)||s.qaidWindowActive)return status('طلب القيد غير متاح الآن.');transport.emit('room:qaid-open',{code:roomCode},r=>{if(!r?.ok)return status(r?.error||'تعذر بدء مهلة القيد');const deadline=Number(r.expiresAt);if(!Number.isFinite(deadline)||deadline<=Date.now()){status('وصل وقت انتهاء القيد بصورة غير صحيحة؛ حدّث الصفحة وحاول مجدداً.');return;}qaidState={step:'firstTrick',firstTrick:null,violationIndex:null,secondTrick:null,proofIndex:null,deadline};if(qaidTimer)clearInterval(qaidTimer);qaidTimer=setInterval(()=>{if(!qaidState)return;const left=Math.max(0,Math.ceil((qaidState.deadline-Date.now())/1000));const clock=document.querySelector('#qaidPage .qaid-countdown');if(clock)clock.textContent='المتبقي: '+left+' ثانية';if(left<=0){clearInterval(qaidTimer);qaidTimer=null;qaidState=null;$('qaidPage').classList.add('hidden');$('resultPage').classList.toggle('hidden',['roundEnd','gameEnd'].includes(latest?.phase)&&!!latest?.resultVisible);$('board').classList.toggle('hidden',['roundEnd','gameEnd'].includes(latest?.phase)&&!!latest?.resultVisible);$('controls').classList.toggle('hidden',['roundEnd','gameEnd'].includes(latest?.phase)&&!!latest?.resultVisible);status('انتهت مهلة كشف أوراق القيد.');if(latest)renderControls(latest);}},250);if(latest)renderControls(latest);});};const qaidSummaryButton=$('resultPage').querySelector('[data-qaid-open]');if(qaidSummaryButton)qaidSummaryButton.onclick=openQaid;$('qaidHeaderButton').onclick=openQaid;
+ const openQaid=()=>{if(!s.qaidEnabled||!['playing','roundEnd','gameEnd'].includes(s.phase)||(s.phase==='roundEnd'&&!s.resultVisible)||s.qaidWindowActive)return status('طلب القيد غير متاح الآن.');transport.emit('room:qaid-open',{code:roomCode},r=>{if(!r?.ok)return status(r?.error||'تعذر بدء مهلة القيد');const deadline=Number(r.expiresAt);if(!Number.isFinite(deadline)||deadline<=Date.now()){status('وصل وقت انتهاء القيد بصورة غير صحيحة؛ حدّث الصفحة وحاول مجدداً.');return;}qaidState={verdict:null,deadline};if(qaidTimer)clearInterval(qaidTimer);qaidTimer=setInterval(()=>{if(!qaidState)return;const left=Math.max(0,Math.ceil((qaidState.deadline-Date.now())/1000));const clock=document.querySelector('#qaidPage .qaid-countdown');if(clock)clock.textContent='المتبقي: '+left+' ثانية';if(left<=0){clearInterval(qaidTimer);qaidTimer=null;qaidState=null;$('qaidPage').classList.add('hidden');$('resultPage').classList.toggle('hidden',['roundEnd','gameEnd'].includes(latest?.phase)&&!!latest?.resultVisible);$('board').classList.toggle('hidden',['roundEnd','gameEnd'].includes(latest?.phase)&&!!latest?.resultVisible);$('controls').classList.toggle('hidden',['roundEnd','gameEnd'].includes(latest?.phase)&&!!latest?.resultVisible);status('انتهت المهلة؛ تم احتساب خسارة القيد تلقائياً.');if(latest)renderControls(latest);}},250);if(latest)renderControls(latest);});};const qaidSummaryButton=$('resultPage').querySelector('[data-qaid-open]');if(qaidSummaryButton)qaidSummaryButton.onclick=openQaid;$('qaidHeaderButton').onclick=openQaid;
  const replayButton=$('resultPage').querySelector('[data-replay]');if(replayButton)replayButton.onclick=e=>{e.stopPropagation();replayButton.disabled=true;transport.emit('room:replay',{code:roomCode},r=>{if(!r?.ok){replayButton.disabled=false;status(r?.error||'تعذرت إعادة اللعب');}else status('بدأت صكة جديدة.');});};
  const continueButton=$('resultPage').querySelector('[data-continue]');if(continueButton)continueButton.onclick=()=>{continueButton.disabled=true;transport.emit('room:result-continue',{code:roomCode},r=>{if(!r?.ok){continueButton.disabled=false;status(r?.error||'تعذر إكمال التوزيعة');}else status('تم تسجيل طلبك؛ ستبدأ التوزيعة التالية عند اكتمال تأكيد اللاعبين أو انتهاء المهلة.');});};
  $('pointsLive').textContent='';
@@ -124,53 +124,28 @@ function renderQaidChooser(s,container){
  const panel=document.createElement('div');panel.className='qaid-panel qaid-visual-panel';
  const head=document.createElement('div');head.className='qaid-board-head';
  const title=document.createElement('strong');title.textContent='كشف أوراق القيد';head.appendChild(title);
- const headActions=document.createElement('div');headActions.className='qaid-head-actions';
- const clock=document.createElement('span');clock.className='qaid-countdown';clock.textContent='المتبقي: '+left+' ثانية';headActions.appendChild(clock);
- const headClose=document.createElement('button');headClose.type='button';headClose.className='secondary qaid-head-close';headClose.textContent='إغلاق';headClose.onclick=()=>{qaidState=null;if(qaidTimer)clearInterval(qaidTimer);qaidTimer=null;container.innerHTML='';$('qaidPage').classList.add('hidden');const current=latest||s,showResult=['roundEnd','gameEnd'].includes(current.phase)&&!!current.resultVisible;$('resultPage').classList.toggle('hidden',!showResult);$('board').classList.toggle('hidden',showResult);$('controls').classList.toggle('hidden',showResult);transport.emit('room:qaid-cancel',{code:roomCode},()=>{if(latest)renderControls(latest);});if(!showResult)renderControls(current);};headActions.appendChild(headClose);
- head.appendChild(headActions);panel.appendChild(head);
+ const clock=document.createElement('span');clock.className='qaid-countdown';clock.textContent='المتبقي: '+left+' ثانية';head.appendChild(clock);panel.appendChild(head);
  const instruction=document.createElement('p');instruction.className='qaid-instruction';
- instruction.textContent='اختر الورقة المخالفة باللون الأحمر ثم أكد طلب القيد. لا يلزم اختيار ورقة إثبات ثانية.';panel.appendChild(instruction);
- const legend=document.createElement('div');legend.className='qaid-legend';
- legend.innerHTML='<span class="qaid-legend-cheat">الورقة المخالفة</span>';panel.appendChild(legend);
+ instruction.textContent='اطّلع على أوراق الطاولة ثم احكم: هل حدثت مخالفة للقيد؟ يجب اختيار أحد الحكمين قبل انتهاء المهلة.';panel.appendChild(instruction);
  const board=document.createElement('div');board.className='qaid-history-board';
- const findCard=index=>{for(const trick of history){const found=trick.cards.find(x=>x.historyIndex===index);if(found)return found;}return null;};
- history.forEach((trick,rowIndex)=>{
+ history.forEach(trick=>{
   const row=document.createElement('section');row.className='qaid-trick-row';
   const label=document.createElement('div');label.className='qaid-trick-label';label.textContent='اللفة '+(trick.trickIndex+1);row.appendChild(label);
   const cards=document.createElement('div');cards.className='qaid-card-grid';
   trick.cards.forEach(item=>{
-   const isCheat=state.violationIndex===item.historyIndex,isProof=state.proofIndex===item.historyIndex;
-   const ownTeam=item.seat%2===s.mySeat%2;
-   const b=document.createElement('button');b.type='button';
-   b.className='qaid-card-choice'+(isCheat?' qaid-cheat-selected':'')+(isProof?' qaid-proof-selected':'');
-   b.disabled=ownTeam;
-   b.title=ownTeam?'أوراق فريقك لا يمكن اتهامها':item.violation?'ورقة مخالفة مسجلة ويمكن اختيارها':'لا توجد مخالفة مسجلة على هذه الورقة';
-   b.innerHTML='<span class="qaid-card-name">'+cardLabel(item.card)+'</span><span class="qaid-card-art">'+cardFace(item.card)+'</span><small>اللاعب '+(item.seat+1)+'</small>'+(isCheat?'<b class="qaid-card-tag">ورقة الغش</b>':isProof?'<b class="qaid-card-tag">ورقة التأكيد</b>':item.violation?'<b class="qaid-card-tag qaid-card-tag-available">مخالفة</b>':'');
-   b.onclick=()=>{
-    const index=item.historyIndex;
-    if(ownTeam)return;
-    if(!item.violation){status('هذه الورقة ليست مخالفة مسجلة؛ اختر الورقة المعلّمة كمخالفة.');return;}
-    if(state.violationIndex===index){state.violationIndex=null;}
-    else{state.violationIndex=index;}
-    renderQaidChooser(s,container);
-   };
-   cards.appendChild(b);
+   const card=document.createElement('div');card.className='qaid-card-choice';
+   card.innerHTML='<span class="qaid-card-name">'+cardLabel(item.card)+'</span><span class="qaid-card-art">'+cardFace(item.card)+'</span><small>'+escapeHtml(item.playerName||('لاعب '+(item.seat+1)))+'</small>';
+   cards.appendChild(card);
   });
   row.appendChild(cards);board.appendChild(row);
  });
- if(!history.length){const empty=document.createElement('p');empty.textContent='لم تُلعب أوراق بعد؛ ستظهر هنا الورقة المخالفة بمجرد لعبها.';board.appendChild(empty);}
+ if(!history.length){const empty=document.createElement('p');empty.textContent='لم تُلعب أوراق بعد.';board.appendChild(empty);}
  panel.appendChild(board);
  const actions=document.createElement('div');actions.className='qaid-actions';
- if(state.violationIndex!==null){
-  const first=findCard(state.violationIndex);
-  const summary=document.createElement('p');summary.className='qaid-selection-summary';
-  summary.textContent='الورقة المخالفة: '+(first?cardLabel(first.card):'—');actions.appendChild(summary);
-  const confirm=document.createElement('button');confirm.type='button';confirm.className='qaid-confirm qaid-head-confirm';confirm.textContent='تأكيد طلب القيد';
-  confirm.onclick=()=>{confirm.disabled=true;transport.emit('room:claim',{code:roomCode,violationIndex:state.violationIndex},r=>{if(!r?.ok){status(r?.error||'تعذر طلب القيد');confirm.disabled=false;}else{qaidState=null;if(qaidTimer)clearInterval(qaidTimer);qaidTimer=null;container.innerHTML='';$('qaidPage').classList.add('hidden');const current=latest||s;const showResult=['roundEnd','gameEnd'].includes(current.phase);$('resultPage').classList.toggle('hidden',!showResult);$('board').classList.toggle('hidden',showResult);$('controls').classList.toggle('hidden',showResult);status('تم حسم طلب القيد.');if(latest)renderControls(latest);}});};
-  headActions.insertBefore(confirm,clock);
- }else{
-  const missing=document.createElement('p');missing.className='qaid-selection-summary';missing.textContent='اختر الورقة المخالفة فقط.';actions.appendChild(missing);
- }
+ const summary=document.createElement('p');summary.className='qaid-selection-summary';summary.textContent='اختر حكمك؛ لن تتمكن من التراجع بعد الاختيار.';actions.appendChild(summary);
+ const choose=(verdict,label)=>{const b=document.createElement('button');b.type='button';b.className='qaid-confirm';b.textContent=label;b.onclick=()=>{if(state.verdict)return;state.verdict=verdict;b.disabled=true;actions.querySelectorAll('button').forEach(x=>x.disabled=true);transport.emit('room:claim',{code:roomCode,verdict},r=>{if(!r?.ok){state.verdict=null;status(r?.error||'تعذر حسم القيد');actions.querySelectorAll('button').forEach(x=>x.disabled=false);}else{qaidState=null;if(qaidTimer)clearInterval(qaidTimer);qaidTimer=null;container.innerHTML='';$('qaidPage').classList.add('hidden');const current=latest||s;const showResult=['roundEnd','gameEnd'].includes(current.phase);$('resultPage').classList.toggle('hidden',!showResult);$('board').classList.toggle('hidden',showResult);$('controls').classList.toggle('hidden',showResult);status('تم حسم القيد.');if(latest)renderControls(latest);}});};actions.appendChild(b);};
+ choose('correct','القيد صحيح');
+ choose('incorrect','القيد خطأ');
  panel.appendChild(actions);container.appendChild(panel);$('qaidPage').classList.remove('hidden');$('resultPage').classList.add('hidden');
  panel.querySelectorAll('.full-card-art').forEach(img=>{img.onerror=()=>{img.hidden=true;const fallback=img.nextElementSibling;if(fallback)fallback.hidden=false;};if(img.complete&&!img.naturalWidth)img.onerror();});
 }
