@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use Baloot\Game\Engine;
+use Baloot\Infrastructure\Database;
 use Baloot\Infrastructure\RoomStore;
 
 require_once __DIR__ . '/../../app/Game/Seating.php';
