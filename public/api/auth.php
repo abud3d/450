@@ -80,7 +80,7 @@ if(in_array($action,['profile','logout','logout_all'],true)){
 if ($action==='register') {
  $email=strtolower(trim((string)($in['email']??'')));$password=(string)($in['password']??'');$name=mb_substr(trim(strip_tags((string)($in['displayName']??''))),0,40,'UTF-8');
  if(!filter_var($email,FILTER_VALIDATE_EMAIL)||strlen($email)>190)done(422,['ok'=>false,'message'=>'البريد الإلكتروني غير صحيح']);
- if(strlen($password)<12||strlen($password)>200)done(422,['ok'=>false,'message'=>'كلمة المرور يجب ألا تقل عن 12 حرفاً']);
+ if(strlen($password)<6||strlen($password)>200)done(422,['ok'=>false,'message'=>'كلمة المرور يجب ألا تقل عن 6 أحرف']);
  if(limited($db,'auth-register',5,3600))done(429,['ok'=>false,'message'=>'محاولات كثيرة، حاول لاحقاً']);
  $uid=bin2hex(random_bytes(16));$token=randtoken();
  try{$q=$db->prepare('INSERT INTO baloot_users (uid,email,password_hash,display_name,guest_id,verified,verify_token_hash,verify_expires) VALUES (?,?,?,?,?,0,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 30 MINUTE))');
@@ -123,7 +123,7 @@ if ($action==='forgot') {
 }
 if ($action==='reset') {
  $token=(string)($in['token']??'');$password=(string)($in['password']??'');
- if(strlen($password)<12||strlen($password)>200)done(422,['ok'=>false,'message'=>'كلمة المرور يجب ألا تقل عن 12 حرفاً']);
+ if(strlen($password)<6||strlen($password)>200)done(422,['ok'=>false,'message'=>'كلمة المرور يجب ألا تقل عن 6 أحرف']);
  if(!preg_match('/^[a-f0-9]{64}$/',$token))done(400,['ok'=>false,'message'=>'رابط الاستعادة غير صالح']);
  if(limited($db,'auth-reset',8,3600))done(429,['ok'=>false,'message'=>'محاولات كثيرة؛ اطلب رابطاً جديداً لاحقاً']);
  $q=$db->prepare('SELECT uid FROM baloot_password_resets WHERE token_hash=? AND used_at IS NULL AND expires_at>=UTC_TIMESTAMP() LIMIT 1');$q->execute([hash('sha256',$token)]);$uid=$q->fetchColumn();
