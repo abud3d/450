@@ -122,12 +122,13 @@ try {
 
     if ($method === 'GET' && in_array($action, ['state','resume'], true)) {
         $guestId = apiGuestId(Database::connection());
-        if (!$store->allowRate('state', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 90, 60)) apiReply(429, ['ok' => false, 'error' => 'طلبات كثيرة؛ حاول بعد قليل']);
+        if (!$store->allowRate('state', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 180, 60)) apiReply(429, ['ok' => false, 'error' => 'طلبات كثيرة؛ حاول بعد قليل']);
         $code = apiRoomCode($_GET['code'] ?? '');
         $store->advanceRoomBots($code);
         $store->touchPlayer($code, $guestId);
         $room = $store->read($code);
         if (!$room) apiReply(404, ['ok' => false, 'error' => 'الغرفة غير موجودة']);
+        if (($room['status'] ?? '') === 'closed') apiReply(410, ['ok' => false, 'error' => 'انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.']);
         $seat = null;
         foreach ($room['state']['players'] ?? [] as $i => $player) {
             if (is_array($player) && hash_equals((string) ($player['guestId'] ?? ''), $guestId)) { $seat = (int) $i; break; }

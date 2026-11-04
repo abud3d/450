@@ -29,8 +29,10 @@ if (PHP_SAPI !== 'cli') {
 }
 
 try {
-    $advanced = (new Baloot\Infrastructure\RoomStore())->advanceDueRooms(100);
-    $result = ['ok' => true, 'roomsAdvanced' => $advanced, 'time' => gmdate('c')];
+    $store = new Baloot\Infrastructure\RoomStore();
+    $expired = $store->expireStaleLobbies();
+    $advanced = $store->advanceDueRooms(100);
+    $result = ['ok' => true, 'roomsAdvanced' => $advanced, 'lobbiesExpired' => $expired, 'time' => gmdate('c')];
     if (PHP_SAPI === 'cli') {
         echo json_encode($result, JSON_UNESCAPED_SLASHES) . PHP_EOL;
     } else {

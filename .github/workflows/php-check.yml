@@ -1,9 +1,9 @@
 name: PHP checks
 on:
   push:
-    branches: [main, php-native-engine, preview/player-accounts-profile, preview/accounts-bot-combined, preview/transfer-400-features, preview/identity-access-guards, preview/join-page-quick-match, preview/fix-timeouts-qaid-roomcodes]
+    branches: [main, php-native-engine, preview/player-accounts-profile, preview/accounts-bot-combined, preview/transfer-400-features, preview/identity-access-guards, preview/join-page-quick-match, preview/fix-timeouts-qaid-roomcodes, preview/fix-qaid-lobby-expiry]
   pull_request:
-    branches: [main, preview/visible-bot-turns]
+    branches: [main, preview/visible-bot-turns, preview/password-minimum-six]
 jobs:
   lint:
     runs-on: ubuntu-latest

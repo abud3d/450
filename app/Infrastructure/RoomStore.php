@@ -37,10 +37,12 @@ final class RoomStore
 
     public function join(string $code, string $guestId, string $displayName): array
     {
+        $this->expireStaleLobbies();
         $this->assertGuestId($guestId);
         $name = $this->cleanName($displayName);
         return Database::transaction(function (PDO $pdo) use ($code, $guestId, $name): array {
             $room = $this->lockedRoom($pdo, $code);
+            if (($room['status'] ?? '') === 'closed') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
             $state = $this->decode((string) $room['state_json']);
             $players = $state['players'] ?? array_fill(0, 4, null);
 
@@ -78,6 +80,7 @@ final class RoomStore
     /** Join the newest compatible lobby, or create a room when none is available. */
     public function quickJoin(string $guestId, string $displayName, bool $qaidEnabled = true): array
     {
+        $this->expireStaleLobbies();
         $this->assertGuestId($guestId);
         $name = $this->cleanName($displayName);
         $stmt = Database::connection()->prepare(
@@ -110,6 +113,27 @@ final class RoomStore
     }
 
     /**
+     * Expire abandoned lobbies only when they are old and every human seat has
+     * stopped sending heartbeats. Active waiting rooms remain joinable.
+     */
+    public function expireStaleLobbies(): int
+    {
+        $stmt = Database::connection()->prepare(
+            "UPDATE baloot_rooms r
+             SET status = 'closed', phase = 'expired'
+             WHERE r.status = 'lobby'
+               AND r.last_activity_at < UTC_TIMESTAMP(6) - INTERVAL 5 MINUTE
+               AND NOT EXISTS (
+                   SELECT 1 FROM baloot_room_players p
+                   WHERE p.room_id = r.id
+                     AND p.last_seen_at >= UTC_TIMESTAMP(6) - INTERVAL 90 SECOND
+               )"
+        );
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
+    /**
      * Idempotent state mutation with row-level serialization and optimistic versioning.
      * The supplied callback receives the decoded state and must return the response to cache.
      */
@@ -125,6 +149,7 @@ final class RoomStore
 
         return Database::transaction(function (PDO $pdo) use ($code, $guestId, $actionId, $actionType, $mutation, $expectedVersion): array {
             $room = $this->lockedRoom($pdo, $code);
+            if (($room['status'] ?? '') === 'closed') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
             $check = $pdo->prepare('SELECT result_json FROM baloot_room_actions WHERE room_id = ? AND action_id = ?');
             $check->execute([(int) $room['id'], $actionId]);
             $prior = $check->fetchColumn();
@@ -215,6 +240,7 @@ final class RoomStore
         }
         return Database::transaction(function (PDO $pdo) use ($code, $guestId, $targetSeat, $actionId): array {
             $room = $this->lockedRoom($pdo, $code);
+            if (($room['status'] ?? '') === 'closed') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
             $check = $pdo->prepare('SELECT result_json FROM baloot_room_actions WHERE room_id = ? AND action_id = ?');
             $check->execute([(int) $room['id'], $actionId]);
             $prior = $check->fetchColumn();
@@ -270,7 +296,28 @@ final class RoomStore
     /** Advance all due timers for one room during its normal state polling. */
     public function advanceRoomBots(string $code): bool
     {
-        return $this->advanceDueRooms(1, $code) > 0;
+        // Avoid taking a row lock and opening a transaction on every poll.
+        // Most polls have no due timer, so inspect the stored deadline first.
+        $stmt = Database::connection()->prepare(
+            "SELECT state_json FROM baloot_rooms
+             WHERE status = 'active' AND room_code = ? LIMIT 1"
+        );
+        $stmt->execute([strtoupper($code)]);
+        $json = $stmt->fetchColumn();
+        if (!is_string($json) || $json === '') return false;
+
+        $state = $this->decode($json);
+        $now = time();
+        $phase = (string) ($state['game']['phase'] ?? 'lobby');
+        $due = (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? PHP_INT_MAX) <= $now)
+            || (isset($state['autoLastCardAt']) && (int) $state['autoLastCardAt'] <= $now)
+            || (isset($state['botActionAt']) && (int) $state['botActionAt'] <= $now)
+            || \Baloot\Game\TurnClock::expired($state, $now)
+            || ($phase === 'roundEnd'
+                && (int) ($state['roundResultReadyAt'] ?? 0) > 0
+                && $now >= (int) $state['roundResultReadyAt'] + 10);
+
+        return $due ? $this->advanceDueRooms(1, $code) > 0 : false;
     }
 
     public function advanceDueRooms(int $limit = 100, ?string $onlyCode = null): int
