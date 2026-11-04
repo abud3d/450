@@ -1465,3 +1465,10 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
  .table-page .turn-timeout button{padding:6px 8px;font-size:10px}
 }
 @media(prefers-reduced-motion:reduce){.controls button.is-pending::after{animation:none}}
+
+
+/* Keep the player's portrait visible; the seconds sit in a small lower badge. */
+.avatar-countdown b{
+ inset:auto 0 5px;width:22px;height:17px;margin:0 auto;
+ border-radius:9px;font-size:11px;background:#0b3d2deF;
+}
