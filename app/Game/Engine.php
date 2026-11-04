@@ -402,6 +402,8 @@ final class Engine
             'players' => $players,
             'phase' => $g['phase'],
             'turn' => $g['turn'] ?? 0,
+            'auctionCalls' => $g['auctionCalls'] ?? [null,null,null,null],
+            'legalCardIds' => (($g['phase'] ?? '') === 'playing' && (int) ($g['turn'] ?? -1) === $seat) ? array_column(Rules::legal($g['hands'][$seat] ?? [], $g['trick'] ?? [], $g['contract'] ?? ['type'=>'sun'], $seat), 'id') : [],
             'contract' => $g['contract'] ?? null,
             'upCard' => $g['upCard'] ?? null,
             'qaidEnabled' => !empty($room['qaidEnabled']),
