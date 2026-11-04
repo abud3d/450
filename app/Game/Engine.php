@@ -389,7 +389,7 @@ final class Engine
             $history[] = [
                 'historyIndex' => $index, 'seat' => $play['seat'],
                 'playerName' => (string) ($players[(int) $play['seat']]['name'] ?? ('لاعب ' . ((int) $play['seat'] + 1))),
-                'card' => $play['card'], 'proofCard' => $canReviewQaid ? ($play['proofCard'] ?? null) : null, 'violation' => !empty($play['violation']),
+                'card' => $play['card'], 'proofCard' => $canReviewQaid ? ($play['proofCard'] ?? null) : null, 'violationReason' => $canReviewQaid ? ($play['violationReason'] ?? null) : null, 'violation' => !empty($play['violation']),
                 'leadSuit' => $play['leadSuit'] ?? null, 'trickIndex' => $play['trickIndex'] ?? 0,
             ];
         }
@@ -402,11 +402,8 @@ final class Engine
             $hand = $g['hands'][$seat] ?? [];
             $legalCardIds = array_column(Rules::legal($hand, $g['trick'] ?? [], $g['contract'] ?? ['type' => 'sun'], $seat), 'id');
             if (!empty($room['qaidEnabled']) && !empty($g['trick'])) {
-                $leadSuit = $g['trick'][0]['card']['suit'] ?? null;
-                $hasLeadSuit = $leadSuit !== null && (bool) array_filter($hand, static fn($card) => ($card['suit'] ?? null) === $leadSuit);
-                if ($hasLeadSuit) foreach ($hand as $card) {
-                    if (($card['suit'] ?? null) !== $leadSuit) $legalCardIds[] = $card['id'];
-                }
+                // Qaid rooms allow a player to expose an illegal choice; the server records it and the claimant can review proof.
+                $legalCardIds = array_column($hand, 'id');
             }
             $legalCardIds = array_values(array_unique($legalCardIds));
         }
