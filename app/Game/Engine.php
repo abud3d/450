@@ -304,6 +304,14 @@ final class Engine
             $players[] = [
                 'seat' => $i,
                 'name' => $p['name'] ?? 'بانتظار لاعب',
+                'avatar' => (string) (($p['publicProfile']['avatar'] ?? '') ?: (!empty($p['bot']) ? '🤖' : '👤')),
+                'profile' => is_array($p['publicProfile'] ?? null) ? [
+                    'points' => (int) ($p['publicProfile']['points'] ?? 0),
+                    'matches' => (int) ($p['publicProfile']['matches'] ?? 0),
+                    'wins' => (int) ($p['publicProfile']['wins'] ?? 0),
+                    'losses' => (int) ($p['publicProfile']['losses'] ?? 0),
+                    'draws' => (int) ($p['publicProfile']['draws'] ?? 0),
+                ] : null,
                 'bot' => !empty($p['bot']) || !empty($p['botControl']),
                 'botControl' => !empty($p['botControl']),
                 'botNumber' => !empty($p['bot']) ? (int) ($p['botNumber'] ?? ($i + 10)) : null,
