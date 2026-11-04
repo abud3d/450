@@ -125,6 +125,7 @@ final class Purchase
         }
         if ($g['phase'] === 'auction1') {
             if ($choice === 'sun') {
+                $g['auctionCalls'][$seat] = null;
                 $g['contract'] = ['type' => 'sun', 'trump' => null, 'buyer' => $seat, 'purchaseType' => 'sun'];
                 self::begin($g, $seat, 'sunChallenge');
                 $g['postPurchase']['sunCallerSeat'] = $seat;
@@ -134,11 +135,13 @@ final class Purchase
                 return;
             }
             if (in_array($choice, ['take', 'hokum'], true)) {
+                $g['auctionCalls'][$seat] = null;
                 $g['contract'] = ['type' => 'hokum', 'trump' => $g['upCard']['suit'], 'buyer' => $seat, 'purchaseRound' => 1];
                 self::begin($g, $seat, 'responses');
                 return;
             }
             if ($choice !== 'pass') throw new \DomainException('اختيار شراء غير صالح');
+            $g['auctionCalls'][$seat] = 'بس';
             $g['auctionPasses']++;
             $g['turn'] = Rules::next($seat);
             if ($g['auctionPasses'] >= 4) {
@@ -150,6 +153,7 @@ final class Purchase
         }
 
         if ($choice === 'sun') {
+            $g['auctionCalls'][$seat] = null;
             $g['contract'] = ['type' => 'sun', 'trump' => null, 'buyer' => $seat, 'purchaseRound' => 2, 'purchaseType' => 'sun'];
             self::begin($g, $seat, 'sunChallenge');
             $g['postPurchase']['sunCallerSeat'] = $seat;
@@ -159,14 +163,20 @@ final class Purchase
             return;
         }
         if (in_array($choice, ['takeSecond', 'hokum', 'take', 'S', 'H', 'D', 'C'], true)) {
+            $g['auctionCalls'][$seat] = null;
             $g['contract'] = ['type' => 'hokum', 'trump' => null, 'buyer' => $seat, 'purchaseRound' => 2];
             self::begin($g, $seat, 'secondPasses');
             return;
         }
         if ($choice !== 'pass') throw new \DomainException('اختيار شراء غير صالح');
+        $g['auctionCalls'][$seat] = 'ولا';
         $g['auctionPasses']++;
         $g['turn'] = Rules::next($seat);
-        if ($g['auctionPasses'] >= 4) $g['phase'] = 'redeal';
+        if ($g['auctionPasses'] >= 4) {
+            // Four 'ولا' calls complete both auctions: deal immediately and rotate the dealer.
+            $g['phase'] = 'redeal';
+            Rules::nextRound($g);
+        }
     }
 
     public static function options(array $g, int $seat): array

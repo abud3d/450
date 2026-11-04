@@ -169,13 +169,17 @@ final class RoomStore
 
             $state = $this->decode((string) $room['state_json']);
             $beforePhase = (string) ($state['game']['phase'] ?? 'lobby');
+            $beforeQaidResult = $state['game']['qaidResult'] ?? null;
             $response = $mutation($state, (int) $seat);
             if (!is_array($response)) {
                 throw new RuntimeException('استجابة العملية غير صالحة.');
             }
             $afterPhase = (string) ($state['game']['phase'] ?? 'lobby');
-            if ($beforePhase !== 'gameEnd' && $afterPhase === 'gameEnd') {
+            $qaidChanged = $beforeQaidResult !== ($state['game']['qaidResult'] ?? null);
+            if ($afterPhase === 'gameEnd' && ($beforePhase !== 'gameEnd' || $qaidChanged)) {
                 $this->recordCompletedMatch($pdo, (int) $room['id'], $state);
+            } elseif ($beforePhase === 'gameEnd' && $afterPhase !== 'gameEnd' && $qaidChanged) {
+                $this->removeCompletedMatch($pdo, $state);
             }
             $this->saveState($pdo, $room, $state);
             $touch = $pdo->prepare('UPDATE baloot_room_players SET last_seen_at = UTC_TIMESTAMP(6), connected_at = COALESCE(connected_at, UTC_TIMESTAMP(6)) WHERE room_id = ? AND guest_id = ?');
@@ -192,7 +196,7 @@ final class RoomStore
      * Award the final team score to each registered human player exactly once.
      * The unique (match_id, uid) ledger key protects against duplicate requests.
      */
-    private function recordCompletedMatch(PDO $pdo, int $roomId, array $state): void
+    private function recordCompletedMatch(PDO $pdo, int $roomId, array &$state): void
     {
         $game = $state['game'] ?? [];
         $matchId = (string) ($state['matchId'] ?? '');
@@ -203,8 +207,7 @@ final class RoomStore
         $scores = array_values($game['scores'] ?? [0, 0]);
         $scores = [(int) ($scores[0] ?? 0), (int) ($scores[1] ?? 0)];
         $winner = $scores[0] === $scores[1] ? -1 : ($scores[0] > $scores[1] ? 0 : 1);
-        $players = $state['players'] ?? [];
-        foreach ($players as $seat => $player) {
+        foreach ($state['players'] ?? [] as $seat => $player) {
             if (!is_array($player) || !empty($player['bot'])) continue;
             $guestId = (string) ($player['guestId'] ?? '');
             if (!preg_match('/^[a-f0-9]{64}$/', $guestId)) continue;
@@ -214,22 +217,42 @@ final class RoomStore
             if (!is_string($uid) || $uid === '') continue;
             $team = ((int) $seat) % 2;
             $outcome = $winner < 0 ? 'draw' : ($winner === $team ? 'win' : 'loss');
-            $insert = $pdo->prepare(
-                'INSERT IGNORE INTO baloot_match_results (match_id, room_id, uid, guest_id, team, final_score, outcome) VALUES (?, ?, ?, ?, ?, ?, ?)'
-            );
+            $oldQuery = $pdo->prepare('SELECT final_score, outcome FROM baloot_match_results WHERE match_id = ? AND uid = ? FOR UPDATE');
+            $oldQuery->execute([$matchId, $uid]);
+            $old = $oldQuery->fetch(PDO::FETCH_ASSOC);
+            if (is_array($old)) {
+                $oldOutcome = (string) $old['outcome'];
+                $pdo->prepare('UPDATE baloot_match_results SET final_score = ?, outcome = ? WHERE match_id = ? AND uid = ?')->execute([$scores[$team], $outcome, $matchId, $uid]);
+                $pdo->prepare('UPDATE baloot_users SET points = points + ?, wins = wins + ?, losses = losses + ?, draws = draws + ? WHERE uid = ?')->execute([
+                    $scores[$team] - (int) $old['final_score'],
+                    ($outcome === 'win' ? 1 : 0) - ($oldOutcome === 'win' ? 1 : 0),
+                    ($outcome === 'loss' ? 1 : 0) - ($oldOutcome === 'loss' ? 1 : 0),
+                    ($outcome === 'draw' ? 1 : 0) - ($oldOutcome === 'draw' ? 1 : 0), $uid
+                ]);
+                continue;
+            }
+            $insert = $pdo->prepare('INSERT IGNORE INTO baloot_match_results (match_id, room_id, uid, guest_id, team, final_score, outcome) VALUES (?, ?, ?, ?, ?, ?, ?)');
             $insert->execute([$matchId, $roomId, $uid, $guestId, $team, $scores[$team], $outcome]);
             if ($insert->rowCount() !== 1) continue;
-            $update = $pdo->prepare(
-                'UPDATE baloot_users SET points = points + ?, matches = matches + 1, wins = wins + ?, losses = losses + ?, draws = draws + ? WHERE uid = ?'
-            );
-            $update->execute([
-                $scores[$team],
-                $outcome === 'win' ? 1 : 0,
-                $outcome === 'loss' ? 1 : 0,
-                $outcome === 'draw' ? 1 : 0,
-                $uid,
+            $pdo->prepare('UPDATE baloot_users SET points = points + ?, matches = matches + 1, wins = wins + ?, losses = losses + ?, draws = draws + ? WHERE uid = ?')->execute([
+                $scores[$team], $outcome === 'win' ? 1 : 0, $outcome === 'loss' ? 1 : 0, $outcome === 'draw' ? 1 : 0, $uid
             ]);
         }
+    }
+
+    private function removeCompletedMatch(PDO $pdo, array $state): void
+    {
+        $matchId = (string) ($state['matchId'] ?? '');
+        if (!preg_match('/^[a-f0-9]{32}$/', $matchId)) return;
+        $query = $pdo->prepare('SELECT uid, final_score, outcome FROM baloot_match_results WHERE match_id = ? FOR UPDATE');
+        $query->execute([$matchId]);
+        foreach ($query->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $outcome = (string) $row['outcome'];
+            $pdo->prepare('UPDATE baloot_users SET points = GREATEST(0, points - ?), matches = GREATEST(0, matches - 1), wins = GREATEST(0, wins - ?), losses = GREATEST(0, losses - ?), draws = GREATEST(0, draws - ?) WHERE uid = ?')->execute([
+                (int) $row['final_score'], $outcome === 'win' ? 1 : 0, $outcome === 'loss' ? 1 : 0, $outcome === 'draw' ? 1 : 0, (string) $row['uid']
+            ]);
+        }
+        $pdo->prepare('DELETE FROM baloot_match_results WHERE match_id = ?')->execute([$matchId]);
     }
 
     public function moveSeat(string $code, string $guestId, int $targetSeat, string $actionId): array
@@ -300,7 +323,7 @@ final class RoomStore
         // Most polls have no due timer, so inspect the stored deadline first.
         $stmt = Database::connection()->prepare(
             "SELECT state_json FROM baloot_rooms
-             WHERE status = 'active' AND room_code = ? LIMIT 1"
+             WHERE status IN ('active','finished') AND room_code = ? LIMIT 1"
         );
         $stmt->execute([strtoupper($code)]);
         $json = $stmt->fetchColumn();
@@ -309,7 +332,8 @@ final class RoomStore
         $state = $this->decode($json);
         $now = time();
         $phase = (string) ($state['game']['phase'] ?? 'lobby');
-        $due = (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? PHP_INT_MAX) <= $now)
+        $due = $phase === 'redeal'
+            || (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? PHP_INT_MAX) <= $now)
             || (isset($state['autoLastCardAt']) && (int) $state['autoLastCardAt'] <= $now)
             || (isset($state['botActionAt']) && (int) $state['botActionAt'] <= $now)
             || \Baloot\Game\TurnClock::expired($state, $now)
@@ -324,7 +348,7 @@ final class RoomStore
     {
         $limit = max(1, min(500, $limit));
         if ($onlyCode !== null) {
-            $query = Database::connection()->prepare("SELECT room_code FROM baloot_rooms WHERE status = 'active' AND room_code = ? LIMIT 1");
+            $query = Database::connection()->prepare("SELECT room_code FROM baloot_rooms WHERE status IN ('active','finished') AND room_code = ? LIMIT 1");
             $query->execute([strtoupper($onlyCode)]);
         } else {
             $query = Database::connection()->query("SELECT room_code FROM baloot_rooms WHERE status = 'active' ORDER BY last_activity_at ASC LIMIT " . $limit);
@@ -337,14 +361,27 @@ final class RoomStore
                 $state = $this->decode((string) $room['state_json']);
                 $now = time();
                 $beforePhase = (string) ($state['game']['phase'] ?? 'lobby');
+                $beforeQaidResult = $state['game']['qaidResult'] ?? null;
                 $game =& $state['game'];
                 if (!is_array($game ?? null)) return false;
                 $didChange = false;
 
                 if (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? 0) <= $now) {
+                    $claimantSeat = (int) ($state['qaidWindow']['seat'] ?? -1);
+                    if ($claimantSeat >= 0 && $claimantSeat <= 3) {
+                        \Baloot\Game\Qaid::expire($game, $claimantSeat);
+                    }
                     unset($state['qaidWindow']);
-                    if (($game['phase'] ?? '') === 'roundEnd') $state['roundResultReadyAt'] = $now;
-                    $state['lastAction'] = 'انتهت مهلة كشف أوراق القيد.';
+                    $state['roundResultReadyAt'] = $now;
+                    $state['lastAction'] = 'انتهت مهلة القيد دون اختيار؛ خسر فاتح القيد.';
+                    $didChange = true;
+                }
+
+                if (!$didChange && !isset($state['qaidWindow']) && ($game['phase'] ?? '') === 'redeal') {
+                    \Baloot\Game\Rules::nextRound($game);
+                    unset($state['roundResultReadyAt'], $state['timeoutSeat'], $state['timeoutGraceUntil']);
+                    \Baloot\Game\Engine::advanceBots($state);
+                    $state['lastAction'] = 'استُعيدت التوزيعة وبدأت الجولة التالية تلقائياً.';
                     $didChange = true;
                 }
 
@@ -414,8 +451,11 @@ final class RoomStore
 
                 if ($didChange) {
                     $afterPhase = (string) ($state['game']['phase'] ?? 'lobby');
-                    if ($beforePhase !== 'gameEnd' && $afterPhase === 'gameEnd') {
+                    $qaidChanged = $beforeQaidResult !== ($state['game']['qaidResult'] ?? null);
+                    if ($afterPhase === 'gameEnd' && ($beforePhase !== 'gameEnd' || $qaidChanged)) {
                         $this->recordCompletedMatch($pdo, (int) $room['id'], $state);
+                    } elseif ($beforePhase === 'gameEnd' && $afterPhase !== 'gameEnd' && $qaidChanged) {
+                        $this->removeCompletedMatch($pdo, $state);
                     }
                     $this->saveState($pdo, $room, $state);
                 }

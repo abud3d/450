@@ -27,9 +27,24 @@ while($g['phase']==='postPurchase' && $g['postPurchase']['stage']==='doubleRespo
 ok(in_array($g['phase'],['playing','projectDeclaration'],true),'first purchase completes');
 ok(count(array_filter($g['hands'],fn($h)=>count($h)!==8))===0,'first purchase deals eight cards each');
 
+$callTest=Rules::create(['A','B','C','D']); Rules::deal($callTest);
+$firstPassSeat=$callTest['turn']; Purchase::choose($callTest,$firstPassSeat,'pass');
+ok(($callTest['auctionCalls'][$firstPassSeat]??'')==='بس','first auction pass is shown as بس');
+for($i=0;$i<3;$i++) Purchase::choose($callTest,$callTest['turn'],'pass');
+ok($callTest['phase']==='auction2' && ($callTest['auctionCalls'][$firstPassSeat]??'')==='بس','بس remains visible into the second auction');
+$secondPassSeat=$callTest['turn']; Purchase::choose($callTest,$secondPassSeat,'pass');
+ok(($callTest['auctionCalls'][$secondPassSeat]??'')==='ولا','second auction pass is shown as ولا');
 $second=Rules::create(['A','B','C','D']); Rules::deal($second);
 for($i=0;$i<4;$i++) Purchase::choose($second,$second['turn'],'pass');
 ok($second['phase']==='auction2','four passes open second auction');
+$allPass=Rules::create(['A','B','C','D']); Rules::deal($allPass);
+$oldDealer=$allPass['dealer'];
+for($i=0;$i<8;$i++) Purchase::choose($allPass,$allPass['turn'],'pass');
+ok($allPass['phase']==='auction1' && $allPass['round']===2,'four passes in both auctions immediately start the next deal');
+ok($allPass['dealer']===Rules::next($oldDealer),'all-pass redeal rotates the dealer');
+ok(array_sum(array_map('count',$allPass['hands']))===20 && count(array_filter($allPass['hands'],fn($h)=>count($h)!==5))===0,'all-pass redeal deals five cards to every seat');
+ok($allPass['auctionCalls']===[null,null,null,null],'new deal clears pass labels');
+
 $secondBuyer=$second['turn']; Purchase::choose($second,$secondBuyer,'takeSecond');
 while($second['phase']==='postPurchase' && $second['postPurchase']['stage']==='secondPasses'){ $s=$second['turn']; Purchase::respond($second,$s,'pass'); }
 ok($second['phase']==='buyerSelectHukm','second-round buyer selects trump');
@@ -53,9 +68,9 @@ Purchase::callDouble($doubleGame,0,'coffee');
 ok($doubleGame['contract']['level']===5,'coffee escalation level');
 
 $qaid=['phase'=>'playing','qaidEnabled'=>true,'history'=>[['seat'=>1,'violation'=>true]],'contract'=>['type'=>'sun','buyer'=>1,'buyerTeam'=>1,'originalBuyerTeam'=>1],'projectClaims'=>[[],[],[],[]],'balotClaims'=>[],'dealer'=>0,'scores'=>[0,0]];
-$result=Qaid::claim($qaid,0,0,0);
-ok($result['success']===true && $result['winnerTeam']===0,'valid qaid claim awards claimant team');
-ok($qaid['phase']==='roundEnd' && $qaid['scores'][0]>0,'qaid resolves and scores');
+$result=Qaid::decide($qaid,0);
+ok($result['success']===true && $result['winnerTeam']===1,'valid qaid claim awards the team that committed the violation');
+ok($qaid['phase']==='roundEnd' && $qaid['scores'][1]>0,'qaid resolves and awards points to the violating team');
 
 $clock=['turn'=>1]; TurnClock::arm($clock,30,100);
 ok(!TurnClock::expired($clock,129),'clock before deadline');
