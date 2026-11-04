@@ -191,7 +191,25 @@ final class Engine
             ];
         }
         if (!is_array($g)) {
-            return ['code' => $room['code'] ?? '', 'players' => $players, 'phase' => 'lobby', 'lastAction' => $room['lastAction'] ?? ''];
+            return [
+                'code' => $room['code'] ?? '',
+                'players' => $players,
+                'phase' => 'lobby',
+                'mySeat' => $seat,
+                'scores' => [0, 0],
+                'runningRaw' => [0, 0],
+                'hand' => [],
+                'handCounts' => [0, 0, 0, 0],
+                'trick' => [],
+                'tricksPlayed' => 0,
+                'turn' => 0,
+                'dealer' => 0,
+                'qaidEnabled' => !empty($room['qaidEnabled']),
+                'qaidHistory' => [],
+                'qaidWindowActive' => false,
+                'qaidResult' => null,
+                'lastAction' => $room['lastAction'] ?? '',
+            ];
         }
         $history = [];
         $runningRaw = [0,0];
