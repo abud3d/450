@@ -20,14 +20,24 @@ function roomRequest(string $method,string $path,?array $body=null,string $cooki
  return ['status'=>$status,'data'=>$data,'cookies'=>$cookies];
 }
 function uuidRoom(int $n):string{return sprintf('bbbbbbbb-bbbb-4bbb-8bbb-%012x',$n);}
+$anonymousCreate=roomRequest('POST','/api/room.php?action=create',['name'=>'Anonymous','qaidEnabled'=>true]);
+roomCheck($anonymousCreate['status']===401,'anonymous room creation is rejected without an identity');
+$anonymousState=roomRequest('GET','/api/room.php?action=state&code=ABC123');
+roomCheck($anonymousState['status']===401,'anonymous room state access is rejected without an identity');
+
 $clients=[];
-$created=roomRequest('POST','/api/room.php?action=create',['name'=>'API Player 1','qaidEnabled'=>true]);
+$identity=roomRequest('GET','/api/room.php?action=identity');
+roomCheck($identity['status']===200 && preg_match('/^[a-f0-9]{64}$/',(string)($identity['data']['guestId']??''))===1,'guest identity bootstrap returns a persistent identity');
+$created=roomRequest('POST','/api/room.php?action=create',['name'=>'API Player 1','qaidEnabled'=>true],'baloot_guest='.($identity['cookies']['baloot_guest']??''));
 roomCheck($created['status']===201 && ($created['data']['ok']??false),'room API creates first player room');
 $code=(string)$created['data']['code'];
 $clients[0]=['cookie'=>'baloot_guest='.($created['cookies']['baloot_guest']??''),'seat'=>0];
 roomCheck((bool)preg_match('/^[A-F0-9]{6}$/',$code),'room API returns a six-character room code');
 for($seat=1;$seat<4;$seat++){
- $joined=roomRequest('POST','/api/room.php?action=join',['code'=>$code,'name'=>'API Player '.($seat+1)],'');
+ $guestIdentity=roomRequest('GET','/api/room.php?action=identity');
+ roomCheck($guestIdentity['status']===200,'joining browser obtains its own guest identity');
+ $guestCookie='baloot_guest='.($guestIdentity['cookies']['baloot_guest']??'');
+ $joined=roomRequest('POST','/api/room.php?action=join',['code'=>$code,'name'=>'API Player '.($seat+1)],$guestCookie);
  roomCheck($joined['status']===200 && ($joined['data']['seat']??-1)===$seat,'separate guest joins expected seat '.$seat);
  $guest=$joined['cookies']['baloot_guest']??'';
  roomCheck((bool)preg_match('/^[a-f0-9]{64}$/',$guest),'each joining browser receives its own guest cookie');
