@@ -11,6 +11,7 @@
       this.busy = false;
       this.stopped = false;
       this.delay = 1800;
+      this.identityPromise = null;
       queueMicrotask(() => this.dispatch('connect'));
     }
 
@@ -26,6 +27,19 @@
       }
     }
 
+    async ensureIdentity() {
+      if (!this.identityPromise) {
+        this.identityPromise = this.request('/api/room.php?action=identity').then(data => {
+          if (data.guestId) localStorage.setItem('baloot400Guest', data.guestId);
+          return data.guestId;
+        }).catch(error => {
+          this.identityPromise = null;
+          throw error;
+        });
+      }
+      return this.identityPromise;
+    }
+
     async request(url, options) {
       const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...options });
       let data;
@@ -37,6 +51,7 @@
     async emit(event, payload = {}, ack = () => {}) {
       const data = payload || {};
       try {
+        await this.ensureIdentity();
         let result;
         if (event === 'room:resume') {
           this.code = String(data.code || '').toUpperCase();
