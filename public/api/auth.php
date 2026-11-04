@@ -16,7 +16,7 @@ function body(): array {
  if (!is_array($v)) done(400,['ok'=>false,'message'=>'طلب غير صالح']);
  return $v;
 }
-function pdo(): PDO { try{return \\Baloot\\Infrastructure\\Database::connection();}catch(Throwable $e){error_log('Baloot auth DB: '.$e->getMessage());done(503,['ok'=>false,'message'=>'تعذر الاتصال بقاعدة البيانات']);} }
+function pdo(): PDO { try{return \Baloot\Infrastructure\Database::connection();}catch(Throwable $e){error_log('Baloot auth DB: '.$e->getMessage());done(503,['ok'=>false,'message'=>'تعذر الاتصال بقاعدة البيانات']);} }
 function origin_guard(): void {
  $expected=rtrim((string)getenv('APP_ORIGIN'),'/');
  if (!$expected) {$config=is_file('/home/arbim/baloot450-config.php')?require '/home/arbim/baloot450-config.php':[];$expected=rtrim((string)(is_array($config)?($config['origin']??''):'') ,'/');}
@@ -52,8 +52,12 @@ function current_user(PDO $db): ?array {
 }
 function mailtoken(string $email,string $subject,string $url): bool {
  $from=(string)getenv('MAIL_FROM');if (!$from||!filter_var($from,FILTER_VALIDATE_EMAIL)) return false;
- $msg="مرحباً،\nاستخدم الرابط الآمن التالي خلال 30 دقيقة:\n".$url."\nإذا لم تطلب هذه العملية فتجاهل الرسالة.";
- return @mail($email,'=?UTF-8?B?'.base64_encode($subject).'?=',$msg,"From: ".$from."\r\nContent-Type: text/plain; charset=UTF-8");
+ $msg="مرحباً،
+استخدم الرابط الآمن التالي خلال 30 دقيقة:
+".$url."
+إذا لم تطلب هذه العملية فتجاهل الرسالة.";
+ return @mail($email,'=?UTF-8?B?'.base64_encode($subject).'?=',$msg,"From: ".$from."\r
+Content-Type: text/plain; charset=UTF-8");
 }
 function baseurl(): string {
  $v=rtrim((string)getenv('APP_URL'),'/');if (!str_starts_with($v,'https://')) done(503,['ok'=>false,'message'=>'إعداد رابط HTTPS غير مكتمل']);return $v;
@@ -116,10 +120,11 @@ if ($action==='forgot') {
 if ($action==='reset') {
  $token=(string)($in['token']??'');$password=(string)($in['password']??'');
  if(strlen($password)<12||strlen($password)>200)done(422,['ok'=>false,'message'=>'كلمة المرور يجب ألا تقل عن 12 حرفاً']);
- if(!preg_match('/^[a-f0-9]{64}$/',$token))done(400,['ok'=>false,'message'=>'رابط الاستعادة غير صالح']);\n if(limited($db,'auth-reset',8,3600))done(429,['ok'=>false,'message'=>'محاولات كثيرة؛ اطلب رابطاً جديداً لاحقاً']);
+ if(!preg_match('/^[a-f0-9]{64}$/',$token))done(400,['ok'=>false,'message'=>'رابط الاستعادة غير صالح']);
+ if(limited($db,'auth-reset',8,3600))done(429,['ok'=>false,'message'=>'محاولات كثيرة؛ اطلب رابطاً جديداً لاحقاً']);
  $q=$db->prepare('SELECT uid FROM baloot_password_resets WHERE token_hash=? AND used_at IS NULL AND expires_at>=UTC_TIMESTAMP() LIMIT 1');$q->execute([hash('sha256',$token)]);$uid=$q->fetchColumn();
  if(!$uid)done(400,['ok'=>false,'message'=>'رابط الاستعادة منتهي أو غير صالح؛ اطلب رابطاً جديداً']);
- \\Baloot\\Infrastructure\\Database::transaction(function(PDO $pdo)use($uid,$token,$password){
+ \Baloot\Infrastructure\Database::transaction(function(PDO $pdo)use($uid,$token,$password){
   $q=$pdo->prepare('SELECT uid FROM baloot_password_resets WHERE token_hash=? AND used_at IS NULL AND expires_at>=UTC_TIMESTAMP() FOR UPDATE');$q->execute([hash('sha256',$token)]);$found=$q->fetchColumn();if(!$found)throw new RuntimeException('reset token used');
   $q=$pdo->prepare('UPDATE baloot_users SET password_hash=? WHERE uid=?');$q->execute([password_hash($password,PASSWORD_DEFAULT),$uid]);
   $q=$pdo->prepare('UPDATE baloot_password_resets SET used_at=UTC_TIMESTAMP() WHERE token_hash=?');$q->execute([hash('sha256',$token)]);
