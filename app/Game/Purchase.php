@@ -139,9 +139,11 @@ final class Purchase
                 return;
             }
             if ($choice !== 'pass') throw new \DomainException('اختيار شراء غير صالح');
+            $g['auctionCalls'][$seat] = 'بس';
             $g['auctionPasses']++;
             $g['turn'] = Rules::next($seat);
             if ($g['auctionPasses'] >= 4) {
+                $g['auctionCalls'] = [null,null,null,null];
                 $g['phase'] = 'auction2';
                 $g['turn'] = Rules::next((int) $g['dealer']);
                 $g['auctionPasses'] = 0;
@@ -164,9 +166,13 @@ final class Purchase
             return;
         }
         if ($choice !== 'pass') throw new \DomainException('اختيار شراء غير صالح');
+        $g['auctionCalls'][$seat] = 'ولا';
         $g['auctionPasses']++;
         $g['turn'] = Rules::next($seat);
-        if ($g['auctionPasses'] >= 4) $g['phase'] = 'redeal';
+        if ($g['auctionPasses'] >= 4) {
+            // Four 'ولا' calls complete both auctions: deal immediately and rotate the dealer.
+            Rules::nextRound($g);
+        }
     }
 
     public static function options(array $g, int $seat): array
