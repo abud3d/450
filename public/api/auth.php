@@ -72,6 +72,10 @@ if ($action==='verify'&&$method==='GET') {
 }
 if ($method!=='POST') done(405,['ok'=>false,'message'=>'طريقة الطلب غير مدعومة']);
 origin_guard();$in=body();$guestId=currentguestid();
+if(in_array($action,['profile','logout','logout_all'],true)){
+ $csrfUser=current_user($db);$sent=(string)($_SERVER['HTTP_X_CSRF_TOKEN']??'');
+ if(!$csrfUser||!$sent||!hash_equals((string)$csrfUser['csrf'],$sent))done(403,['ok'=>false,'message'=>'انتهت صلاحية الجلسة أو رمز الحماية؛ حدّث الصفحة وسجّل الدخول مجدداً']);
+}
 
 if ($action==='register') {
  $email=strtolower(trim((string)($in['email']??'')));$password=(string)($in['password']??'');$name=mb_substr(trim(strip_tags((string)($in['displayName']??''))),0,40,'UTF-8');
@@ -134,7 +138,10 @@ if ($action==='reset') {
 }
 if ($action==='profile') {
  $u=current_user($db);if(!$u)done(401,['ok'=>false,'message'=>'سجّل الدخول أولاً']);
- $name=mb_substr(trim(strip_tags((string)($in['displayName']??''))),0,40,'UTF-8');$avatar=(string)($in['avatar']??'🃏');$bio=mb_substr(trim(strip_tags((string)($in['bio']??''))),0,120,'UTF-8');
+ if(limited($db,'auth-profile',30,600))done(429,['ok'=>false,'message'=>'طلبات كثيرة؛ انتظر قليلاً ثم حاول مجدداً']);
+ $nameRaw=trim(strip_tags((string)($in['displayName']??'')));$bioRaw=trim(strip_tags((string)($in['bio']??'')));
+ if(mb_strlen($nameRaw,'UTF-8')>40||mb_strlen($bioRaw,'UTF-8')>120||preg_match('/[\\x00-\\x1F\\x7F]/u',$nameRaw.$bioRaw))done(422,['ok'=>false,'message'=>'تحقق من طول الاسم والنبذة وأزل الرموز غير المسموحة']);
+ $name=$nameRaw;$avatar=(string)($in['avatar']??'🃏');$bio=$bioRaw;
  if(mb_strlen($name,'UTF-8')<2)done(422,['ok'=>false,'message'=>'اسم اللاعب يجب أن يكون حرفين على الأقل']);
  if(!in_array($avatar,['🃏','♠','♥','♦','♣','😀','😎','🤠','👑','🐪','🦅','⚽','🏆'],true))done(422,['ok'=>false,'message'=>'الصورة الرمزية غير معتمدة']);
  $q=$db->prepare('UPDATE baloot_users SET display_name=?,avatar=?,bio=? WHERE uid=?');$q->execute([$name,$avatar,$bio,$u['uid']]);
