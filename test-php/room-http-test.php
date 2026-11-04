@@ -39,7 +39,7 @@ for($seat=1;$seat<4;$seat++){
  $guestCookie='baloot_guest='.($guestIdentity['cookies']['baloot_guest']??'');
  $joined=roomRequest('POST','/api/room.php?action=join',['code'=>$code,'name'=>'API Player '.($seat+1)],$guestCookie);
  roomCheck($joined['status']===200 && ($joined['data']['seat']??-1)===$seat,'separate guest joins expected seat '.$seat);
- $guest=$joined['cookies']['baloot_guest']??'';
+ $guest=(string)($guestIdentity['cookies']['baloot_guest']??'');
  roomCheck((bool)preg_match('/^[a-f0-9]{64}$/',$guest),'each joining browser receives its own guest cookie');
  $clients[$seat]=['cookie'=>$guestCookie,'seat'=>$seat];
 }
