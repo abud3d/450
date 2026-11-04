@@ -57,7 +57,7 @@ final class Engine
         if (!isset($room['players'][$seat]) || !is_array($room['players'][$seat])) throw new DomainException('المقعد غير معروف');
         if (!empty($room['players'][$seat]['botControl']) && $action !== 'timeout_return') throw new DomainException('البوت يدير هذا المقعد حالياً');
         $g =& $room['game'];
-        if (isset($room['qaidWindow']) && $action !== 'qaid_claim') {
+        if (isset($room['qaidWindow']) && !in_array($action, ['qaid_claim','qaid_cancel'], true)) {
             throw new DomainException('اللعب متوقف حتى يختار فاتح القيد؛ لا يمكن تنفيذ حركات أخرى.');
         }
         if (!in_array($action, ['timeout_return','timeout_bot'], true)) unset($room['timeoutSeat'], $room['timeoutGraceUntil']);
@@ -90,7 +90,7 @@ final class Engine
                 if (($room['qaidWindow']['seat'] ?? -1) !== $seat || (int) ($room['qaidWindow']['expiresAt'] ?? 0) < time()) {
                     throw new DomainException('انتهت مهلة كشف أوراق القيد؛ افتح الطلب من جديد');
                 }
-                $result = Qaid::decide($g, $seat, (string) ($input['verdict'] ?? ''));
+                $result = Qaid::decide($g, $seat);
                 unset($room['qaidWindow']);
                 $room['roundResultReadyAt'] = time();
                 $room['lastAction'] = 'تم حسم طلب القيد.';
@@ -104,7 +104,14 @@ final class Engine
                 $room['lastAction'] = 'بدأ كشف أوراق القيد.';
                 break;
             case 'qaid_cancel':
-                throw new DomainException('بعد فتح أوراق القيد يجب اختيار الحكم؛ لا يمكن إغلاق الطلب.');
+                if (($room['qaidWindow']['seat'] ?? -1) !== $seat || (int) ($room['qaidWindow']['expiresAt'] ?? 0) <= time()) {
+                    throw new DomainException('انتهت مهلة كشف أوراق القيد.');
+                }
+                $result = Qaid::decide($g, $seat);
+                unset($room['qaidWindow']);
+                $room['roundResultReadyAt'] = time();
+                $room['lastAction'] = 'أُغلق كشف القيد وتم احتساب النتيجة.';
+                return ['ok' => true, 'result' => $result];
             case 'next':
                 if (!hash_equals((string) ($room['ownerGuestId'] ?? ''), (string) ($room['players'][$seat]['guestId'] ?? ''))) throw new DomainException('صاحب الغرفة فقط يبدأ التوزيعة التالية');
                 Rules::nextRound($g);
@@ -376,7 +383,7 @@ final class Engine
             $history[] = [
                 'historyIndex' => $index, 'seat' => $play['seat'],
                 'playerName' => (string) ($players[(int) $play['seat']]['name'] ?? ('لاعب ' . ((int) $play['seat'] + 1))),
-                'card' => $play['card'], 'violation' => !empty($play['violation']),
+                'card' => $play['card'], 'proofCard' => $play['proofCard'] ?? null, 'violation' => !empty($play['violation']),
                 'leadSuit' => $play['leadSuit'] ?? null, 'trickIndex' => $play['trickIndex'] ?? 0,
             ];
         }
