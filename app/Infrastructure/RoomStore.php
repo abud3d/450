@@ -314,7 +314,7 @@ final class RoomStore
 
                 if (!$didChange && !isset($state['qaidWindow'])
                     && isset($state['autoLastCardAt']) && (int) $state['autoLastCardAt'] <= $now) {
-                    $didChange = \\Baloot\\Game\\Engine::advanceAutoLastCard($state);
+                    $didChange = \Baloot\Game\Engine::advanceAutoLastCard($state);
                 }
 
                 if (!$didChange && ($game['phase'] ?? '') === 'roundEnd'
