@@ -1,9 +1,9 @@
 name: PHP checks
 on:
   push:
-    branches: [main, php-native-engine, preview/player-accounts-profile, preview/accounts-bot-combined, preview/transfer-400-features, preview/identity-access-guards, preview/join-page-quick-match, preview/fix-timeouts-qaid-roomcodes, preview/fix-qaid-lobby-expiry]
+    branches: [main, php-native-engine, preview/player-accounts-profile, preview/accounts-bot-combined, preview/transfer-400-features, preview/identity-access-guards, preview/join-page-quick-match, preview/fix-timeouts-qaid-roomcodes, preview/fix-qaid-lobby-expiry, bot-strategy-v12]
   pull_request:
-    branches: [main, preview/visible-bot-turns, preview/password-minimum-six]
+    branches: [main, preview/visible-bot-turns, preview/password-minimum-six, preview/bot-fallback-qaid-scroll-projects]
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -35,7 +35,7 @@ jobs:
         run: find . -path './.git' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Run PHP game engine tests
         run: php test-php/game-engine-test.php
-      - name: Run PHP purchase engine tests
+      - name: Run PHP qaid verdict tests\n        run: php test-php/qaid-test.php\n      - name: Run PHP purchase engine tests
         run: php test-php/purchase-engine-test.php
       - name: Run PHP room engine tests
         run: php test-php/engine-room-test.php
