@@ -22,7 +22,7 @@
 <label class="qaid-setting"><input id="qaidEnabled" type="checkbox" checked> تفعيل قاعدة القيد (اختياري)</label><div class="actions"><button id="quickJoin">دخول غرفة</button><button id="createRoom" class="secondary">إنشاء غرفة جديدة</button><div class="join"><input id="roomCode" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="رمز الغرفة — 4 أرقام"><button id="joinRoom" class="secondary">انضمام برمز</button></div></div>
 <p id="status" role="status">متصل بالخادم عند تشغيل المشروع.</p>
 </section>
-<section id="table" class="table">
+<div class="table-scroll"><section id="table" class="table">
 <div class="table-head"><strong class="room-label">الغرفة <span id="code"></span></strong><div class="room-actions"><button id="qaidHeaderButton" class="qaid-open" type="button" hidden>قيد</button><button id="shareRoom" class="share-room" type="button" aria-label="نسخ أو مشاركة رابط الغرفة" title="نسخ أو مشاركة رابط الغرفة"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07 0l3-3A5 5 0 0 0 13 2.93l-1.72 1.72M14 11a5 5 0 0 0-7.07 0l-3 3A5 5 0 0 0 11 21.07l1.72-1.72"/></svg></button><button id="startGame" hidden>ابدأ</button></div></div>
 
 <div class="game-info"><span id="phase">انتظار...</span><span id="score">لنا 0 | 0 لهم</span></div>
@@ -32,5 +32,5 @@
 <div id="controls" class="controls"></div>
 <div id="turnTimeout" class="turn-timeout hidden" role="alertdialog" aria-live="assertive"><strong>تأخرت عن اللعب</strong><span>سيبدأ البوت اللعب تلقائياً خلال ثانيتين. يمكنك العودة فوراً.</span><div><button id="timeoutReturn">رجوع للعب</button><button id="timeoutBot" class="secondary">اترك البوت يكمل</button></div></div><div id="myProjects" class="my-projects" aria-live="polite"></div><div id="gameNotice" class="game-notice" role="status" aria-live="polite">جاهز</div>
 
-</section><footer>بلوت 400 · <span id="buildVersion">تحميل رقم النسخة...</span></footer>
+</section></div><footer>بلوت 400 · <span id="buildVersion">تحميل رقم النسخة...</span></footer>
 </main><script src="/api-client.js"></script><script src="/site.js"></script><script src="/app.js"></script></body></html>
