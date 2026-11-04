@@ -17,9 +17,13 @@ final class Database
             return self::$connection;
         }
 
-        $dsn = trim((string) getenv('BALOUT_DB_DSN'));
-        $user = (string) getenv('BALOUT_DB_USER');
-        $pass = (string) getenv('BALOUT_DB_PASSWORD');
+        $configPath = '/home/arbim/baloot450-config.php';
+        $config = is_file($configPath) ? require $configPath : [];
+        if (!is_array($config)) $config = [];
+
+        $dsn = trim((string) ($config['dsn'] ?? getenv('BALOUT_DB_DSN')));
+        $user = (string) ($config['user'] ?? getenv('BALOUT_DB_USER'));
+        $pass = (string) ($config['pass'] ?? getenv('BALOUT_DB_PASSWORD'));
         if ($dsn === '' || !str_starts_with($dsn, 'mysql:')) {
             throw new RuntimeException('قاعدة بيانات MySQL غير مهيأة.');
         }
