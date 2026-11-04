@@ -128,7 +128,7 @@ try {
         $store->touchPlayer($code, $guestId);
         $room = $store->read($code);
         if (!$room) apiReply(404, ['ok' => false, 'error' => 'الغرفة غير موجودة']);
-        if (($room['status'] ?? '') === 'expired') apiReply(410, ['ok' => false, 'error' => 'انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.']);
+        if (($room['status'] ?? '') === 'closed') apiReply(410, ['ok' => false, 'error' => 'انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.']);
         $seat = null;
         foreach ($room['state']['players'] ?? [] as $i => $player) {
             if (is_array($player) && hash_equals((string) ($player['guestId'] ?? ''), $guestId)) { $seat = (int) $i; break; }
