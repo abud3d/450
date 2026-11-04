@@ -1,7 +1,7 @@
 name: PHP checks
 on:
   push:
-    branches: [main, php-native-engine, preview/player-accounts-profile, preview/accounts-bot-combined]
+    branches: [main, php-native-engine, preview/player-accounts-profile, preview/accounts-bot-combined, preview/transfer-400-features]
   pull_request:
     branches: [main, preview/visible-bot-turns]
 jobs:
