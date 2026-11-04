@@ -169,7 +169,7 @@ final class Engine
             $acted = false;
             try {
                 $acted = Bot::act($g, $seat);
-            } catch (\\Throwable $error) {
+            } catch (\Throwable $error) {
                 error_log('Baloot primary bot failed: ' . $error->getMessage());
             }
 
@@ -186,7 +186,7 @@ final class Engine
                 }
                 try {
                     $acted = Bot::fallbackAct($g, $seat);
-                } catch (\\Throwable $error) {
+                } catch (\Throwable $error) {
                     error_log('Baloot backup bot failed: ' . $error->getMessage());
                 }
                 if (!$acted) {
