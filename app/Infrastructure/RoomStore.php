@@ -303,62 +303,62 @@ final class RoomStore
 
                 if (!$didChange && !isset($state['qaidWindow'])
                     && isset($state['autoLastCardAt']) && (int) $state['autoLastCardAt'] <= $now) {
-                    $didChange = \Baloot\\Game\\Engine::advanceAutoLastCard($state);
+                    $didChange = \Baloot\Game\Engine::advanceAutoLastCard($state);
                 }
 
                 if (!$didChange && !isset($state['qaidWindow'])
                     && isset($state['botActionAt']) && (int) $state['botActionAt'] <= $now) {
-                    $didChange = \Baloot\\Game\\Engine::advanceBots($state, 1) > 0;
+                    $didChange = \Baloot\Game\Engine::advanceBots($state, 1) > 0;
                 }
 
                 if (!$didChange && ($game['phase'] ?? '') === 'roundEnd'
                     && (int) ($state['roundResultReadyAt'] ?? 0) > 0
                     && $now >= (int) $state['roundResultReadyAt'] + 10
                     && !isset($state['qaidWindow'])) {
-                    \Baloot\\Game\\Rules::nextRound($game);
+                    \Baloot\Game\Rules::nextRound($game);
                     unset($state['roundResultReadyAt'], $state['timeoutSeat'], $state['timeoutGraceUntil']);
-                    \Baloot\\Game\\Engine::advanceBots($state);
+                    \Baloot\Game\Engine::advanceBots($state);
                     $state['lastAction'] = 'بدأت التوزيعة التالية تلقائياً.';
                     $didChange = true;
                 } elseif (!$didChange && isset($state['qaidWindow'])) {
                     // A qaid review pauses game timers until it is claimed or expires.
-                } elseif (!$didChange && \Baloot\\Game\\TurnClock::expired($state, $now)) {
+                } elseif (!$didChange && \Baloot\Game\TurnClock::expired($state, $now)) {
                     $phase = $game['phase'] ?? '';
                     if ($phase === 'postPurchase') {
-                        \Baloot\\Game\\Purchase::expire($game);
-                        \Baloot\\Game\\Engine::advanceBots($state);
+                        \Baloot\Game\Purchase::expire($game);
+                        \Baloot\Game\Engine::advanceBots($state);
                         $state['lastAction'] = 'انتهت مهلة الرد على الشراء.';
                         $didChange = true;
                     } elseif ($phase === 'projectDeclaration') {
                         foreach ($state['players'] as $seat => $player) {
                             if (empty($game['projectDeclared'][$seat])) {
                                 if (!empty($player['bot']) || !empty($player['botControl'])) {
-                                    \Baloot\\Game\\Bot::act($game, (int) $seat);
+                                    \Baloot\Game\Bot::act($game, (int) $seat);
                                 } else {
-                                    \Baloot\\Game\\Projects::declare($game, (int) $seat, 'pass');
+                                    \Baloot\Game\Projects::declare($game, (int) $seat, 'pass');
                                 }
                                 $didChange = true;
                             }
                         }
-                        \Baloot\\Game\\Engine::advanceBots($state);
+                        \Baloot\Game\Engine::advanceBots($state);
                         $state['lastAction'] = 'انتهت مهلة إعلان المشاريع.';
                     } elseif (in_array($phase, ['auction1','auction2','playing','buyerConfirm','buyerSelectHukm'], true)) {
                         $seat = in_array($phase, ['buyerConfirm','buyerSelectHukm'], true) ? (int) ($game['postPurchase']['buyer'] ?? -1) : (int) ($game['turn'] ?? -1);
                         $player = $state['players'][$seat] ?? null;
                         if ($seat >= 0 && is_array($player) && (!empty($player['bot']) || !empty($player['botControl']))) {
-                            \Baloot\\Game\\Engine::advanceBots($state);
+                            \Baloot\Game\Engine::advanceBots($state);
                             $didChange = true;
                         } elseif ($seat >= 0 && (int) ($state['timeoutSeat'] ?? -1) === $seat
                             && (int) ($state['timeoutGraceUntil'] ?? PHP_INT_MAX) <= $now) {
                             $state['players'][$seat]['botControl'] = true;
                             unset($state['timeoutSeat'], $state['timeoutGraceUntil']);
-                            \Baloot\\Game\\Engine::advanceBots($state);
+                            \Baloot\Game\Engine::advanceBots($state);
                             $state['lastAction'] = 'انتهت مهلة اللاعب؛ البوت يكمل اللعب.';
                             $didChange = true;
                         } elseif ($seat >= 0 && (int) ($state['timeoutSeat'] ?? -1) !== $seat) {
                             $state['timeoutSeat'] = $seat;
                             $state['timeoutGraceUntil'] = $now + 2;
-                            \Baloot\\Game\\TurnClock::arm($state, 2, $now);
+                            \Baloot\Game\TurnClock::arm($state, 2, $now);
                             $state['lastAction'] = 'تأخر اللاعب؛ سيُعرض خيار تولي البوت للمقعد.';
                             $didChange = true;
                         }
