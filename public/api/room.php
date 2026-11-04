@@ -269,6 +269,7 @@ try {
         if (is_array($player) && hash_equals((string) ($player['guestId'] ?? ''), $guestId)) { $seat = (int) $i; break; }
     }
     if ($seat === null) apiReply(403, ['ok' => false, 'error' => 'المقعد غير معروف']);
+    apiEnrichPlayerProfiles($room['state']);
     $snapshot = Engine::snapshot($room['state'], $seat); $snapshot['version'] = $room['version'];
     $extra = $operation === 'qaid_open'
         ? ['expiresAt' => (int) (($room['state']['qaidWindow']['expiresAt'] ?? 0) * 1000)]
