@@ -166,8 +166,44 @@ final class Engine
             } else break;
 
             $beforeTricks = count($g['tricks'] ?? []);
-            if (!Bot::act($g, $seat)) break;
-            if (count($g['tricks'] ?? []) > $beforeTricks) $room['trickVisibleUntil'] = time() + (in_array($g['phase'], ['roundEnd','gameEnd'], true) ? 6 : 2);
+            $acted = false;
+            try {
+                $acted = Bot::act($g, $seat);
+            } catch (\\Throwable $error) {
+                error_log('Baloot primary bot failed: ' . $error->getMessage());
+            }
+
+            if (!$acted) {
+                $retrySeat = (int) ($room['botRetrySeat'] ?? -1);
+                $retryCount = (int) ($room['botRetryCount'] ?? 0);
+                if ($retrySeat !== $seat || $retryCount < 1) {
+                    $room['botRetrySeat'] = $seat;
+                    $room['botRetryCount'] = 1;
+                    $room['botActionAt'] = time() + 5;
+                    $room['lastAction'] = 'تأخر البوت؛ سيتولى بوت احتياطي الحركة بعد 5 ثوانٍ.';
+                    TurnClock::arm($room, 35);
+                    return 1;
+                }
+                try {
+                    $acted = Bot::fallbackAct($g, $seat);
+                } catch (\\Throwable $error) {
+                    error_log('Baloot backup bot failed: ' . $error->getMessage());
+                }
+                if (!$acted) {
+                    // Keep a bounded retry cadence instead of clearing the only timer.
+                    $room['botRetrySeat'] = $seat;
+                    $room['botRetryCount'] = $retryCount + 1;
+                    $room['botActionAt'] = time() + 5;
+                    $room['lastAction'] = 'البوت الاحتياطي يعيد المحاولة بعد 5 ثوانٍ.';
+                    TurnClock::arm($room, 35);
+                    return 1;
+                }
+            }
+
+            unset($room['botRetrySeat'], $room['botRetryCount']);
+            if (count($g['tricks'] ?? []) > $beforeTricks) {
+                $room['trickVisibleUntil'] = time() + (in_array($g['phase'], ['roundEnd','gameEnd'], true) ? 6 : 2);
+            }
             if (in_array($g['phase'], ['roundEnd','gameEnd'], true)) $room['roundResultReadyAt'] = time() + 6;
             $count++;
         }
@@ -282,6 +318,20 @@ final class Engine
         $resultReadyAt = (int) ($room['roundResultReadyAt'] ?? 0);
         $trickVisible = (int) ($room['trickVisibleUntil'] ?? 0) > time();
         $projectDisplayBySeat = [[],[],[],[]];
+        $announcedProjectsBySeat = [[],[],[],[]];
+        // During trick one, reveal a project's name only after its owner has
+        // actually played a card. The card faces are shown during trick two.
+        if (($g['phase'] ?? '') === 'playing' && count($g['tricks'] ?? []) === 0
+            && !empty($g['projectClaims'])) {
+            foreach ($g['projectClaims'] as $projectSeat => $claims) {
+                foreach ($g['trick'] ?? [] as $play) {
+                    if ((int) ($play['seat'] ?? -1) === (int) $projectSeat) {
+                        $announcedProjectsBySeat[$projectSeat] = $claims;
+                        break;
+                    }
+                }
+            }
+        }
         if (($g['phase'] ?? '') === 'playing' && count($g['tricks'] ?? []) === 1
             && !empty($g['projectClaims'])) {
             $resolvedProjects = Projects::resolve(
@@ -350,7 +400,7 @@ final class Engine
             'tricksWon' => $g['tricksWon'] ?? [0,0],
             'mySeat' => $seat,
             'myProjects' => ($g['tricks'] ?? []) === [] ? ($g['projectClaims'][$seat] ?? []) : [],
-            'projectsBySeat' => ($g['tricks'] ?? []) === [] ? ($g['projectClaims'] ?? [[],[],[],[]]) : [[],[],[],[]],
+            'projectsBySeat' => $announcedProjectsBySeat,
             'projectDisplayBySeat' => $projectDisplayBySeat,
             'projectOptions' => $g['projectOptions'][$seat] ?? [],
             'projectDeclared' => $g['projectDeclared'] ?? [false,false,false,false],
