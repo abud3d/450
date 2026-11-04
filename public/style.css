@@ -1153,3 +1153,38 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
 
 /* Clean, consistent service-page system */
 .service-page{min-height:100vh;background:radial-gradient(circle at 85% 0%,#e4eee6 0,transparent 34%),#f5f7f4;color:#183b2e}.service-shell{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:22px 0 18px}.service-page .site-header{margin-bottom:28px;background:#fff;border:1px solid #dbe5dd;box-shadow:0 8px 28px #173c2810}.service-page .site-header .tag{color:#607568}.service-page .site-menu{z-index:1000}.service-page .site-menu a{display:block}.service-page .site-menu .hidden{display:none!important}.service-page .site-menu button{display:block}.service-card{width:min(720px,100%);margin:30px auto;padding:clamp(22px,4vw,42px);background:#fff;border:1px solid #e0e8e1;border-radius:22px;box-shadow:0 18px 55px #193d2b12}.auth-card{max-width:510px}.service-card h1{font-size:clamp(27px,4vw,36px);margin:8px 0 10px;color:#153f30}.eyebrow{color:#a17b38;font-weight:800;letter-spacing:.02em;margin:0}.service-intro{color:#66786d;line-height:1.9;margin:0 0 24px}.service-form{display:grid;gap:16px}.service-form label{display:grid;gap:8px;font-weight:750;color:#284b3b}.service-form input,.service-form select{width:100%;min-height:48px;padding:11px 13px;border:1px solid #d5e0d7;border-radius:11px;background:#fbfcfb;color:#173b2d;font:inherit;outline:none}.service-form input:focus,.service-form select:focus{border-color:#38745a;box-shadow:0 0 0 3px #38745a18}.primary-action{display:flex;align-items:center;justify-content:center;min-height:49px;padding:12px 18px;border:0;border-radius:11px;background:#174d3c;color:white;text-decoration:none;font:inherit;font-weight:850;cursor:pointer}.primary-action:hover{background:#0e3d2e}.primary-action:disabled{opacity:.6;cursor:wait}.form-message{min-height:22px;margin:0;color:#a04432;font-size:14px;line-height:1.7}.form-message.success{color:#23734a}.auth-links{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:22px;padding-top:18px;border-top:1px solid #edf1ed}.auth-links a,.service-footer a{color:#28634a;font-weight:750;text-decoration:none}.check-line{display:flex!important;align-items:center;gap:10px}.check-line input{width:18px;height:18px;min-height:18px}.profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:22px 0}.profile-stats div{display:grid;gap:5px;text-align:center;padding:15px 8px;border:1px solid #e2eae3;border-radius:13px;background:#f7faf7}.profile-stats strong{font-size:23px;color:#174d3c}.profile-stats span{font-size:12px;color:#718176}.feature-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:24px}.feature-grid article{padding:18px;border:1px solid #e2eae3;border-radius:14px;background:#f8faf8}.feature-grid h2{font-size:18px;margin:0 0 8px}.feature-grid p,.how-list{color:#64766b;line-height:1.9}.how-list{padding-right:22px;margin:22px 0}.how-list li{padding:7px 0}.link-action{margin-top:20px}.service-footer{display:flex;justify-content:space-between;gap:12px;padding:18px 6px;color:#87958b;font-size:12px;border-top:1px solid #e0e8e1}.service-footer a{color:#557565}@media(max-width:600px){.service-shell{width:min(100% - 20px,1120px);padding-top:10px}.service-page .site-header{margin-bottom:14px}.service-card{margin:18px auto;border-radius:16px}.profile-stats{grid-template-columns:repeat(2,1fr)}.feature-grid{grid-template-columns:1fr}.service-footer{flex-direction:column}}
+
+
+/* Qaid is rendered in #qaidPage at document.body, not in #qaidTopControl. */
+.table-page #qaidPage:has(.qaid-visual-panel){
+  position:fixed;inset:0;z-index:10000;width:100vw;height:100vh;height:100dvh;
+  margin:0;padding:0;background:rgba(0,0,0,.82);
+  display:flex;align-items:stretch;justify-content:stretch;
+}
+.table-page #qaidPage .qaid-visual-panel{
+  display:flex;flex-direction:column;align-items:stretch;gap:7px;
+  width:100%;height:100%;height:100dvh;max-width:none;max-height:none;min-height:0;
+  margin:0;padding:calc(10px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+  overflow:hidden;border:0;border-radius:0;
+}
+.table-page #qaidPage .qaid-board-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.table-page #qaidPage .qaid-head-actions{display:flex;align-items:center;gap:7px}
+.table-page #qaidPage .qaid-history-board{flex:1 1 auto;min-height:0;max-height:none;width:100%;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+.table-page #qaidPage .qaid-card-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;width:100%;max-width:none}
+.table-page #qaidPage .qaid-card-choice{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:4px!important;background:#fff!important;color:#18372b!important;border:2px solid #d6d0c2!important;border-radius:7px}
+.table-page #qaidPage .qaid-card-art{position:relative;display:block;width:100%;max-width:64px;aspect-ratio:5/7;overflow:hidden}
+.table-page #qaidPage .qaid-card-art .full-card-art{position:static!important;display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important}
+.table-page #qaidPage .qaid-card-art .card-fallback{display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#fff;color:#173d30}
+.table-page #qaidPage .qaid-card-choice small{font-size:8px;line-height:1.1;color:#294638}
+.table-page #qaidPage .qaid-card-choice.qaid-cheat-selected{border:3px solid #d51f2a!important;background:#fff0f0!important}
+.table-page #qaidPage .qaid-card-tag{display:block;width:100%;padding:2px 1px;border-radius:4px;color:#fff;font-size:8px}
+.table-page #qaidPage .qaid-cheat-selected .qaid-card-tag{background:#bd202b}
+.table-page #qaidPage .qaid-actions{flex:0 0 auto;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:7px;width:100%}
+.table-page #qaidPage .qaid-selection-summary{width:100%;margin:0!important}
+@media(max-width:560px){
+  .table-page #qaidPage .qaid-visual-panel{padding:calc(7px + env(safe-area-inset-top)) 7px calc(7px + env(safe-area-inset-bottom));gap:5px}
+  .table-page #qaidPage .qaid-card-grid{gap:3px}
+  .table-page #qaidPage .qaid-card-choice{padding:2px!important}
+  .table-page #qaidPage .qaid-card-name{font-size:9px}
+  .table-page #qaidPage .qaid-card-art{max-width:60px}
+}
