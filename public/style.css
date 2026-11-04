@@ -1128,3 +1128,15 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
 .hand .playing-card.card-dealing{animation:baloot-card-deal .38s cubic-bezier(.2,.75,.25,1) both;animation-delay:var(--deal-delay,0ms)}
 @keyframes baloot-card-deal{from{opacity:0;top:20px;filter:blur(2px)}to{opacity:1;top:0;filter:blur(0)}}
 @media(prefers-reduced-motion:reduce){.hand .playing-card.card-dealing{animation:none;opacity:1}}
+
+/* Player profile and account recovery */
+.account-subpanel{margin-top:16px;padding:16px;border:1px solid #c5a36566;border-radius:14px;background:#0b3327;color:#fff4d3}
+.account-subpanel h3{margin:0 0 12px;color:#ffe39a}
+.account-subpanel .account-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin:12px 0}
+.account-subpanel input,.account-subpanel select{width:100%;min-width:0;box-sizing:border-box}
+.profile-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.profile-stats>div{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 5px;border:1px solid #d6bb7966;border-radius:10px;background:#ffffff0a}
+.profile-stats b{font-size:21px;color:#ffe39a}.profile-stats small{font-size:11px;color:#e5d8b6}
+.profile-message{min-height:20px;margin:8px 0 0;color:#ffe39a}
+.account-subpanel button{margin-top:6px}
+@media(max-width:520px){.profile-stats{gap:5px}.profile-stats>div{padding:9px 2px}.profile-stats b{font-size:17px}.profile-stats small{font-size:9px}}

@@ -174,6 +174,8 @@ try {
         function (array &$state, int $seat) use ($operation, $input): array {
             if ($operation === 'start') {
                 Engine::start($state, $seat);
+                $state['matchId'] = bin2hex(random_bytes(16));
+                Engine::advanceBots($state);
                 return ['ok' => true];
             }
             return Engine::apply($state, $seat, $operation, $input);
