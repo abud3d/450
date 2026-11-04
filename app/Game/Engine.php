@@ -196,7 +196,8 @@ final class Engine
             $seat = (int) ($g['turn'] ?? -1);
         }
         if ($seat !== null && $seat >= 0 && (!empty($room['players'][$seat]['bot']) || !empty($room['players'][$seat]['botControl']))) {
-            $room['botActionAt'] = time() + 1;
+            $pause = max(1, min(6, (int) ($room['trickVisibleUntil'] ?? 0) - time()));
+            $room['botActionAt'] = time() + $pause;
         }
     }
 
