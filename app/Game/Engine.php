@@ -20,12 +20,20 @@ final class Engine
             || !is_string($owner) || !hash_equals($owner, (string) ($players[$requestingSeat]['guestId'] ?? ''))) {
             throw new DomainException('صاحب الغرفة فقط يبدأ اللعبة');
         }
+        $botStyles = ['professional', 'aggressive', 'cautious', 'analyst'];
         for ($seat = 0; $seat < 4; $seat++) {
-            if (empty($players[$seat])) {
-                $players[$seat] = ['name' => 'كمبيوتر ' . ($seat + 10), 'seat' => $seat, 'bot' => true, 'botNumber' => $seat + 10, 'guestId' => null];
-            }
+            if (empty($players[$seat])) $players[$seat] = ['name' => 'كمبيوتر', 'seat' => $seat, 'bot' => true, 'guestId' => null];
             $players[$seat]['seat'] = $seat;
             $players[$seat]['bot'] = !empty($players[$seat]['bot']);
+            if ($players[$seat]['bot']) {
+                $number = (int) ($players[$seat]['botNumber'] ?? 0);
+                if ($number < 1 || $number > 99) $number = random_int(1, 99);
+                $players[$seat]['botNumber'] = $number;
+                $style = (string) ($players[$seat]['botStyle'] ?? '');
+                if (!in_array($style, $botStyles, true)) $style = $botStyles[random_int(0, 3)];
+                $players[$seat]['botStyle'] = $style;
+                $players[$seat]['name'] = 'كمبيوتر ' . $number;
+            }
         }
         $game = Rules::create(array_map(fn($p) => (string) ($p['name'] ?? 'ضيف'), $players));
         $game['players'] = array_values($players);
