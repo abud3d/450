@@ -42,6 +42,7 @@ final class RoomStore
         $name = $this->cleanName($displayName);
         return Database::transaction(function (PDO $pdo) use ($code, $guestId, $name): array {
             $room = $this->lockedRoom($pdo, $code);
+            if (($room['status'] ?? '') === 'expired') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
             $state = $this->decode((string) $room['state_json']);
             $players = $state['players'] ?? array_fill(0, 4, null);
 
