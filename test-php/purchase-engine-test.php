@@ -30,6 +30,14 @@ ok(count(array_filter($g['hands'],fn($h)=>count($h)!==8))===0,'first purchase de
 $second=Rules::create(['A','B','C','D']); Rules::deal($second);
 for($i=0;$i<4;$i++) Purchase::choose($second,$second['turn'],'pass');
 ok($second['phase']==='auction2','four passes open second auction');
+$allPass=Rules::create(['A','B','C','D']); Rules::deal($allPass);
+$oldDealer=$allPass['dealer'];
+for($i=0;$i<8;$i++) Purchase::choose($allPass,$allPass['turn'],'pass');
+ok($allPass['phase']==='auction1' && $allPass['round']===2,'four passes in both auctions immediately start the next deal');
+ok($allPass['dealer']===Rules::next($oldDealer),'all-pass redeal rotates the dealer');
+ok(array_sum(array_map('count',$allPass['hands']))===20 && count(array_filter($allPass['hands'],fn($h)=>count($h)!==5))===0,'all-pass redeal deals five cards to every seat');
+ok($allPass['auctionCalls']===[null,null,null,null],'new deal clears pass labels');
+
 $secondBuyer=$second['turn']; Purchase::choose($second,$secondBuyer,'takeSecond');
 while($second['phase']==='postPurchase' && $second['postPurchase']['stage']==='secondPasses'){ $s=$second['turn']; Purchase::respond($second,$s,'pass'); }
 ok($second['phase']==='buyerSelectHukm','second-round buyer selects trump');
