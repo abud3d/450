@@ -86,7 +86,8 @@ final class RoomStore
              WHERE r.status = 'lobby'
                AND r.qaid_enabled = ?
                AND (SELECT COUNT(*) FROM baloot_room_players p WHERE p.room_id = r.id) < 4
-             ORDER BY r.last_activity_at DESC
+             ORDER BY (SELECT COUNT(*) FROM baloot_room_players ranked WHERE ranked.room_id = r.id) DESC,
+                      r.last_activity_at DESC
              LIMIT 25"
         );
         $stmt->execute([$qaidEnabled ? 1 : 0]);
@@ -272,9 +273,13 @@ final class RoomStore
         return Database::transaction(function (PDO $pdo) use ($code): bool {
             $room = $this->lockedRoom($pdo, $code);
             $state = $this->decode((string) $room['state_json']);
-            if (!isset($state['botActionAt']) || (int) $state['botActionAt'] > time()) return false;
+            $now = time();
+            $autoLastDue = isset($state['autoLastCardAt']) && (int) $state['autoLastCardAt'] <= $now;
+            $botDue = isset($state['botActionAt']) && (int) $state['botActionAt'] <= $now;
+            if (!$autoLastDue && !$botDue) return false;
             $beforePhase = (string) ($state['game']['phase'] ?? 'lobby');
-            \Baloot\Game\Engine::advanceBots($state, 1);
+            if ($autoLastDue) \Baloot\Game\Engine::advanceAutoLastCard($state);
+            else \Baloot\Game\Engine::advanceBots($state, 1);
             $afterPhase = (string) ($state['game']['phase'] ?? 'lobby');
             if ($beforePhase !== 'gameEnd' && $afterPhase === 'gameEnd') {
                 $this->recordCompletedMatch($pdo, (int) $room['id'], $state);
