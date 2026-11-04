@@ -78,7 +78,7 @@ $newLogin=authRequest('POST','/api/auth.php?action=login',['email'=>$email,'pass
 authCheck($newLogin['status']===200,'new password can log in');
 $newSession=$newLogin['cookies']['b450_session']??'';
 authCheck((bool)preg_match('/^[a-f0-9]{64}$/',$newSession),'password reset invalidates old sessions and allows a fresh session');
-$logout=authRequest('POST','/api/auth.php?action=logout',null,'b450_session='.$newSession);
+$logout=authRequest('POST','/api/auth.php?action=logout',null,'b450_session='.$newSession,(string)$newLogin['data']['csrf']);
 authCheck($logout['status']===200,'logout succeeds');
 $afterLogout=authRequest('POST','/api/auth.php?action=me',null,'b450_session='.$newSession);
 authCheck($afterLogout['status']===401,'logged-out session is invalidated');
