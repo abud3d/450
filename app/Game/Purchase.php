@@ -125,6 +125,7 @@ final class Purchase
         }
         if ($g['phase'] === 'auction1') {
             if ($choice === 'sun') {
+                $g['auctionCalls'][$seat] = null;
                 $g['contract'] = ['type' => 'sun', 'trump' => null, 'buyer' => $seat, 'purchaseType' => 'sun'];
                 self::begin($g, $seat, 'sunChallenge');
                 $g['postPurchase']['sunCallerSeat'] = $seat;
@@ -134,6 +135,7 @@ final class Purchase
                 return;
             }
             if (in_array($choice, ['take', 'hokum'], true)) {
+                $g['auctionCalls'][$seat] = null;
                 $g['contract'] = ['type' => 'hokum', 'trump' => $g['upCard']['suit'], 'buyer' => $seat, 'purchaseRound' => 1];
                 self::begin($g, $seat, 'responses');
                 return;
@@ -143,7 +145,6 @@ final class Purchase
             $g['auctionPasses']++;
             $g['turn'] = Rules::next($seat);
             if ($g['auctionPasses'] >= 4) {
-                $g['auctionCalls'] = [null,null,null,null];
                 $g['phase'] = 'auction2';
                 $g['turn'] = Rules::next((int) $g['dealer']);
                 $g['auctionPasses'] = 0;
@@ -152,6 +153,7 @@ final class Purchase
         }
 
         if ($choice === 'sun') {
+            $g['auctionCalls'][$seat] = null;
             $g['contract'] = ['type' => 'sun', 'trump' => null, 'buyer' => $seat, 'purchaseRound' => 2, 'purchaseType' => 'sun'];
             self::begin($g, $seat, 'sunChallenge');
             $g['postPurchase']['sunCallerSeat'] = $seat;
@@ -161,6 +163,7 @@ final class Purchase
             return;
         }
         if (in_array($choice, ['takeSecond', 'hokum', 'take', 'S', 'H', 'D', 'C'], true)) {
+            $g['auctionCalls'][$seat] = null;
             $g['contract'] = ['type' => 'hokum', 'trump' => null, 'buyer' => $seat, 'purchaseRound' => 2];
             self::begin($g, $seat, 'secondPasses');
             return;
