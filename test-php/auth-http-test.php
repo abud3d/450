@@ -5,12 +5,13 @@ $base = rtrim((string)getenv('AUTH_TEST_BASE'),'/');
 $mailFile = (string)getenv('MAIL_CAPTURE');
 if ($base === '' || $mailFile === '') throw new RuntimeException('auth test environment missing');
 function authCheck(bool $ok,string $message):void { if(!$ok) throw new RuntimeException($message); }
-function authRequest(string $method,string $path,?array $body=null,string $cookie=''):array {
+function authRequest(string $method,string $path,?array $body=null,string $cookie='',string $csrf=''):array {
     global $base;
     $headers=[];
     $ch=curl_init($base.$path);
     $requestHeaders=['Origin: '.$base,'Content-Type: application/json'];
     if($cookie!=='')$requestHeaders[]='Cookie: '.$cookie;
+    if($csrf!=='')$requestHeaders[]='X-CSRF-Token: '.$csrf;
     curl_setopt_array($ch,[
         CURLOPT_RETURNTRANSFER=>true,
         CURLOPT_CUSTOMREQUEST=>$method,
@@ -60,7 +61,7 @@ $me=authRequest('POST','/api/auth.php?action=me',null,'b450_session='.$session);
 authCheck($me['status']===200 && ($me['data']['user']['email']??'')===$email,'session restores account on another browser profile');
 authCheck(($me['cookies']['baloot_guest']??'')===$guest,'session restores the saved guest identity without the old guest cookie');
 
-$profile=authRequest('POST','/api/auth.php?action=profile',['displayName'=>'QA Profile','avatar'=>'🏆','bio'=>'لاعب تجريبي'],'b450_session='.$session);
+$profile=authRequest('POST','/api/auth.php?action=profile',['displayName'=>'QA Profile','avatar'=>'🏆','bio'=>'لاعب تجريبي'],'b450_session='.$session,(string)$login['data']['csrf']);
 authCheck($profile['status']===200 && ($profile['data']['user']['displayName']??'')==='QA Profile','profile update saves the player display name');
 authCheck(($profile['data']['user']['avatar']??'')==='🏆','profile update saves the avatar');
 authCheck(($profile['data']['user']['stats']['points']??-1)===0,'new player starts with zero accumulated points');
