@@ -64,9 +64,31 @@ authCheck($logout['status']===200,'logout succeeds');
 $afterLogout=authRequest('POST','/api/auth.php?action=me',null,'b450_session='.$session);
 authCheck($afterLogout['status']===401,'logged-out session is invalidated');
 
+$profile=authRequest('POST','/api/auth.php?action=profile',['displayName'=>'QA Profile','avatar'=>'🏆','bio'=>'لاعب تجريبي'],'b450_session='.$session);
+authCheck($profile['status']===200 && ($profile['data']['user']['displayName']??'')==='QA Profile','profile update saves the player display name');
+authCheck(($profile['data']['user']['avatar']??'')==='🏆','profile update saves the avatar');
+authCheck(($profile['data']['user']['stats']['points']??-1)===0,'new player starts with zero accumulated points');
+
+$forgot=authRequest('POST','/api/auth.php?action=forgot',['email'=>$email]);
+authCheck($forgot['status']===200,'password recovery request is accepted');
+$mail=@file_get_contents($mailFile);
+authCheck(is_string($mail)&&preg_match('~https://example\\.test/\\?reset=([a-f0-9]{64})~',$mail,$resetMatch)===1,'recovery email contains a single-use reset link');
+$reset=authRequest('POST','/api/auth.php?action=reset',['token'=>$resetMatch[1],'password'=>'NewTestPassword!2026']);
+authCheck($reset['status']===200,'valid reset token changes the password');
+$oldPassword=authRequest('POST','/api/auth.php?action=login',['email'=>$email,'password'=>$password],'baloot_guest='.$guest);
+authCheck($oldPassword['status']===401,'old password stops working after reset');
+$newLogin=authRequest('POST','/api/auth.php?action=login',['email'=>$email,'password'=>'NewTestPassword!2026'],'baloot_guest='.$guest);
+authCheck($newLogin['status']===200,'new password can log in');
+$newSession=$newLogin['cookies']['b450_session']??'';
+authCheck((bool)preg_match('/^[a-f0-9]{64}$/',$newSession),'password reset invalidates old sessions and allows a fresh session');
+$logout=authRequest('POST','/api/auth.php?action=logout',null,'b450_session='.$newSession);
+authCheck($logout['status']===200,'logout succeeds');
+$afterLogout=authRequest('POST','/api/auth.php?action=me',null,'b450_session='.$newSession);
+authCheck($afterLogout['status']===401,'logged-out session is invalidated');
+
 $app=(string)file_get_contents(__DIR__.'/../public/app.js');
-foreach(['/api/auth.php?action=register','/api/auth.php?action=login','/api/auth.php?action=me','/api/auth.php?action=logout'] as $endpoint) {
+foreach(['/api/auth.php?action=register','/api/auth.php?action=login','/api/auth.php?action=me','/api/auth.php?action=logout','/api/auth.php?action=forgot','/api/auth.php?action=reset','/api/auth.php?action=profile'] as $endpoint) {
     authCheck(str_contains($app,$endpoint),'browser UI must call '.$endpoint);
 }
 authCheck(str_contains($app,'account?.guestId'),'browser UI must restore guest identity from account session');
-echo "PHP account HTTP/mail integration tests passed (mail transport captured; no external email sent)\\n";
+echo "PHP account, profile, password recovery and mail integration tests passed (mail transport captured; no external email sent)\\n";
