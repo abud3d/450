@@ -379,11 +379,13 @@ final class Engine
                 }
             }
         }
+        // Never expose the proof card from a hidden hand before the claimant opens the qaid review.
+        $canReviewQaid = (int) ($room['qaidWindow']['seat'] ?? -1) === $seat;
         foreach ($g['history'] ?? [] as $index => $play) {
             $history[] = [
                 'historyIndex' => $index, 'seat' => $play['seat'],
                 'playerName' => (string) ($players[(int) $play['seat']]['name'] ?? ('لاعب ' . ((int) $play['seat'] + 1))),
-                'card' => $play['card'], 'proofCard' => $play['proofCard'] ?? null, 'violation' => !empty($play['violation']),
+                'card' => $play['card'], 'proofCard' => $canReviewQaid ? ($play['proofCard'] ?? null) : null, 'violation' => !empty($play['violation']),
                 'leadSuit' => $play['leadSuit'] ?? null, 'trickIndex' => $play['trickIndex'] ?? 0,
             ];
         }
@@ -399,7 +401,7 @@ final class Engine
             'contract' => $g['contract'] ?? null,
             'upCard' => $g['upCard'] ?? null,
             'qaidEnabled' => !empty($room['qaidEnabled']),
-            'qaidHistory' => !empty($room['qaidEnabled']) && empty($g['qaidResult']) && in_array($g['phase'], ['playing','roundEnd','gameEnd'], true) ? $qaidHistory : [],
+            'qaidHistory' => !empty($room['qaidEnabled']) && $canReviewQaid && empty($g['qaidResult']) && in_array($g['phase'], ['playing','roundEnd','gameEnd'], true) ? $qaidHistory : [],
             'qaidReady' => !empty($room['qaidEnabled']) && in_array($g['phase'], ['playing','roundEnd','gameEnd'], true) && empty($g['qaidResult']),
             'qaidDeadline' => ($room['qaidWindow']['seat'] ?? -1) === $seat ? ($room['qaidWindow']['expiresAt'] ?? null) : null,
             'qaidResult' => $g['qaidResult'] ?? null,
