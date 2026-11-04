@@ -120,7 +120,7 @@ final class RoomStore
     {
         $stmt = Database::connection()->prepare(
             "UPDATE baloot_rooms r
-             SET r.status = 'expired', r.phase = 'expired'
+             SET status = 'expired', phase = 'expired'
              WHERE r.status = 'lobby'
                AND r.last_activity_at < UTC_TIMESTAMP(6) - INTERVAL 5 MINUTE
                AND NOT EXISTS (
