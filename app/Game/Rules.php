@@ -31,6 +31,9 @@ final class Rules {
    return $follow;
   }
   if(!$tr)return $h;
+  // When the partner is already winning, a void player may discard any card;
+  // cutting is required only when the opponents are currently winning.
+  if(self::team(self::winner($t,$k))===self::team($seat))return $h;
   if($tableTrumps){
    $highest=$tableTrumps[0];foreach(array_slice($tableTrumps,1) as $played)if(self::rank($played['card'],$k['trump'])>self::rank($highest['card'],$k['trump']))$highest=$played;
    if(self::team((int)$highest['seat'])!==self::team($seat)){
