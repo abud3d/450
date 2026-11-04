@@ -32,7 +32,7 @@ $created=roomRequest('POST','/api/room.php?action=create',['name'=>'API Player 1
 roomCheck($created['status']===201 && ($created['data']['ok']??false),'room API creates first player room');
 $code=(string)$created['data']['code'];
 $clients[0]=['cookie'=>'baloot_guest='.($identity['cookies']['baloot_guest']??''),'seat'=>0];
-roomCheck((bool)preg_match('/^[A-F0-9]{6}$/',$code),'room API returns a six-character room code');
+roomCheck((bool)preg_match('/^[0-9]{4}$/',$code),'room API returns a four-digit numeric room code');
 for($seat=1;$seat<4;$seat++){
  $guestIdentity=roomRequest('GET','/api/room.php?action=identity');
  roomCheck($guestIdentity['status']===200,'joining browser obtains its own guest identity');

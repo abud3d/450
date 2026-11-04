@@ -14,7 +14,7 @@ final class RoomStore
         $name = $this->cleanName($displayName);
         return Database::transaction(function (PDO $pdo) use ($ownerGuestId, $name, $qaidEnabled): array {
             for ($attempt = 0; $attempt < 5; $attempt++) {
-                $code = strtoupper(bin2hex(random_bytes(3)));
+                $code = (string) random_int(1000, 9999);
                 try {
                     $state = ['code' => $code, 'phase' => 'lobby', 'ownerGuestId' => $ownerGuestId, 'qaidEnabled' => $qaidEnabled, 'players' => array_fill(0, 4, null), 'game' => null];
                     $state['players'][0] = ['name' => $name, 'guestId' => $ownerGuestId, 'seat' => 0, 'bot' => false];
@@ -267,32 +267,21 @@ final class RoomStore
         });
     }
 
-    /** Advance at most one scheduled bot action for the requested room. */
+    /** Advance all due timers for one room during its normal state polling. */
     public function advanceRoomBots(string $code): bool
     {
-        return Database::transaction(function (PDO $pdo) use ($code): bool {
-            $room = $this->lockedRoom($pdo, $code);
-            $state = $this->decode((string) $room['state_json']);
-            $now = time();
-            $autoLastDue = isset($state['autoLastCardAt']) && (int) $state['autoLastCardAt'] <= $now;
-            $botDue = isset($state['botActionAt']) && (int) $state['botActionAt'] <= $now;
-            if (!$autoLastDue && !$botDue) return false;
-            $beforePhase = (string) ($state['game']['phase'] ?? 'lobby');
-            if ($autoLastDue) \Baloot\Game\Engine::advanceAutoLastCard($state);
-            else \Baloot\Game\Engine::advanceBots($state, 1);
-            $afterPhase = (string) ($state['game']['phase'] ?? 'lobby');
-            if ($beforePhase !== 'gameEnd' && $afterPhase === 'gameEnd') {
-                $this->recordCompletedMatch($pdo, (int) $room['id'], $state);
-            }
-            $this->saveState($pdo, $room, $state);
-            return true;
-        });
+        return $this->advanceDueRooms(1, $code) > 0;
     }
 
-    public function advanceDueRooms(int $limit = 100): int
+    public function advanceDueRooms(int $limit = 100, ?string $onlyCode = null): int
     {
         $limit = max(1, min(500, $limit));
-        $query = Database::connection()->query("SELECT room_code FROM baloot_rooms WHERE status = 'active' ORDER BY last_activity_at ASC LIMIT " . $limit);
+        if ($onlyCode !== null) {
+            $query = Database::connection()->prepare("SELECT room_code FROM baloot_rooms WHERE status = 'active' AND room_code = ? LIMIT 1");
+            $query->execute([strtoupper($onlyCode)]);
+        } else {
+            $query = Database::connection()->query("SELECT room_code FROM baloot_rooms WHERE status = 'active' ORDER BY last_activity_at ASC LIMIT " . $limit);
+        }
         $codes = $query->fetchAll(PDO::FETCH_COLUMN);
         $advanced = 0;
         foreach ($codes as $code) {
@@ -315,6 +304,11 @@ final class RoomStore
                 if (!$didChange && !isset($state['qaidWindow'])
                     && isset($state['autoLastCardAt']) && (int) $state['autoLastCardAt'] <= $now) {
                     $didChange = \Baloot\Game\Engine::advanceAutoLastCard($state);
+                }
+
+                if (!$didChange && !isset($state['qaidWindow'])
+                    && isset($state['botActionAt']) && (int) $state['botActionAt'] <= $now) {
+                    $didChange = \Baloot\Game\Engine::advanceBots($state, 1) > 0;
                 }
 
                 if (!$didChange && ($game['phase'] ?? '') === 'roundEnd'
@@ -351,7 +345,7 @@ final class RoomStore
                     } elseif (in_array($phase, ['auction1','auction2','playing','buyerConfirm','buyerSelectHukm'], true)) {
                         $seat = in_array($phase, ['buyerConfirm','buyerSelectHukm'], true) ? (int) ($game['postPurchase']['buyer'] ?? -1) : (int) ($game['turn'] ?? -1);
                         $player = $state['players'][$seat] ?? null;
-                        if ($seat >= 0 && (is_array($player)) && (!empty($player['bot']) || !empty($player['botControl']))) {
+                        if ($seat >= 0 && is_array($player) && (!empty($player['bot']) || !empty($player['botControl']))) {
                             \Baloot\Game\Engine::advanceBots($state);
                             $didChange = true;
                         } elseif ($seat >= 0 && (int) ($state['timeoutSeat'] ?? -1) === $seat

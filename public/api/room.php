@@ -85,7 +85,7 @@ function apiGuestId(PDO $pdo): string
 function apiRoomCode(mixed $value): string
 {
     $code = strtoupper(trim((string) $value));
-    if (!preg_match('/^[A-F0-9]{6}$/', $code)) apiReply(422, ['ok' => false, 'error' => 'رمز الغرفة غير صحيح']);
+    if (!preg_match('/^(?:[0-9]{4}|[A-F0-9]{6})$/', $code)) apiReply(422, ['ok' => false, 'error' => 'رمز الغرفة غير صحيح']);
     return $code;
 }
 
@@ -230,7 +230,10 @@ try {
     }
     if ($seat === null) apiReply(403, ['ok' => false, 'error' => 'المقعد غير معروف']);
     $snapshot = Engine::snapshot($room['state'], $seat); $snapshot['version'] = $room['version'];
-    apiReply(200, ['ok' => true, 'result' => $result, 'snapshot' => $snapshot]);
+    $extra = $operation === 'qaid_open'
+        ? ['expiresAt' => (int) (($room['state']['qaidWindow']['expiresAt'] ?? 0) * 1000)]
+        : [];
+    apiReply(200, ['ok' => true, 'result' => $result] + $extra + ['snapshot' => $snapshot]);
 } catch (DomainException $e) {
     apiReply(422, ['ok' => false, 'error' => $e->getMessage()]);
 } catch (RuntimeException $e) {
