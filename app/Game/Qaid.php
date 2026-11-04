@@ -23,7 +23,7 @@ final class Qaid
  private static function settle(array &$game,int $claimantSeat,bool $claimWasCorrect,string $verdict,bool $timeout):array
  {
   $previous=$game['lastAwarded']??[0,0];
-  if(in_array($game['phase'],['roundEnd','gameEnd'],true))foreach([0,1] as $team)$game['scores'][$team]=($game['scores'][$team]??0)-($previous[$team]??0);
+  if(in_array($game['phase'],['roundEnd','gameEnd'],true)){if(isset($game['roundScoresBefore'])&&is_array($game['roundScoresBefore']))$game['scores']=$game['roundScoresBefore'];else foreach([0,1] as $team)$game['scores'][$team]=($game['scores'][$team]??0)-($previous[$team]??0);}
   $actualViolation=self::hasViolation($game);$claimantTeam=Rules::team($claimantSeat);$winnerTeam=$claimWasCorrect?$claimantTeam:1-$claimantTeam;
   $claims=array_merge($game['projectClaims']??[[],[],[],[]],[$game['balotClaims']??[]]);
   $scored=Scoring::score([0,0],$game['contract'],$claims,(int)($game['dealer']??0),[0,0]);
