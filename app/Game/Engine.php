@@ -149,9 +149,13 @@ final class Engine
                 throw new DomainException('نوع العملية غير مدعوم');
         }
 
-        if (!isset($room['qaidWindow'])) self::queueBotTurn($room);
-        if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 10);
-        else TurnClock::clear($room);
+        if (isset($room['qaidWindow'])) {
+            TurnClock::clear($room);
+        } else {
+            self::queueBotTurn($room);
+            if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 10);
+            else TurnClock::clear($room);
+        }
         return ['ok' => true];
     }
 
