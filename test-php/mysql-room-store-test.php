@@ -12,6 +12,7 @@ require_once __DIR__ . '/../app/Game/Engine.php';
 require_once __DIR__ . '/../app/Infrastructure/Database.php';
 require_once __DIR__ . '/../app/Infrastructure/RoomStore.php';
 use Baloot\Game\Engine;
+use Baloot\Game\Rules;
 use Baloot\Infrastructure\RoomStore;
 use Baloot\Infrastructure\Database;
 function verify(bool $condition,string $message):void{if(!$condition)throw new RuntimeException($message);}
