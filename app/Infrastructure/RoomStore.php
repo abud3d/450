@@ -224,7 +224,7 @@ final class RoomStore
             $state = $this->decode((string) $room['state_json']);
             if ((int) ($state['botActionAt'] ?? PHP_INT_MAX) > time()) return false;
             if (!isset($state['botActionAt'])) return false;
-            \\Baloot\\Game\\Engine::advanceBots($state, 1);
+            \Baloot\Game\Engine::advanceBots($state, 1);
             $this->saveState($pdo, $room, $state);
             return true;
         });
