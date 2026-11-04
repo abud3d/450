@@ -50,21 +50,14 @@ mysql -u 'DB_USER' -p 'DB_NAME' < /home/CPUSER/baloot450/database/schema.mysql.s
 - `BALOUT_DB_PASSWORD=DB_PASSWORD`
 - `BALOUT_DATA_DIR=/home/CPUSER/baloot450-private`
 
-أنشئ مجلد البيانات الخاص خارج public:
-```bash
-mkdir -p /home/CPUSER/baloot450-private
-chmod 700 /home/CPUSER/baloot450-private
-```
-يجب أن يكون المجلد قابلاً للكتابة من مستخدم PHP-FPM الخاص بالحساب، دون جعله عاماً.
-
-## 5) مهمة cron
+## 5) إضافة جداول الحسابات والملف الشخصي\nبعد استيراد المخطط الأساسي الحالي، استورد الملف التالي إلى قاعدة البيانات نفسها من phpMyAdmin:\n`/home/CPUSER/baloot450/database/migrations/002_accounts_profiles.sql`\n\nتضيف الترقية جداول الحسابات والجلسات واستعادة كلمة المرور ونتائج المباريات فقط، ولا تحذف جداول الغرف أو بياناتها.\n\n## 6) مهمة cron
 بعد التأكد من مسار PHP CLI ومتغيرات البيئة ضمن cron، شغّل كل دقيقة:
 ```bash
 /usr/local/bin/php /home/CPUSER/baloot450/public/api/cron.php
 ```
 قد يختلف مسار PHP في CWP؛ تحقق باستخدام `which php` و`php -v`. لا تفتح cron.php للعامة دون سر مخصص.
 
-## 6) فحص أولي قبل مشاركة الرابط
+## 7) فحص أولي قبل مشاركة الرابط
 - افتح الصفحة عبر HTTPS.
 - اختبر إنشاء غرفة ثم الانضمام من أربعة متصفحات/أجهزة مستقلة.
 - اختبر استعادة اللاعب بعد تحديث الصفحة وانقطاع الاتصال.
