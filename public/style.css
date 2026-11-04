@@ -1298,3 +1298,6 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
 /* Clear auction decisions in the empty badge area under each player name. */
 .seat-badges .seat-call{display:inline-flex;align-items:center;justify-content:center;min-width:42px;min-height:23px;padding:2px 9px;border:1px solid #e0c16d;border-radius:6px;background:#123e30;color:#fff0b5;font-size:14px;font-weight:1000;line-height:1.1;text-shadow:0 1px 2px #001;}
 @media(max-width:560px){.seat-badges .seat-call{min-width:38px;min-height:21px;font-size:12px;padding:2px 7px}}
+
+/* The fullscreen qaid selector has higher specificity than .hidden. */
+.table-page #qaidPage.hidden{display:none!important}
