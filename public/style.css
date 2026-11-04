@@ -211,14 +211,14 @@ footer #buildVersion{display:inline-block;color:#53685d;font-weight:700;directio
 /* Turn marker leads the dealer/contract/project badges; winning team projects are shown beside their owners during trick two. */
 .turn-dot{display:inline-block;flex:0 0 9px;width:9px;height:9px;margin:0 2px 0 0;vertical-align:middle}
 .project-cards{direction:ltr;display:flex;justify-content:center;align-items:center;gap:2px;margin:4px auto 2px;max-width:100%;}
-.project-card{display:block;flex:0 0 29px;width:29px;height:42px;background:#fff;border:1px solid #d9d2c4;border-radius:4px;overflow:hidden;box-shadow:0 2px 5px #0018;color:#17231e}
+.project-card{display:block;flex:0 0 34px;width:34px;height:50px;background:#fff;border:1px solid #d9d2c4;border-radius:4px;overflow:hidden;box-shadow:0 2px 5px #0018;color:#17231e}
 .project-card .card-corner-top,.project-card .card-corner-bottom{left:2px;right:2px}
 .project-card .card-corner b,.project-card .card-corner i{font-size:7px!important}
 .project-card .card-pips{font-size:7px!important;padding:5px 0 2px;height:78%;width:76%}
 .project-card .court-art{width:68%;height:70%;margin-top:5px}
 .project-card .ace-art{font-size:19px}
 .project-card.red{color:#c62828}
-@media(max-width:560px){.project-card{flex-basis:23px;width:23px;height:34px}.project-card .card-corner b,.project-card .card-corner i{font-size:6px!important}.project-card .card-pips{font-size:6px!important;padding-top:4px}.project-card .ace-art{font-size:15px}}
+@media(max-width:560px){.project-card{flex-basis:28px;width:28px;height:42px}.project-card .card-corner b,.project-card .card-corner i{font-size:6px!important}.project-card .card-pips{font-size:6px!important;padding-top:4px}.project-card .ace-art{font-size:15px}}
 
 
 /* Final card-size overrides: table cards grow clearly; hand cards grow subtly. */
@@ -1064,6 +1064,8 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
 .table-page .round-summary-qaid{background:#f7e9c5;color:#4a1d18;border:1px solid #e8b3a2}
 .table-page .round-summary-qaid:disabled{opacity:.6}
 .table-page .round-summary-replay{background:#e7ca7f;color:#26351f}
+.table-page .round-summary-actions a{display:flex;align-items:center;justify-content:center;width:100%;min-height:40px;padding:8px 12px;border:1px solid #fff0bd;border-radius:9px;background:#164b39;color:#fff0c7;text-decoration:none;font-size:13px;font-weight:900}
+.table-page .round-summary-actions a:hover{background:#23664c}
 .table-page #qaidPage:not(.hidden){
  position:fixed;inset:0;z-index:10000;width:100vw;height:100vh;height:100dvh;
  display:flex;align-items:stretch;justify-content:stretch;overflow:hidden;
@@ -1074,7 +1076,9 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
  padding:calc(10px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
  overflow:hidden;border:0;border-radius:0;display:flex;flex-direction:column;gap:7px;
 }
-.table-page #qaidPage .qaid-history-board{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto}
+.table-page #qaidPage .qaid-history-board{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-behavior:auto}
+html:has(body.table-page.qaid-review-open),body.table-page.qaid-review-open{touch-action:pan-y}
+.table-page .qaid-violation-reason{display:block;color:#8b1d24;font-size:10px;font-weight:800;line-height:1.35;text-align:center}
 @media(max-width:560px){
  .table-page .result-page:not(.hidden){padding:8px}
  .table-page .result-page .round-summary{width:96vw;max-height:calc(100dvh - 16px);padding:9px;gap:6px}
@@ -1291,6 +1295,126 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
   .table-page #table .board{flex-basis:410px;min-height:410px}
   .table-page .board .seat-left .project-card,
   .table-page .board .seat-right .project-card{
-    flex-basis:21px;width:21px;height:31px;margin-left:-11px;
+    flex-basis:25px;width:25px;height:37px;margin-left:-12px;
   }
+}
+
+/* Clear auction decisions in the empty badge area under each player name. */
+.seat-badges .seat-call{display:inline-flex;align-items:center;justify-content:center;min-width:42px;min-height:23px;padding:2px 9px;border:1px solid #e0c16d;border-radius:6px;background:#123e30;color:#fff0b5;font-size:14px;font-weight:1000;line-height:1.1;text-shadow:0 1px 2px #001;}
+.seat-badges .seat-call.pulse-a{animation:auction-call-a .65s ease-in-out 2}.seat-badges .seat-call.pulse-b{animation:auction-call-b .65s ease-in-out 2}@keyframes auction-call-a{50%{border-color:#fff;background:#9a7423;box-shadow:0 0 0 3px #f4d46b66}}@keyframes auction-call-b{50%{border-color:#fff;background:#315f9c;box-shadow:0 0 0 3px #8ebeff66}}
+@media(max-width:560px){.seat-badges .seat-call{min-width:38px;min-height:21px;font-size:12px;padding:2px 7px}.table-page .board .seat-left .project-card,.table-page .board .seat-right .project-card{flex-basis:23px;width:23px;height:34px;margin-left:-10px}}
+
+/* The fullscreen qaid selector has higher specificity than .hidden. */
+.table-page #qaidPage.hidden{display:none!important}
+
+
+/* Player avatar overlaps the seat plaque and the enlarged hidden-card fan. */
+.table-page .board .seat{position:relative;overflow:visible}
+.table-page .board .opponent-hand{
+  position:relative;z-index:1;height:46px;max-width:164px;margin:2px auto 0;
+  overflow:visible;
+}
+.table-page .board .back-card{
+  flex-basis:22px;width:27px;height:37px;margin-left:-10px;border-radius:5px;
+  border:1px solid #e8d7b4;box-shadow:0 3px 6px #001b;
+}
+.table-page .board .seat-identity{
+  position:relative;z-index:3;margin-top:22px;padding-top:12px;
+}
+.table-page .board .seat-avatar{
+  position:absolute;top:-25px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;justify-content:center;width:48px;height:48px;
+  padding:0;border:3px solid #e3c477;border-radius:50%;
+  background:radial-gradient(circle at 30% 25%,#fff8e7,#d9c28d 52%,#82633a);
+  color:#173d30;font-size:25px;line-height:1;box-shadow:0 3px 10px #001b,inset 0 1px 2px #fff9;
+  z-index:5;cursor:pointer;
+}
+.table-page .board .seat-name.seat-profile-trigger{
+  display:block;width:100%;padding:0;border:0;border-radius:0;background:transparent;
+  color:#fff4d2;font:inherit;font-size:13px;font-weight:900;line-height:1.35;
+  text-shadow:0 1px 2px #0019;cursor:pointer;
+}
+.table-page .board .seat-name.seat-profile-trigger:hover{color:#ffe08a}
+.table-page .board .seat-profile-trigger:focus-visible{outline:2px solid #ffe08a;outline-offset:3px}
+.table-page .board .seat-identity:has(.seat-call) .seat-avatar{opacity:.35}
+.table-page .board .seat-badges{position:relative}
+.table-page .board .seat-badges .seat-call{
+  position:absolute;left:50%;top:-22px;transform:translateX(-50%);
+  z-index:8;min-width:58px;min-height:30px;padding:4px 12px;
+  border:2px solid #f3d27a;border-radius:9px;
+  background:linear-gradient(145deg,#0a3025,#1d5b42);color:#fff3c8;
+  box-shadow:0 5px 16px #0009;font-size:16px;
+}
+.table-page .board .seat-badges .seat-call.pulse-a{animation:auction-call-float-a .65s ease-in-out 2}
+.table-page .board .seat-badges .seat-call.pulse-b{animation:auction-call-float-b .65s ease-in-out 2}
+@keyframes auction-call-float-a{50%{transform:translate(-50%,-7px);box-shadow:0 0 0 4px #f4d46b66,0 7px 18px #0009}}
+@keyframes auction-call-float-b{50%{transform:translate(-50%,7px);box-shadow:0 0 0 4px #8ebeff66,0 7px 18px #0009}}
+.table-page #table #seat0 #turnTimeout{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:30;width:min(88vw,390px);max-width:none;margin:0;padding:12px 14px;
+  border:2px solid #ff6b55;border-radius:14px;
+  background:linear-gradient(145deg,#fff1e9,#ffe0d5);color:#76251d;
+  box-shadow:0 9px 28px #0009,0 0 0 5px #f04b3530;
+}
+.table-page #table #seat0 #turnTimeout strong{color:#b42318;font-size:17px}
+.table-page #table #seat0 #turnTimeout span{color:#76251d}
+.table-page #table #seat0 #turnTimeout button{background:#b42318;color:#fff}
+.table-page #table #seat0 #turnTimeout button.secondary{background:#ffe3dc;color:#84251b;border:1px solid #e98b78}
+.table-page #table #seat0 #turnTimeout.hidden{display:none!important}
+
+/* The lower strip reports the current player's real record or the active call. */
+.table-page #table #gameNotice{
+  display:flex!important;align-items:center;justify-content:center;gap:9px;
+  min-height:38px;margin:7px auto 2px;padding:7px 12px;
+  border:1px solid #c6a15d77;border-radius:10px;
+  background:linear-gradient(90deg,#0a3025,#174b39,#0a3025);
+  color:#fff0c6;font-size:12px;line-height:1.4;
+  box-shadow:inset 0 1px 0 #fff2,0 3px 9px #0017;
+}
+.table-page #table #gameNotice .status-strip-label{
+  color:#e8ca83;font-size:10px;font-weight:800;white-space:nowrap;
+}
+.table-page #table #gameNotice.is-announcement{
+  border-color:#f0cd71;background:linear-gradient(90deg,#443312,#8a6824,#443312);
+  color:#fff7d8;font-size:14px;
+}
+.player-profile-modal{
+  position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;
+  padding:18px;background:#000b;backdrop-filter:blur(4px);
+}
+.player-profile-modal.hidden{display:none!important}
+.player-profile-card{
+  position:relative;width:min(100%,360px);padding:24px 20px 20px;text-align:center;
+  border:1px solid #c6a15d;border-radius:18px;
+  background:linear-gradient(155deg,#103d2e,#08291f);color:#fff4d2;
+  box-shadow:0 18px 50px #0009;
+}
+.player-profile-close{
+  position:absolute;top:8px;left:10px;width:34px;height:34px;padding:0;
+  border:1px solid #ffffff40;border-radius:50%;background:#ffffff16;color:#fff;font-size:24px;
+}
+.player-profile-avatar{
+  display:flex;align-items:center;justify-content:center;width:76px;height:76px;margin:0 auto 10px;
+  border:3px solid #e3c477;border-radius:50%;background:#ead9ad;color:#173d30;font-size:40px;
+  box-shadow:0 4px 12px #0007;
+}
+.player-profile-card h2{margin:8px 0;color:#fff4d2;font-size:20px}
+.player-profile-level{
+  display:inline-block;margin:2px auto 14px;padding:5px 14px;border-radius:20px;
+  background:#d7b766;color:#34270b;font-size:12px;
+}
+.player-profile-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.player-profile-stat{display:grid;gap:4px;padding:12px 8px;border:1px solid #ffffff25;border-radius:10px;background:#ffffff0c}
+.player-profile-stat b{font-size:21px;color:#f4d47a}
+.player-profile-stat span,.player-profile-empty{font-size:12px;color:#e5e1cf}
+@media(max-width:560px){
+  .table-page .board .opponent-hand{height:39px;max-width:146px}
+  .table-page .board .back-card{flex-basis:19px;width:23px;height:31px;margin-left:-8px}
+  .table-page .board .seat-identity{margin-top:20px;padding:10px 7px 4px}
+  .table-page .board .seat-avatar{top:-22px;width:42px;height:42px;font-size:22px}
+  .table-page .board .seat-name.seat-profile-trigger{font-size:11px}
+  .table-page .board .seat-badges .seat-call{top:-19px;min-width:50px;min-height:26px;font-size:13px}
+  .table-page #table #gameNotice{min-height:34px;margin-top:5px;padding:6px 8px;font-size:11px}
+  .table-page #table #seat0 #turnTimeout{width:min(92vw,360px);padding:10px}
+  .table-page #table #seat0 #turnTimeout strong{font-size:15px}
 }

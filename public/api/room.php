@@ -95,6 +95,40 @@ function apiName(mixed $value): string
     return mb_substr($name !== '' ? $name : 'ضيف', 0, 24, 'UTF-8');
 }
 
+function apiEnrichPlayerProfiles(array &$state): void
+{
+    $guestIds = [];
+    foreach ($state['players'] ?? [] as $player) {
+        $id = is_array($player) ? (string) ($player['guestId'] ?? '') : '';
+        if (preg_match('/^[a-f0-9]{64}$/', $id)) $guestIds[$id] = $id;
+    }
+    if (!$guestIds) return;
+
+    $ids = array_values($guestIds);
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $query = Database::connection()->prepare(
+        "SELECT guest_id, avatar, points, matches, wins, losses, draws
+         FROM baloot_users WHERE verified = 1 AND guest_id IN ($placeholders)"
+    );
+    $query->execute($ids);
+    $profiles = [];
+    foreach ($query->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $profiles[(string) $row['guest_id']] = [
+            'avatar' => (string) ($row['avatar'] ?? '🃏'),
+            'points' => (int) ($row['points'] ?? 0),
+            'matches' => (int) ($row['matches'] ?? 0),
+            'wins' => (int) ($row['wins'] ?? 0),
+            'losses' => (int) ($row['losses'] ?? 0),
+            'draws' => (int) ($row['draws'] ?? 0),
+        ];
+    }
+    foreach ($state['players'] ?? [] as $seat => $player) {
+        if (!is_array($player)) continue;
+        $id = (string) ($player['guestId'] ?? '');
+        $state['players'][$seat]['publicProfile'] = $profiles[$id] ?? null;
+    }
+}
+
 $store = new RoomStore();
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = (string) ($_GET['action'] ?? '');
@@ -134,6 +168,7 @@ try {
             if (is_array($player) && hash_equals((string) ($player['guestId'] ?? ''), $guestId)) { $seat = (int) $i; break; }
         }
         if ($seat === null) apiReply(403, ['ok' => false, 'error' => 'لا يوجد مقعد محفوظ لهذا اللاعب']);
+        apiEnrichPlayerProfiles($room['state']);
         $snapshot = Engine::snapshot($room['state'], $seat);
         $snapshot['version'] = $room['version'];
         apiReply(200, ['ok' => true, 'seat' => $seat, 'snapshot' => $snapshot]);
@@ -148,6 +183,7 @@ try {
         if (!$store->allowRate('create', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 5, 3600)) apiReply(429, ['ok' => false, 'error' => 'تجاوزت حد إنشاء الغرف مؤقتاً']);
         $room = $store->create($guestId, apiName($input['name'] ?? ''), ($input['qaidEnabled'] ?? true) === true);
         $room['state']['code'] = $room['code'];
+        apiEnrichPlayerProfiles($room['state']);
         $snapshot = Engine::snapshot($room['state'], 0); $snapshot['version'] = $room['version'];
         apiReply(201, ['ok' => true, 'code' => $room['code'], 'seat' => 0, 'guestId' => $guestId, 'created' => true, 'qaidEnabled' => $room['state']['qaidEnabled'], 'snapshot' => $snapshot]);
     }
@@ -155,6 +191,7 @@ try {
     if ($action === 'quick-join') {
         if (!$store->allowRate('quick-join', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 8, 900)) apiReply(429, ['ok' => false, 'error' => 'محاولات الدخول السريع كثيرة؛ حاول لاحقاً']);
         $quick = $store->quickJoin($guestId, apiName($input['name'] ?? ''), ($input['qaidEnabled'] ?? true) === true);
+        apiEnrichPlayerProfiles($quick['state']);
         $snapshot = Engine::snapshot($quick['state'], $quick['seat']);
         $snapshot['version'] = $quick['version'];
         apiReply(200, [
@@ -171,6 +208,7 @@ try {
     if ($action === 'join') {
         if (!$store->allowRate('join', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 900)) apiReply(429, ['ok' => false, 'error' => 'محاولات الانضمام كثيرة؛ حاول لاحقاً']);
         $joined = $store->join(apiRoomCode($input['code'] ?? ''), $guestId, apiName($input['name'] ?? ''));
+        apiEnrichPlayerProfiles($joined['state']);
         $snapshot = Engine::snapshot($joined['state'], $joined['seat']); $snapshot['version'] = $joined['version'];
         apiReply(200, ['ok' => true, 'code' => $joined['code'], 'seat' => $joined['seat'], 'guestId' => $guestId, 'snapshot' => $snapshot]);
     }
@@ -184,6 +222,7 @@ try {
         $moved = $store->moveSeat($code, $guestId, (int) ($input['targetSeat'] ?? -1), $actionId);
         $room = $store->read($code);
         if (!$room) apiReply(404, ['ok' => false, 'error' => 'الغرفة غير موجودة']);
+        apiEnrichPlayerProfiles($room['state']);
         $snapshot = Engine::snapshot($room['state'], (int) $moved['seat']);
         $snapshot['version'] = $room['version'];
         apiReply(200, ['ok' => true, 'seat' => (int) $moved['seat'], 'snapshot' => $snapshot]);
@@ -230,6 +269,7 @@ try {
         if (is_array($player) && hash_equals((string) ($player['guestId'] ?? ''), $guestId)) { $seat = (int) $i; break; }
     }
     if ($seat === null) apiReply(403, ['ok' => false, 'error' => 'المقعد غير معروف']);
+    apiEnrichPlayerProfiles($room['state']);
     $snapshot = Engine::snapshot($room['state'], $seat); $snapshot['version'] = $room['version'];
     $extra = $operation === 'qaid_open'
         ? ['expiresAt' => (int) (($room['state']['qaidWindow']['expiresAt'] ?? 0) * 1000)]
