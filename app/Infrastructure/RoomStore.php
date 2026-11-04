@@ -42,7 +42,7 @@ final class RoomStore
         $name = $this->cleanName($displayName);
         return Database::transaction(function (PDO $pdo) use ($code, $guestId, $name): array {
             $room = $this->lockedRoom($pdo, $code);
-            if (($room['status'] ?? '') === 'expired') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
+            if (($room['status'] ?? '') === 'closed') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
             $state = $this->decode((string) $room['state_json']);
             $players = $state['players'] ?? array_fill(0, 4, null);
 
@@ -120,7 +120,7 @@ final class RoomStore
     {
         $stmt = Database::connection()->prepare(
             "UPDATE baloot_rooms r
-             SET status = 'expired', phase = 'expired'
+             SET status = 'closed', phase = 'expired'
              WHERE r.status = 'lobby'
                AND r.last_activity_at < UTC_TIMESTAMP(6) - INTERVAL 5 MINUTE
                AND NOT EXISTS (
@@ -149,7 +149,7 @@ final class RoomStore
 
         return Database::transaction(function (PDO $pdo) use ($code, $guestId, $actionId, $actionType, $mutation, $expectedVersion): array {
             $room = $this->lockedRoom($pdo, $code);
-            if (($room['status'] ?? '') === 'expired') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
+            if (($room['status'] ?? '') === 'closed') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
             $check = $pdo->prepare('SELECT result_json FROM baloot_room_actions WHERE room_id = ? AND action_id = ?');
             $check->execute([(int) $room['id'], $actionId]);
             $prior = $check->fetchColumn();
@@ -240,7 +240,7 @@ final class RoomStore
         }
         return Database::transaction(function (PDO $pdo) use ($code, $guestId, $targetSeat, $actionId): array {
             $room = $this->lockedRoom($pdo, $code);
-            if (($room['status'] ?? '') === 'expired') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
+            if (($room['status'] ?? '') === 'closed') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
             $check = $pdo->prepare('SELECT result_json FROM baloot_room_actions WHERE room_id = ? AND action_id = ?');
             $check->execute([(int) $room['id'], $actionId]);
             $prior = $check->fetchColumn();
