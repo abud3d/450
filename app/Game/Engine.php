@@ -87,7 +87,7 @@ final class Engine
                 if (($room['qaidWindow']['seat'] ?? -1) !== $seat || (int) ($room['qaidWindow']['expiresAt'] ?? 0) < time()) {
                     throw new DomainException('انتهت مهلة كشف أوراق القيد؛ افتح الطلب من جديد');
                 }
-                $result = Qaid::claim($g, $seat, (int) ($input['violationIndex'] ?? -1), (int) ($input['proofIndex'] ?? -1));
+                $result = Qaid::decide($g, $seat, (string) ($input['verdict'] ?? ''));
                 unset($room['qaidWindow']);
                 $room['roundResultReadyAt'] = time();
                 $room['lastAction'] = 'تم حسم طلب القيد.';
@@ -101,11 +101,7 @@ final class Engine
                 $room['lastAction'] = 'بدأ كشف أوراق القيد.';
                 break;
             case 'qaid_cancel':
-                if (($room['qaidWindow']['seat'] ?? -1) !== $seat) throw new DomainException('لا يوجد طلب قيد لهذا المقعد');
-                unset($room['qaidWindow']);
-                if (($g['phase'] ?? '') === 'roundEnd') $room['roundResultReadyAt'] = time();
-                $room['lastAction'] = 'أُغلق كشف القيد.';
-                break;
+                throw new DomainException('بعد فتح أوراق القيد يجب اختيار الحكم؛ لا يمكن إغلاق الطلب.');
             case 'next':
                 if (!hash_equals((string) ($room['ownerGuestId'] ?? ''), (string) ($room['players'][$seat]['guestId'] ?? ''))) throw new DomainException('صاحب الغرفة فقط يبدأ التوزيعة التالية');
                 Rules::nextRound($g);
@@ -376,6 +372,7 @@ final class Engine
         foreach ($g['history'] ?? [] as $index => $play) {
             $history[] = [
                 'historyIndex' => $index, 'seat' => $play['seat'],
+                'playerName' => (string) ($players[(int) $play['seat']]['name'] ?? ('لاعب ' . ((int) $play['seat'] + 1))),
                 'card' => $play['card'], 'violation' => !empty($play['violation']),
                 'leadSuit' => $play['leadSuit'] ?? null, 'trickIndex' => $play['trickIndex'] ?? 0,
             ];
