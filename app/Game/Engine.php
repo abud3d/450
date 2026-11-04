@@ -57,6 +57,9 @@ final class Engine
         if (!isset($room['players'][$seat]) || !is_array($room['players'][$seat])) throw new DomainException('المقعد غير معروف');
         if (!empty($room['players'][$seat]['botControl']) && $action !== 'timeout_return') throw new DomainException('البوت يدير هذا المقعد حالياً');
         $g =& $room['game'];
+        if (isset($room['qaidWindow']) && $action !== 'qaid_claim') {
+            throw new DomainException('اللعب متوقف حتى يختار فاتح القيد؛ لا يمكن تنفيذ حركات أخرى.');
+        }
         if (!in_array($action, ['timeout_return','timeout_bot'], true)) unset($room['timeoutSeat'], $room['timeoutGraceUntil']);
 
         switch ($action) {
