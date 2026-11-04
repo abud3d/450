@@ -138,7 +138,7 @@ final class Bot
             $trial[] = ['seat' => $seat, 'card' => $card];
             $winnerAfter = Rules::winner($trial, $contract);
             $wins = $winnerAfter === $seat;
-            $cost = self::cardCost($card, $contract);
+            $cost = self::cardCost($card, $g);
             $score = -$cost * $weights['save'];
 
             if ($partnerWinning) {
