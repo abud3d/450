@@ -216,6 +216,20 @@ final class RoomStore
         });
     }
 
+    /** Advance at most one scheduled bot action for the requested room. */
+    public function advanceRoomBots(string $code): bool
+    {
+        return Database::transaction(function (PDO $pdo) use ($code): bool {
+            $room = $this->lockedRoom($pdo, $code);
+            $state = $this->decode((string) $room['state_json']);
+            if ((int) ($state['botActionAt'] ?? PHP_INT_MAX) > time()) return false;
+            if (!isset($state['botActionAt'])) return false;
+            \Baloot\Game\Engine::advanceBots($state, 1);
+            $this->saveState($pdo, $room, $state);
+            return true;
+        });
+    }
+
     public function advanceDueRooms(int $limit = 100): int
     {
         $limit = max(1, min(500, $limit));

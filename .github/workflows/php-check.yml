@@ -1,9 +1,9 @@
 name: PHP checks
 on:
   push:
-    branches: [main, php-native-engine]
+    branches: [main, php-native-engine, preview/visible-bot-turns]
   pull_request:
-    branches: [main]
+    branches: [main, php-native-engine]
 jobs:
   lint:
     runs-on: ubuntu-latest
