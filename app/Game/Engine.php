@@ -461,6 +461,10 @@ final class Engine
             'postPurchaseBuyer' => $g['postPurchase']['buyer'] ?? $g['contract']['buyer'] ?? null,
             'postPurchaseTurn' => $g['turn'] ?? null,
             'timeoutPrompt' => ($room['timeoutSeat'] ?? -1) === $seat,
+            'timeoutSeat' => isset($room['timeoutSeat']) ? (int) $room['timeoutSeat'] : null,
+            'turnDeadlineAt' => isset($room['turnDeadlineAt']) ? (int) $room['turnDeadlineAt'] : null,
+            'turnDeadlineDuration' => (int) ($room['turnDeadlineDuration'] ?? 10),
+            'timeoutDeadlineAt' => isset($room['timeoutGraceUntil']) ? (int) $room['timeoutGraceUntil'] : null,
             'qaidWindowActive' => isset($room['qaidWindow']),
             'lastAction' => $room['lastAction'] ?? '',
         ];
