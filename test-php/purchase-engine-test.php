@@ -121,5 +121,12 @@ ok($projectGame['phase']==='playing','all project declarations move the game int
 $duplicateProjectRejected=false;
 try { Projects::declare($projectGame,0,'pass'); } catch (DomainException $e) { $duplicateProjectRejected=true; }
 ok($duplicateProjectRejected,'player cannot declare projects twice');
+$passProject=Rules::create(['A','B','C','D']);
+$passProject['phase']='projectDeclaration';
+$passProject['projectOptions']=[[['type'=>'20']],[],[],[]];
+$passProject['projectDeclared']=[false,true,true,true];
+Projects::declare($passProject,0,'pass');
+$unannounced=Projects::resolve($passProject['projectClaims'],0,'sun');
+ok($passProject['projectClaims'][0]===[] && $unannounced['winnerTeam']===null && $unannounced['points']===[0,0],'passing an available sara must exclude it from announcement and scoring');
 
 echo "PHP purchase, qaid, bot and clock tests passed\n";
