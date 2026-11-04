@@ -33,7 +33,8 @@ qaidCheck(!empty($proof['violation']) && ($proof['proofCard']['id'] ?? '') === '
 $game = qaidGame(false);
 $game['phase'] = 'gameEnd';
 $game['scores'] = [152, 140];
-$game['lastAwarded'] = [26, 0];
+$game['lastAwarded'] = [0, 0];
+$game['roundScoresBefore'] = [130, 140];
 $result = Qaid::expire($game, 0);
-qaidCheck($result['timeout'] === true && $game['phase'] === 'gameEnd' && $game['winner'] === 1, 'A timeout opened on the final-score screen must recalculate the winner.');
+qaidCheck($result['timeout'] === true && $game['phase'] === 'gameEnd' && $game['winner'] === 1 && $game['scores'] === [130, 166], 'A timeout opened on the final-score screen must restore the pre-round score and recalculate the winner.');
 echo "PHP automatic qaid settlement tests passed\n";
