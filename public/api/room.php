@@ -38,9 +38,12 @@ function apiBody(): array
 
 function apiOriginGuard(): void
 {
-    $expected = rtrim((string) getenv('APP_ORIGIN'), '/');
+    $configPath = '/home/arbim/baloot450-config.php';
+    $config = is_file($configPath) ? require $configPath : [];
+    if (!is_array($config)) $config = [];
+    $expected = rtrim((string) ($config['origin'] ?? getenv('APP_ORIGIN') ?: 'https://blout.arb.im'), '/');
     $origin = rtrim((string) ($_SERVER['HTTP_ORIGIN'] ?? ''), '/');
-    if ($expected === '' || $origin === '') apiReply(503, ['ok' => false, 'error' => 'إعداد مصدر التطبيق غير مكتمل']);
+    if ($origin === '') apiReply(403, ['ok' => false, 'error' => 'مصدر الطلب غير مسموح']);
     if (!hash_equals($expected, $origin)) apiReply(403, ['ok' => false, 'error' => 'مصدر الطلب غير مسموح']);
 }
 
