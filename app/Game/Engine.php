@@ -33,7 +33,7 @@ final class Engine
         Rules::deal($game);
         $room['players'] = array_values($players);
         $room['game'] = $game;
-        TurnClock::arm($room, 30);
+        TurnClock::arm($room, 10);
         $room['lastAction'] = 'وُزعت خمس أوراق لكل لاعب وبدأ الشراء.';
         self::queueBotTurn($room);
     }
@@ -131,7 +131,7 @@ final class Engine
         }
 
         if (!isset($room['qaidWindow'])) self::queueBotTurn($room);
-        if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 30);
+        if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 10);
         else TurnClock::clear($room);
         return ['ok' => true];
     }
@@ -181,10 +181,17 @@ final class Engine
     /** Schedule, rather than chain, the next computer action so every card is visible. */
     public static function queueBotTurn(array &$room): void
     {
-        unset($room['botActionAt']);
+        unset($room['botActionAt'], $room['autoLastCardAt']);
         if (!isset($room['game']) || isset($room['qaidWindow'])) return;
         $g = $room['game'];
         $phase = $g['phase'] ?? '';
+        if ($phase === 'playing') {
+            $turnSeat = (int) ($g['turn'] ?? -1);
+            if ($turnSeat >= 0 && count($g['hands'][$turnSeat] ?? []) === 1) {
+                $room['autoLastCardAt'] = time() + 1;
+                return;
+            }
+        }
         $seat = null;
         if ($phase === 'projectDeclaration') {
             foreach ($room['players'] ?? [] as $i => $player) {
@@ -199,6 +206,32 @@ final class Engine
             $pause = max(1, min(6, (int) ($room['trickVisibleUntil'] ?? 0) - time()));
             $room['botActionAt'] = time() + $pause;
         }
+    }
+
+    /** Play a player's sole remaining card after the short reveal delay. */
+    public static function advanceAutoLastCard(array &$room): bool
+    {
+        if (!isset($room['game']) || isset($room['qaidWindow'])
+            || (int) ($room['autoLastCardAt'] ?? PHP_INT_MAX) > time()) return false;
+        $g =& $room['game'];
+        $seat = (int) ($g['turn'] ?? -1);
+        if (($g['phase'] ?? '') !== 'playing' || $seat < 0 || count($g['hands'][$seat] ?? []) !== 1) {
+            unset($room['autoLastCardAt']);
+            self::queueBotTurn($room);
+            return false;
+        }
+        unset($room['autoLastCardAt']);
+        $beforeTricks = count($g['tricks'] ?? []);
+        Rules::play($g, $seat, (string) $g['hands'][$seat][0]['id']);
+        if (count($g['tricks'] ?? []) > $beforeTricks) {
+            $room['trickVisibleUntil'] = time() + (in_array($g['phase'], ['roundEnd','gameEnd'], true) ? 6 : 2);
+        }
+        if (in_array($g['phase'], ['roundEnd','gameEnd'], true)) $room['roundResultReadyAt'] = time() + 6;
+        $room['lastAction'] = 'لُعبت الورقة الأخيرة تلقائياً.';
+        if (in_array($g['phase'], ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 10);
+        else TurnClock::clear($room);
+        self::queueBotTurn($room);
+        return true;
     }
 
     public static function snapshot(array $room, int $seat): array
@@ -248,6 +281,29 @@ final class Engine
         $lastLandTeam = isset($g['lastWinner']) ? Rules::team((int) $g['lastWinner']) : null;
         $resultReadyAt = (int) ($room['roundResultReadyAt'] ?? 0);
         $trickVisible = (int) ($room['trickVisibleUntil'] ?? 0) > time();
+        $projectDisplayBySeat = [[],[],[],[]];
+        if (($g['phase'] ?? '') === 'playing' && count($g['tricks'] ?? []) === 1
+            && !empty($g['projectClaims'])) {
+            $resolvedProjects = Projects::resolve(
+                $g['projectClaims'],
+                (int) ($g['dealer'] ?? 0),
+                (string) ($g['contract']['type'] ?? 'sun')
+            );
+            if (is_int($resolvedProjects['winnerTeam'] ?? null)) {
+                foreach ($g['projectClaims'] as $projectSeat => $claims) {
+                    $playedInCurrentTrick = false;
+                    foreach ($g['trick'] ?? [] as $play) {
+                        if ((int) ($play['seat'] ?? -1) === (int) $projectSeat) { $playedInCurrentTrick = true; break; }
+                    }
+                    if ((int) $projectSeat % 2 === $resolvedProjects['winnerTeam'] && $playedInCurrentTrick) {
+                        $projectDisplayBySeat[$projectSeat] = array_values(array_filter(
+                            $claims,
+                            static fn($project) => ($project['type'] ?? '') !== 'belot'
+                        ));
+                    }
+                }
+            }
+        }
         foreach ($g['history'] ?? [] as $index => $play) {
             $history[] = [
                 'historyIndex' => $index, 'seat' => $play['seat'],
@@ -295,7 +351,7 @@ final class Engine
             'mySeat' => $seat,
             'myProjects' => ($g['tricks'] ?? []) === [] ? ($g['projectClaims'][$seat] ?? []) : [],
             'projectsBySeat' => ($g['tricks'] ?? []) === [] ? ($g['projectClaims'] ?? [[],[],[],[]]) : [[],[],[],[]],
-            'projectDisplayBySeat' => [[],[],[],[]],
+            'projectDisplayBySeat' => $projectDisplayBySeat,
             'projectOptions' => $g['projectOptions'][$seat] ?? [],
             'projectDeclared' => $g['projectDeclared'] ?? [false,false,false,false],
             'doubleOptions' => Purchase::doubleOptions($g, $seat),
