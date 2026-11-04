@@ -48,9 +48,16 @@ mysql -u 'DB_USER' -p 'DB_NAME' < /home/CPUSER/baloot450/database/schema.mysql.s
 - `BALOUT_DB_DSN=mysql:host=127.0.0.1;dbname=DB_NAME;charset=utf8mb4`
 - `BALOUT_DB_USER=DB_USER`
 - `BALOUT_DB_PASSWORD=DB_PASSWORD`
-- `BALOUT_DATA_DIR=/home/CPUSER/baloot450-private`
+- `APP_URL=https://blout.arb.im`
+- `MAIL_FROM=no-reply@blout.arb.im`
 
-## 5) إضافة جداول الحسابات والملف الشخصي\nبعد استيراد المخطط الأساسي الحالي، استورد الملف التالي إلى قاعدة البيانات نفسها من phpMyAdmin:\n`/home/CPUSER/baloot450/database/migrations/002_accounts_profiles.sql`\n\nتضيف الترقية جداول الحسابات والجلسات واستعادة كلمة المرور ونتائج المباريات فقط، ولا تحذف جداول الغرف أو بياناتها.\n\n## 6) مهمة cron
+## 5) إضافة جداول الحسابات والملف الشخصي
+بعد استيراد المخطط الأساسي الحالي، استورد الملف التالي إلى قاعدة البيانات نفسها من phpMyAdmin:
+`/home/CPUSER/baloot450/database/migrations/002_accounts_profiles.sql`
+
+تضيف الترقية جداول الحسابات والجلسات واستعادة كلمة المرور ونتائج المباريات فقط، ولا تحذف جداول الغرف أو بياناتها.
+
+## 6) مهمة cron
 بعد التأكد من مسار PHP CLI ومتغيرات البيئة ضمن cron، شغّل كل دقيقة:
 ```bash
 /usr/local/bin/php /home/CPUSER/baloot450/public/api/cron.php
