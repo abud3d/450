@@ -35,4 +35,5 @@ $otherSnapshot = Engine::snapshot($room, 1);
 if (empty($claimantSnapshot['qaidWindowActive']) || empty($claimantSnapshot['qaidDeadline'])) throw new RuntimeException('claimant must recover the active qaid window after refresh');
 if (empty($claimantSnapshot['qaidHistory'][0]['cards'][0]['proofCard']['id'])) throw new RuntimeException('claimant must see the proof card');
 if (!empty($otherSnapshot['qaidHistory']) || !empty($otherSnapshot['qaidDeadline'])) throw new RuntimeException('proof cards must stay private from other seats');
+if (empty($claimantSnapshot['legalCardIds'])) throw new RuntimeException('active player must receive legal card IDs for turn-time validation');
 echo "room engine tests passed\n";
