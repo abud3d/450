@@ -87,7 +87,7 @@ final class Engine
                 $room['lastAction'] = 'تم لعب الورقة.';
                 break;
             case 'qaid_claim':
-                if (($room['qaidWindow']['seat'] ?? -1) !== $seat || (int) ($room['qaidWindow']['expiresAt'] ?? 0) < time()) {
+                if (($room['qaidWindow']['seat'] ?? -1) !== $seat || (int) ($room['qaidWindow']['expiresAt'] ?? 0) <= time()) {
                     throw new DomainException('انتهت مهلة كشف أوراق القيد؛ افتح الطلب من جديد');
                 }
                 $result = Qaid::decide($g, $seat);
