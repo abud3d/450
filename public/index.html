@@ -57,9 +57,17 @@
 <details><summary>هل يمكن اللعب من الجوال؟</summary><p>نعم، يمكنك فتح بلوت نت من متصفح الهاتف واللعب مع أصدقائك.</p></details>
 </section>
 <section id="account" class="panel account-panel">
-<h2>حساب اللاعب — اختياري</h2><p id="accountStatus">تلعب كضيف. لست بحاجة إلى حساب للعب؛ أنشئ حساباً اختيارياً لحفظ هوية الضيف واستعادة مقاعد غرفك عند الدخول من جهاز آخر.</p>
-<div class="account-fields"><input id="accountName" maxlength="40" placeholder="اسم العرض"><input id="accountEmail" type="email" autocomplete="email" placeholder="البريد الإلكتروني"><input id="accountPassword" type="password" autocomplete="new-password" placeholder="كلمة المرور (12 حرفاً على الأقل)"></div>
-<div class="actions"><button id="registerAccount">إنشاء حساب وربط الضيف</button><button id="loginAccount" class="secondary">تسجيل الدخول</button><button id="logoutAccount" class="secondary hidden">تسجيل الخروج</button></div>
+<h2>حساب اللاعب والملف الشخصي</h2>
+<p id="accountStatus">أنشئ حساباً لحفظ هويتك، أو تابع اللعب كضيف. الحساب يتيح لك استعادة مقعدك وإحصائياتك من أجهزتك.</p>
+<div class="account-fields"><input id="accountName" maxlength="40" placeholder="اسم اللاعب"><input id="accountEmail" type="email" autocomplete="email" placeholder="البريد الإلكتروني"><input id="accountPassword" type="password" autocomplete="new-password" placeholder="كلمة المرور (12 حرفاً على الأقل)"></div>
+<div class="actions"><button id="registerAccount">إنشاء حساب</button><button id="loginAccount" class="secondary">تسجيل الدخول</button><button id="forgotAccount" class="secondary">نسيت كلمة المرور؟</button><button id="logoutAccount" class="secondary hidden">تسجيل الخروج</button></div>
+<div id="resetPanel" class="account-subpanel hidden"><h3>إعادة تعيين كلمة المرور</h3><input id="resetPassword" type="password" autocomplete="new-password" placeholder="كلمة المرور الجديدة (12 حرفاً على الأقل)"><button id="resetPasswordButton">حفظ كلمة المرور</button></div>
+<div id="profilePanel" class="account-subpanel hidden">
+<h3>ملفي الشخصي</h3>
+<div class="profile-stats"><div><b id="profilePoints">0</b><small>النقاط</small></div><div><b id="profileMatches">0</b><small>المباريات</small></div><div><b id="profileWins">0</b><small>فوز</small></div><div><b id="profileLosses">0</b><small>خسارة</small></div></div>
+<div class="account-fields"><input id="profileDisplayName" maxlength="40" placeholder="اسم العرض"><select id="profileAvatar" aria-label="الصورة الرمزية"><option>🃏</option><option>♠</option><option>♥</option><option>♦</option><option>♣</option><option>😀</option><option>😎</option><option>🤠</option><option>👑</option><option>🐪</option><option>🦅</option><option>⚽</option><option>🏆</option></select><input id="profileBio" maxlength="120" placeholder="نبذة قصيرة (اختياري)"></div>
+<button id="saveProfile">حفظ الملف الشخصي</button><p id="profileMessage" class="profile-message"></p>
+</div>
 </section>
 <footer class="home-footer"><a class="brand" href="/">♠ <span>بلوت نت</span></a><p>بلوت نت — لعبة بلوت سعودية أونلاين مجانية. العب من المتصفح مع أصحابك بدون تحميل تطبيق.</p><small>© بلوت نت · <span id="buildVersion">تحميل رقم النسخة...</span></small></footer>
 </main><script src="/api-client.js"></script><script src="/app.js"></script></body></html>
