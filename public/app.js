@@ -1,5 +1,5 @@
 const transport=new BalootHttpClient(),$=id=>document.getElementById(id);
-let roomCode=null,mySeat=null,latest=null,account=null,selectedCardId=null,qaidState=null,qaidTimer=null,lastSeenPlayCount=null,dismissedResultRound=null;
+let roomCode=null,mySeat=null,latest=null,account=null,csrfToken=null,selectedCardId=null,qaidState=null,qaidTimer=null,lastSeenPlayCount=null,dismissedResultRound=null;
 let lastRenderedHandIds=[],dealAnimationToken=0;
 let guestId=localStorage.getItem('baloot400Guest')||crypto.randomUUID();localStorage.setItem('baloot400Guest',guestId);
 const ROOM_TTL=60*60*1000;
@@ -11,9 +11,12 @@ $('playerName').addEventListener('input',()=>localStorage.setItem('baloot400Play
 const status=m=>{$('status').textContent=m;};
 const emit=(event,data)=>transport.emit(event,data,r=>{if(!r?.ok)status(r?.error||'تعذر الطلب');else status('تم');});
 async function authRequest(url,body={}){
- const r=await fetch(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ const headers={'Content-Type':'application/json'};const action=new URL(url,location.href).searchParams.get('action');
+ if(['profile','logout','logout_all'].includes(action)&&csrfToken)headers['X-CSRF-Token']=csrfToken;
+ const r=await fetch(url,{method:'POST',credentials:'same-origin',headers,body:JSON.stringify(body)});
  const data=await r.json();if(!r.ok||!data.ok)throw new Error(data.message||data.error||'تعذر تنفيذ الطلب');return data;
 }
+async function withButton(button,task){if(!button||button.disabled)return;button.disabled=true;button.setAttribute('aria-busy','true');try{return await task();}finally{button.disabled=false;button.removeAttribute('aria-busy');}}
 function showAccount(user){
  account=user||null;
  if(account?.guestId){guestId=account.guestId;localStorage.setItem('baloot400Guest',guestId);}
@@ -21,28 +24,31 @@ function showAccount(user){
  $('accountStatus').textContent=account?'مرحباً '+account.displayName+' · '+account.email:'تلعب كضيف. أنشئ حساباً لحفظ هويتك ونقاطك ونتائجك.';
  $('logoutAccount').classList.toggle('hidden',!account);$('registerAccount').classList.toggle('hidden',!!account);$('loginAccount').classList.toggle('hidden',!!account);$('forgotAccount').classList.toggle('hidden',!!account);
  $('profilePanel').classList.toggle('hidden',!account);
+ $('headerGuestActions')?.classList.toggle('hidden',!!account);$('headerUserActions')?.classList.toggle('hidden',!account);document.body.classList.toggle('authenticated',!!account);
  if(!account)return;
  $('profileDisplayName').value=account.displayName||'';$('profileAvatar').value=account.avatar||'🃏';$('profileBio').value=account.bio||'';
  const stats=account.stats||{};$('profilePoints').textContent=Number(stats.points||0).toLocaleString('ar-SA');$('profileMatches').textContent=Number(stats.matches||0).toLocaleString('ar-SA');$('profileWins').textContent=Number(stats.wins||0).toLocaleString('ar-SA');$('profileLosses').textContent=Number(stats.losses||0).toLocaleString('ar-SA');
 }
 async function applyAuth(data){
- showAccount(data.user);
+ csrfToken=data.csrf||null;showAccount(data.user);
  if(roomCode)transport.emit('room:resume',{code:roomCode,guestId},r=>{if(r.ok){mySeat=r.seat;status('تم استعادة مقعدك من حسابك.');}});
 }
-$('registerAccount').onclick=async()=>{try{const d=await authRequest('/api/auth.php?action=register',{email:$('accountEmail').value,password:$('accountPassword').value,displayName:$('accountName').value||name()});$('accountStatus').textContent=d.message;}catch(e){$('accountStatus').textContent=e.message;}};
-$('loginAccount').onclick=async()=>{try{const d=await authRequest('/api/auth.php?action=login',{email:$('accountEmail').value,password:$('accountPassword').value,remember:false});await applyAuth(d);}catch(e){$('accountStatus').textContent=e.message;}};
-$('forgotAccount').onclick=async()=>{try{const email=$('accountEmail').value.trim();if(!email)throw new Error('أدخل بريدك الإلكتروني أولاً.');const d=await authRequest('/api/auth.php?action=forgot',{email});$('accountStatus').textContent=d.message;}catch(e){$('accountStatus').textContent=e.message;}};
-$('resetPasswordButton').onclick=async()=>{try{const token=new URLSearchParams(location.search).get('reset')||'';const d=await authRequest('/api/auth.php?action=reset',{token,password:$('resetPassword').value});history.replaceState({},'',location.pathname);$('resetPanel').classList.add('hidden');$('accountStatus').textContent=d.message+' يمكنك الآن تسجيل الدخول.';}catch(e){$('accountStatus').textContent=e.message;}};
-$('saveProfile').onclick=async()=>{try{const d=await authRequest('/api/auth.php?action=profile',{displayName:$('profileDisplayName').value,avatar:$('profileAvatar').value,bio:$('profileBio').value});showAccount(d.user);$('profileMessage').textContent='تم حفظ الملف الشخصي.';}catch(e){$('profileMessage').textContent=e.message;}};
-$('logoutAccount').onclick=async()=>{try{await authRequest('/api/auth.php?action=logout',{});}catch(e){}showAccount(null);};
+$('registerAccount').onclick=()=>withButton($('registerAccount'),async()=>{try{const d=await authRequest('/api/auth.php?action=register',{email:$('accountEmail').value.trim(),password:$('accountPassword').value,displayName:$('accountName').value||name()});$('accountStatus').textContent=d.message;}catch(e){$('accountStatus').textContent=e.message;}});
+$('loginAccount').onclick=()=>withButton($('loginAccount'),async()=>{try{const d=await authRequest('/api/auth.php?action=login',{email:$('accountEmail').value.trim(),password:$('accountPassword').value,remember:false});await applyAuth(d);}catch(e){$('accountStatus').textContent=e.message;}});
+$('forgotAccount').onclick=()=>withButton($('forgotAccount'),async()=>{try{const email=$('accountEmail').value.trim();if(!email)throw new Error('أدخل بريدك الإلكتروني أولاً.');const d=await authRequest('/api/auth.php?action=forgot',{email});$('accountStatus').textContent=d.message;}catch(e){$('accountStatus').textContent=e.message;}});
+$('resetPasswordButton').onclick=()=>withButton($('resetPasswordButton'),async()=>{try{const token=new URLSearchParams(location.search).get('reset')||'';const d=await authRequest('/api/auth.php?action=reset',{token,password:$('resetPassword').value});history.replaceState({},'',location.pathname);$('resetPanel').classList.add('hidden');$('accountStatus').textContent=d.message+' يمكنك الآن تسجيل الدخول.';}catch(e){$('accountStatus').textContent=e.message;}});
+$('saveProfile').onclick=()=>withButton($('saveProfile'),async()=>{try{const d=await authRequest('/api/auth.php?action=profile',{displayName:$('profileDisplayName').value,avatar:$('profileAvatar').value,bio:$('profileBio').value});showAccount(d.user);$('profileMessage').textContent='تم حفظ الملف الشخصي.';}catch(e){$('profileMessage').textContent=e.message;}});
+async function logoutAccount(){try{await authRequest('/api/auth.php?action=logout',{});csrfToken=null;showAccount(null);if($('accountStatus'))$('accountStatus').textContent='تم تسجيل الخروج.';}catch(e){if($('accountStatus'))$('accountStatus').textContent=e.message;}}
+$('logoutAccount').onclick=()=>withButton($('logoutAccount'),logoutAccount);
+$('headerLogout')?.addEventListener('click',()=>withButton($('headerLogout'),logoutAccount));
 async function restoreAccount(){
  if(new URLSearchParams(location.search).has('reset')){$('resetPanel')?.classList.remove('hidden');$('account')?.scrollIntoView({behavior:'smooth',block:'center'});}
- try{const d=await authRequest('/api/auth.php?action=me',{});showAccount(d.user);if(roomCode)transport.emit('room:resume',{code:roomCode,guestId},r=>{if(r.ok){mySeat=r.seat;status('تم استعادة مقعدك من حسابك.');}});}
+ try{const d=await authRequest('/api/auth.php?action=me',{});csrfToken=d.csrf||null;showAccount(d.user);if(roomCode)transport.emit('room:resume',{code:roomCode,guestId},r=>{if(r.ok){mySeat=r.seat;status('تم استعادة مقعدك من حسابك.');}});}
  catch{showAccount(null);}
 }
-$('createRoom').onclick=()=>transport.emit('room:create',{name:name(),guestId,qaidEnabled:!!$('qaidEnabled')?.checked},r=>{if(!r.ok)return status(r.error);roomCode=r.code;saveRoomCode(roomCode);location.href='/table.html?room='+encodeURIComponent(roomCode);});
+$('createRoom').onclick=()=>withButton($('createRoom'),()=>new Promise(resolve=>transport.emit('room:create',{name:name(),guestId,qaidEnabled:!!$('qaidEnabled')?.checked},r=>{if(!r.ok){status(r.error);resolve();return;}roomCode=r.code;saveRoomCode(roomCode);location.href='/table.html?room='+encodeURIComponent(roomCode);resolve();})));
 $('quickJoin')?.addEventListener('click',()=>{const button=$('quickJoin');button.disabled=true;button.textContent='جارٍ البحث عن غرفة...';transport.emit('room:quick-join',{name:name(),guestId,qaidEnabled:!!$('qaidEnabled')?.checked},r=>{button.disabled=false;button.textContent='دخول غرفة / العب الآن';if(!r?.ok)return status(r?.error||'تعذر العثور على غرفة');roomCode=r.code;mySeat=r.seat;saveRoomCode(roomCode);status(r.created?'لم توجد غرفة مناسبة؛ أنشأنا لك غرفة جديدة.':r.qaidEnabled?'تم إدخالك إلى غرفة مفعّل فيها القيد.':'دخلت غرفة انتظار، لكن قاعدة القيد غير مفعّلة فيها.');location.href='/table.html?room='+encodeURIComponent(roomCode);});});
-$('joinRoom').onclick=()=>transport.emit('room:join',{code:$('roomCode').value,name:name(),guestId},r=>{if(!r.ok)return status(r.error);roomCode=r.code;mySeat=r.seat;saveRoomCode(roomCode);location.href='/table.html?room='+encodeURIComponent(roomCode);});
+$('joinRoom').onclick=()=>withButton($('joinRoom'),()=>new Promise(resolve=>transport.emit('room:join',{code:$('roomCode').value.trim().toUpperCase(),name:name(),guestId},r=>{if(!r.ok){status(r.error);resolve();return;}roomCode=r.code;mySeat=r.seat;saveRoomCode(roomCode);location.href='/table.html?room='+encodeURIComponent(roomCode);resolve();})));
 $('startGame')?.addEventListener('click',()=>emit('room:start',{code:roomCode}));
 function registerGameApp(){if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}
 registerGameApp();
