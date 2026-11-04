@@ -69,7 +69,7 @@ authCheck(($profile['data']['user']['stats']['points']??-1)===0,'new player star
 $forgot=authRequest('POST','/api/auth.php?action=forgot',['email'=>$email]);
 authCheck($forgot['status']===200,'password recovery request is accepted');
 $mail=@file_get_contents($mailFile);
-authCheck(is_string($mail)&&preg_match('~https://example\\.test/\\?reset=([a-f0-9]{64})~',$mail,$resetMatch)===1,'recovery email contains a single-use reset link');
+authCheck(is_string($mail)&&preg_match('~https://example\\.test/reset-password\\.html\\?reset=([a-f0-9]{64})~',$mail,$resetMatch)===1,'recovery email contains a single-use reset link');
 $reset=authRequest('POST','/api/auth.php?action=reset',['token'=>$resetMatch[1],'password'=>'NewTestPassword!2026']);
 authCheck($reset['status']===200,'valid reset token changes the password');
 $oldPassword=authRequest('POST','/api/auth.php?action=login',['email'=>$email,'password'=>$password],'baloot_guest='.$guest);
