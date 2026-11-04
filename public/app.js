@@ -8,7 +8,7 @@ function trackAuctionCalls(s){
  }
  if(latest&&['auction1','auction2'].includes(latest.phase)&&(s.turn!==latest.turn||s.phase!==latest.phase)){
   const actor=Number(latest.turn);let label=s.auctionCalls?.[actor]||'';
-  if(!label&&latest.phase==='auction2'&&s.phase==='auction1'&&Number(s.round)>Number(latest.round))label='ولا';
+  if(!label&&latest.phase==='auction2'&&s.phase==='auction1')label='ولا';
   if(Number.isInteger(actor)&&actor>=0&&actor<4&&label){
    auctionCallText[actor]=label;auctionCallUntil[actor]=Date.now()+5000;auctionCallPulse[actor]++;
    clearTimeout(auctionCallTimers[actor]);
