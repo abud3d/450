@@ -35,7 +35,9 @@ jobs:
         run: find . -path './.git' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Run PHP game engine tests
         run: php test-php/game-engine-test.php
-      - name: Run PHP qaid verdict tests\n        run: php test-php/qaid-test.php\n      - name: Run PHP purchase engine tests
+      - name: Run PHP qaid verdict tests
+        run: php test-php/qaid-test.php
+      - name: Run PHP purchase engine tests
         run: php test-php/purchase-engine-test.php
       - name: Run PHP room engine tests
         run: php test-php/engine-room-test.php
