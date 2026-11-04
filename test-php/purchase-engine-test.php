@@ -27,6 +27,13 @@ while($g['phase']==='postPurchase' && $g['postPurchase']['stage']==='doubleRespo
 ok(in_array($g['phase'],['playing','projectDeclaration'],true),'first purchase completes');
 ok(count(array_filter($g['hands'],fn($h)=>count($h)!==8))===0,'first purchase deals eight cards each');
 
+$callTest=Rules::create(['A','B','C','D']); Rules::deal($callTest);
+$firstPassSeat=$callTest['turn']; Purchase::choose($callTest,$firstPassSeat,'pass');
+ok(($callTest['auctionCalls'][$firstPassSeat]??'')==='بس','first auction pass is shown as بس');
+for($i=0;$i<3;$i++) Purchase::choose($callTest,$callTest['turn'],'pass');
+ok($callTest['phase']==='auction2' && ($callTest['auctionCalls'][$firstPassSeat]??'')==='بس','بس remains visible into the second auction');
+$secondPassSeat=$callTest['turn']; Purchase::choose($callTest,$secondPassSeat,'pass');
+ok(($callTest['auctionCalls'][$secondPassSeat]??'')==='ولا','second auction pass is shown as ولا');
 $second=Rules::create(['A','B','C','D']); Rules::deal($second);
 for($i=0;$i<4;$i++) Purchase::choose($second,$second['turn'],'pass');
 ok($second['phase']==='auction2','four passes open second auction');
