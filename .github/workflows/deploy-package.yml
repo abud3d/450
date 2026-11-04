@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - php-native-engine
+      - bot-strategy-v12
     paths:
       - 'app/**'
       - 'database/**'
@@ -22,7 +23,7 @@ jobs:
       - name: Checkout deployment branch
         uses: actions/checkout@v4
         with:
-          ref: php-native-engine
+          ref: ${{ github.ref }}
       - name: Build clean deployment archive
         run: |
           set -euo pipefail
