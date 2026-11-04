@@ -211,14 +211,14 @@ footer #buildVersion{display:inline-block;color:#53685d;font-weight:700;directio
 /* Turn marker leads the dealer/contract/project badges; winning team projects are shown beside their owners during trick two. */
 .turn-dot{display:inline-block;flex:0 0 9px;width:9px;height:9px;margin:0 2px 0 0;vertical-align:middle}
 .project-cards{direction:ltr;display:flex;justify-content:center;align-items:center;gap:2px;margin:4px auto 2px;max-width:100%;}
-.project-card{display:block;flex:0 0 29px;width:29px;height:42px;background:#fff;border:1px solid #d9d2c4;border-radius:4px;overflow:hidden;box-shadow:0 2px 5px #0018;color:#17231e}
+.project-card{display:block;flex:0 0 34px;width:34px;height:50px;background:#fff;border:1px solid #d9d2c4;border-radius:4px;overflow:hidden;box-shadow:0 2px 5px #0018;color:#17231e}
 .project-card .card-corner-top,.project-card .card-corner-bottom{left:2px;right:2px}
 .project-card .card-corner b,.project-card .card-corner i{font-size:7px!important}
 .project-card .card-pips{font-size:7px!important;padding:5px 0 2px;height:78%;width:76%}
 .project-card .court-art{width:68%;height:70%;margin-top:5px}
 .project-card .ace-art{font-size:19px}
 .project-card.red{color:#c62828}
-@media(max-width:560px){.project-card{flex-basis:23px;width:23px;height:34px}.project-card .card-corner b,.project-card .card-corner i{font-size:6px!important}.project-card .card-pips{font-size:6px!important;padding-top:4px}.project-card .ace-art{font-size:15px}}
+@media(max-width:560px){.project-card{flex-basis:28px;width:28px;height:42px}.project-card .card-corner b,.project-card .card-corner i{font-size:6px!important}.project-card .card-pips{font-size:6px!important;padding-top:4px}.project-card .ace-art{font-size:15px}}
 
 
 /* Final card-size overrides: table cards grow clearly; hand cards grow subtly. */
@@ -1291,13 +1291,14 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
   .table-page #table .board{flex-basis:410px;min-height:410px}
   .table-page .board .seat-left .project-card,
   .table-page .board .seat-right .project-card{
-    flex-basis:21px;width:21px;height:31px;margin-left:-11px;
+    flex-basis:25px;width:25px;height:37px;margin-left:-12px;
   }
 }
 
 /* Clear auction decisions in the empty badge area under each player name. */
 .seat-badges .seat-call{display:inline-flex;align-items:center;justify-content:center;min-width:42px;min-height:23px;padding:2px 9px;border:1px solid #e0c16d;border-radius:6px;background:#123e30;color:#fff0b5;font-size:14px;font-weight:1000;line-height:1.1;text-shadow:0 1px 2px #001;}
-@media(max-width:560px){.seat-badges .seat-call{min-width:38px;min-height:21px;font-size:12px;padding:2px 7px}}
+.seat-badges .seat-call.pulse-a{animation:auction-call-a .65s ease-in-out 2}.seat-badges .seat-call.pulse-b{animation:auction-call-b .65s ease-in-out 2}@keyframes auction-call-a{50%{border-color:#fff;background:#9a7423;box-shadow:0 0 0 3px #f4d46b66}}@keyframes auction-call-b{50%{border-color:#fff;background:#315f9c;box-shadow:0 0 0 3px #8ebeff66}}
+@media(max-width:560px){.seat-badges .seat-call{min-width:38px;min-height:21px;font-size:12px;padding:2px 7px}.table-page .board .seat-left .project-card,.table-page .board .seat-right .project-card{flex-basis:23px;width:23px;height:34px;margin-left:-10px}}
 
 /* The fullscreen qaid selector has higher specificity than .hidden. */
 .table-page #qaidPage.hidden{display:none!important}
