@@ -37,6 +37,7 @@ final class RoomStore
 
     public function join(string $code, string $guestId, string $displayName): array
     {
+        $this->expireStaleLobbies();
         $this->assertGuestId($guestId);
         $name = $this->cleanName($displayName);
         return Database::transaction(function (PDO $pdo) use ($code, $guestId, $name): array {
@@ -78,6 +79,7 @@ final class RoomStore
     /** Join the newest compatible lobby, or create a room when none is available. */
     public function quickJoin(string $guestId, string $displayName, bool $qaidEnabled = true): array
     {
+        $this->expireStaleLobbies();
         $this->assertGuestId($guestId);
         $name = $this->cleanName($displayName);
         $stmt = Database::connection()->prepare(
@@ -110,6 +112,27 @@ final class RoomStore
     }
 
     /**
+     * Expire abandoned lobbies only when they are old and every human seat has
+     * stopped sending heartbeats. Active waiting rooms remain joinable.
+     */
+    public function expireStaleLobbies(): int
+    {
+        $stmt = Database::connection()->prepare(
+            "UPDATE baloot_rooms r
+             SET r.status = 'expired', r.phase = 'expired'
+             WHERE r.status = 'lobby'
+               AND r.last_activity_at < UTC_TIMESTAMP(6) - INTERVAL 5 MINUTE
+               AND NOT EXISTS (
+                   SELECT 1 FROM baloot_room_players p
+                   WHERE p.room_id = r.id
+                     AND p.last_seen_at >= UTC_TIMESTAMP(6) - INTERVAL 90 SECOND
+               )"
+        );
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
+    /**
      * Idempotent state mutation with row-level serialization and optimistic versioning.
      * The supplied callback receives the decoded state and must return the response to cache.
      */
@@ -125,6 +148,7 @@ final class RoomStore
 
         return Database::transaction(function (PDO $pdo) use ($code, $guestId, $actionId, $actionType, $mutation, $expectedVersion): array {
             $room = $this->lockedRoom($pdo, $code);
+            if (($room['status'] ?? '') === 'expired') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
             $check = $pdo->prepare('SELECT result_json FROM baloot_room_actions WHERE room_id = ? AND action_id = ?');
             $check->execute([(int) $room['id'], $actionId]);
             $prior = $check->fetchColumn();
