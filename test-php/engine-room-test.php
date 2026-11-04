@@ -24,6 +24,7 @@ $room['game']['history'] = [[
     'seat' => 2,
     'card' => ['suit' => 'H', 'rank' => '7', 'id' => 'H7'],
     'proofCard' => ['suit' => 'S', 'rank' => 'A', 'id' => 'SA'],
+    'violationReason' => 'لم يتبع الشكل رغم وجوده في يده',
     'violation' => true,
     'trickIndex' => 0,
 ]];
@@ -34,6 +35,7 @@ $claimantSnapshot = Engine::snapshot($room, 0);
 $otherSnapshot = Engine::snapshot($room, 1);
 if (empty($claimantSnapshot['qaidWindowActive']) || empty($claimantSnapshot['qaidDeadline'])) throw new RuntimeException('claimant must recover the active qaid window after refresh');
 if (empty($claimantSnapshot['qaidHistory'][0]['cards'][0]['proofCard']['id'])) throw new RuntimeException('claimant must see the proof card');
+if (($claimantSnapshot['qaidHistory'][0]['cards'][0]['violationReason'] ?? '') !== 'لم يتبع الشكل رغم وجوده في يده') throw new RuntimeException('claimant must see why the played card was illegal');
 if (!empty($otherSnapshot['qaidHistory']) || !empty($otherSnapshot['qaidDeadline'])) throw new RuntimeException('proof cards must stay private from other seats');
 if (empty($claimantSnapshot['legalCardIds'])) throw new RuntimeException('active player must receive legal card IDs for turn-time validation');
 echo "room engine tests passed\n";
