@@ -40,7 +40,7 @@ $('resetPasswordButton').onclick=()=>withButton($('resetPasswordButton'),async()
 $('saveProfile').onclick=()=>withButton($('saveProfile'),async()=>{try{const d=await authRequest('/api/auth.php?action=profile',{displayName:$('profileDisplayName').value,avatar:$('profileAvatar').value,bio:$('profileBio').value});showAccount(d.user);$('profileMessage').textContent='تم حفظ الملف الشخصي.';}catch(e){$('profileMessage').textContent=e.message;}});
 async function logoutAccount(){try{await authRequest('/api/auth.php?action=logout',{});csrfToken=null;showAccount(null);if($('accountStatus'))$('accountStatus').textContent='تم تسجيل الخروج.';}catch(e){if($('accountStatus'))$('accountStatus').textContent=e.message;}}
 $('logoutAccount').onclick=()=>withButton($('logoutAccount'),logoutAccount);
-$('headerLogout')?.addEventListener('click',()=>withButton($('headerLogout'),logoutAccount));
+
 async function restoreAccount(){
  if(new URLSearchParams(location.search).has('reset')){$('resetPanel')?.classList.remove('hidden');$('account')?.scrollIntoView({behavior:'smooth',block:'center'});}
  try{const d=await authRequest('/api/auth.php?action=me',{});csrfToken=d.csrf||null;showAccount(d.user);if(roomCode)transport.emit('room:resume',{code:roomCode,guestId},r=>{if(r.ok){mySeat=r.seat;status('تم استعادة مقعدك من حسابك.');}});}
