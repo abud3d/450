@@ -94,4 +94,10 @@ $store->mutate($code,$owner,$graceId,'test_grace',function(array &$state,int $se
 $store->advanceRoomBots($code);
 $recovered=$store->read($code);
 verify(!empty($recovered['state']['players'][0]['botControl']),'bot takes over after timeout grace');
+$redealId='66666666-6666-4666-8666-666666666666';
+$store->mutate($code,$owner,$redealId,'test_redeal_recovery',function(array &$state,int $seat):array{$state['game']['phase']='redeal';$state['game']['dealer']=0;$state['game']['round']=4;return ['ok'=>true];});
+verify($store->advanceRoomBots($code),'normal room polling recovers a room stuck in redeal');
+$redealt=$store->read($code);
+verify(($redealt['state']['game']['phase']??'')==='auction1' && ($redealt['state']['game']['round']??0)===5,'stuck redeal recovers into a fresh auction');
+verify(($redealt['state']['game']['dealer']??-1)===Rules::next(0) && array_sum(array_map('count',$redealt['state']['game']['hands']??[]))===20,'recovered redeal rotates dealer and deals new hands');
 echo "MySQL room store, idempotency, rate limit and cron recovery tests passed\n";
