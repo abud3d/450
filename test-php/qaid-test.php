@@ -18,7 +18,7 @@ $game=qaidGame(false);$result=Qaid::expire($game,0);
 qaidCheck($result['timeout']===true&&$result['winnerTeam']===1,'Qaid timeout should award the opposing team.');
 qaidCheck($game['scores']===[0,26],'Qaid timeout should apply the loss score.');
 $game=qaidGame(true);$game['scores']=[140,130];$result=Qaid::decide($game,1);
-qaidCheck($game['phase']==='gameEnd'&&$game['winner']===1,'Qaid settlement must finish the match when the claimant reaches 152.');
+qaidCheck($game['phase']==='gameEnd'&&$game['winner']===0,'Qaid settlement must finish the match for the team that committed the violation.');
 $game = qaidGame(true);
 $game['history'] = [];
 $game['turn'] = 1;
