@@ -342,9 +342,13 @@ final class RoomStore
                 $didChange = false;
 
                 if (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? 0) <= $now) {
+                    $claimantSeat = (int) ($state['qaidWindow']['seat'] ?? -1);
+                    if ($claimantSeat >= 0 && $claimantSeat <= 3) {
+                        \Baloot\Game\Qaid::expire($game, $claimantSeat);
+                    }
                     unset($state['qaidWindow']);
-                    if (($game['phase'] ?? '') === 'roundEnd') $state['roundResultReadyAt'] = $now;
-                    $state['lastAction'] = 'انتهت مهلة كشف أوراق القيد.';
+                    $state['roundResultReadyAt'] = $now;
+                    $state['lastAction'] = 'انتهت مهلة القيد دون اختيار؛ خسر فاتح القيد.';
                     $didChange = true;
                 }
 

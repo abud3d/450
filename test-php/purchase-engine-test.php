@@ -53,7 +53,7 @@ Purchase::callDouble($doubleGame,0,'coffee');
 ok($doubleGame['contract']['level']===5,'coffee escalation level');
 
 $qaid=['phase'=>'playing','qaidEnabled'=>true,'history'=>[['seat'=>1,'violation'=>true]],'contract'=>['type'=>'sun','buyer'=>1,'buyerTeam'=>1,'originalBuyerTeam'=>1],'projectClaims'=>[[],[],[],[]],'balotClaims'=>[],'dealer'=>0,'scores'=>[0,0]];
-$result=Qaid::claim($qaid,0,0,0);
+$result=Qaid::decide($qaid,0,'correct');
 ok($result['success']===true && $result['winnerTeam']===0,'valid qaid claim awards claimant team');
 ok($qaid['phase']==='roundEnd' && $qaid['scores'][0]>0,'qaid resolves and scores');
 

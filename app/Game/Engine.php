@@ -20,12 +20,25 @@ final class Engine
             || !is_string($owner) || !hash_equals($owner, (string) ($players[$requestingSeat]['guestId'] ?? ''))) {
             throw new DomainException('صاحب الغرفة فقط يبدأ اللعبة');
         }
+        $botStyles = ['professional', 'aggressive', 'cautious', 'analyst'];
+        $usedBotNumbers = [];
         for ($seat = 0; $seat < 4; $seat++) {
-            if (empty($players[$seat])) {
-                $players[$seat] = ['name' => 'كمبيوتر ' . ($seat + 10), 'seat' => $seat, 'bot' => true, 'botNumber' => $seat + 10, 'guestId' => null];
-            }
+            if (empty($players[$seat])) $players[$seat] = ['name' => 'كمبيوتر', 'seat' => $seat, 'bot' => true, 'guestId' => null];
             $players[$seat]['seat'] = $seat;
             $players[$seat]['bot'] = !empty($players[$seat]['bot']);
+            if ($players[$seat]['bot']) {
+                $number = (int) ($players[$seat]['botNumber'] ?? 0);
+                if ($number < 1 || $number > 99 || in_array($number, $usedBotNumbers, true)) {
+                    $number = random_int(1, 99);
+                    for ($attempt = 0; in_array($number, $usedBotNumbers, true) && $attempt < 99; $attempt++) $number = ($number % 99) + 1;
+                }
+                $usedBotNumbers[] = $number;
+                $players[$seat]['botNumber'] = $number;
+                $style = (string) ($players[$seat]['botStyle'] ?? '');
+                if (!in_array($style, $botStyles, true)) $style = $botStyles[random_int(0, 3)];
+                $players[$seat]['botStyle'] = $style;
+                $players[$seat]['name'] = 'كمبيوتر ' . $number;
+            }
         }
         $game = Rules::create(array_map(fn($p) => (string) ($p['name'] ?? 'ضيف'), $players));
         $game['players'] = array_values($players);
@@ -44,6 +57,9 @@ final class Engine
         if (!isset($room['players'][$seat]) || !is_array($room['players'][$seat])) throw new DomainException('المقعد غير معروف');
         if (!empty($room['players'][$seat]['botControl']) && $action !== 'timeout_return') throw new DomainException('البوت يدير هذا المقعد حالياً');
         $g =& $room['game'];
+        if (isset($room['qaidWindow']) && $action !== 'qaid_claim') {
+            throw new DomainException('اللعب متوقف حتى يختار فاتح القيد؛ لا يمكن تنفيذ حركات أخرى.');
+        }
         if (!in_array($action, ['timeout_return','timeout_bot'], true)) unset($room['timeoutSeat'], $room['timeoutGraceUntil']);
 
         switch ($action) {
@@ -74,7 +90,7 @@ final class Engine
                 if (($room['qaidWindow']['seat'] ?? -1) !== $seat || (int) ($room['qaidWindow']['expiresAt'] ?? 0) < time()) {
                     throw new DomainException('انتهت مهلة كشف أوراق القيد؛ افتح الطلب من جديد');
                 }
-                $result = Qaid::claim($g, $seat, (int) ($input['violationIndex'] ?? -1), (int) ($input['proofIndex'] ?? -1));
+                $result = Qaid::decide($g, $seat, (string) ($input['verdict'] ?? ''));
                 unset($room['qaidWindow']);
                 $room['roundResultReadyAt'] = time();
                 $room['lastAction'] = 'تم حسم طلب القيد.';
@@ -88,11 +104,7 @@ final class Engine
                 $room['lastAction'] = 'بدأ كشف أوراق القيد.';
                 break;
             case 'qaid_cancel':
-                if (($room['qaidWindow']['seat'] ?? -1) !== $seat) throw new DomainException('لا يوجد طلب قيد لهذا المقعد');
-                unset($room['qaidWindow']);
-                if (($g['phase'] ?? '') === 'roundEnd') $room['roundResultReadyAt'] = time();
-                $room['lastAction'] = 'أُغلق كشف القيد.';
-                break;
+                throw new DomainException('بعد فتح أوراق القيد يجب اختيار الحكم؛ لا يمكن إغلاق الطلب.');
             case 'next':
                 if (!hash_equals((string) ($room['ownerGuestId'] ?? ''), (string) ($room['players'][$seat]['guestId'] ?? ''))) throw new DomainException('صاحب الغرفة فقط يبدأ التوزيعة التالية');
                 Rules::nextRound($g);
@@ -283,6 +295,9 @@ final class Engine
                 'name' => $p['name'] ?? 'بانتظار لاعب',
                 'bot' => !empty($p['bot']) || !empty($p['botControl']),
                 'botControl' => !empty($p['botControl']),
+                'botNumber' => !empty($p['bot']) ? (int) ($p['botNumber'] ?? ($i + 10)) : null,
+                'botStyle' => !empty($p['bot']) ? (string) ($p['botStyle'] ?? 'professional') : null,
+                'botStyleLabel' => !empty($p['bot']) ? Bot::styleLabel((string) ($p['botStyle'] ?? 'professional')) : null,
                 'connected' => !empty($p['connected']),
                 'empty' => empty($p),
                 'isOwner' => !empty($p['guestId']) && hash_equals((string) ($room['ownerGuestId'] ?? ''), (string) $p['guestId']),
@@ -360,6 +375,7 @@ final class Engine
         foreach ($g['history'] ?? [] as $index => $play) {
             $history[] = [
                 'historyIndex' => $index, 'seat' => $play['seat'],
+                'playerName' => (string) ($players[(int) $play['seat']]['name'] ?? ('لاعب ' . ((int) $play['seat'] + 1))),
                 'card' => $play['card'], 'violation' => !empty($play['violation']),
                 'leadSuit' => $play['leadSuit'] ?? null, 'trickIndex' => $play['trickIndex'] ?? 0,
             ];
