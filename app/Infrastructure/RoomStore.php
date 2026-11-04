@@ -332,7 +332,8 @@ final class RoomStore
         $state = $this->decode($json);
         $now = time();
         $phase = (string) ($state['game']['phase'] ?? 'lobby');
-        $due = (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? PHP_INT_MAX) <= $now)
+        $due = $phase === 'redeal'
+            || (isset($state['qaidWindow']) && (int) ($state['qaidWindow']['expiresAt'] ?? PHP_INT_MAX) <= $now)
             || (isset($state['autoLastCardAt']) && (int) $state['autoLastCardAt'] <= $now)
             || (isset($state['botActionAt']) && (int) $state['botActionAt'] <= $now)
             || \Baloot\Game\TurnClock::expired($state, $now)
@@ -373,6 +374,14 @@ final class RoomStore
                     unset($state['qaidWindow']);
                     $state['roundResultReadyAt'] = $now;
                     $state['lastAction'] = 'انتهت مهلة القيد دون اختيار؛ خسر فاتح القيد.';
+                    $didChange = true;
+                }
+
+                if (!$didChange && !isset($state['qaidWindow']) && ($game['phase'] ?? '') === 'redeal') {
+                    \\Baloot\\Game\\Rules::nextRound($game);
+                    unset($state['roundResultReadyAt'], $state['timeoutSeat'], $state['timeoutGraceUntil']);
+                    \\Baloot\\Game\\Engine::advanceBots($state);
+                    $state['lastAction'] = 'استُعيدت التوزيعة وبدأت الجولة التالية تلقائياً.';
                     $didChange = true;
                 }
 
