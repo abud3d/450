@@ -312,7 +312,12 @@ final class RoomStore
                     $didChange = true;
                 }
 
-                if (($game['phase'] ?? '') === 'roundEnd'
+                if (!$didChange && !isset($state['qaidWindow'])
+                    && isset($state['autoLastCardAt']) && (int) $state['autoLastCardAt'] <= $now) {
+                    $didChange = \\Baloot\\Game\\Engine::advanceAutoLastCard($state);
+                }
+
+                if (!$didChange && ($game['phase'] ?? '') === 'roundEnd'
                     && (int) ($state['roundResultReadyAt'] ?? 0) > 0
                     && $now >= (int) $state['roundResultReadyAt'] + 10
                     && !isset($state['qaidWindow'])) {
