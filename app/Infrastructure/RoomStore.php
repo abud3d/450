@@ -326,9 +326,9 @@ final class RoomStore
                     \Baloot\Game\Engine::advanceBots($state);
                     $state['lastAction'] = 'بدأت التوزيعة التالية تلقائياً.';
                     $didChange = true;
-                } elseif (isset($state['qaidWindow'])) {
+                } elseif (!$didChange && isset($state['qaidWindow'])) {
                     // A qaid review pauses game timers until it is claimed or expires.
-                } elseif (\Baloot\Game\TurnClock::expired($state, $now)) {
+                } elseif (!$didChange && \Baloot\Game\TurnClock::expired($state, $now)) {
                     $phase = $game['phase'] ?? '';
                     if ($phase === 'postPurchase') {
                         \Baloot\Game\Purchase::expire($game);
