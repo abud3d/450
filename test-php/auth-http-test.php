@@ -5,12 +5,13 @@ $base = rtrim((string)getenv('AUTH_TEST_BASE'),'/');
 $mailFile = (string)getenv('MAIL_CAPTURE');
 if ($base === '' || $mailFile === '') throw new RuntimeException('auth test environment missing');
 function authCheck(bool $ok,string $message):void { if(!$ok) throw new RuntimeException($message); }
-function authRequest(string $method,string $path,?array $body=null,string $cookie=''):array {
+function authRequest(string $method,string $path,?array $body=null,string $cookie='',string $csrf=''):array {
     global $base;
     $headers=[];
     $ch=curl_init($base.$path);
     $requestHeaders=['Origin: '.$base,'Content-Type: application/json'];
     if($cookie!=='')$requestHeaders[]='Cookie: '.$cookie;
+    if($csrf!=='')$requestHeaders[]='X-CSRF-Token: '.$csrf;
     curl_setopt_array($ch,[
         CURLOPT_RETURNTRANSFER=>true,
         CURLOPT_CUSTOMREQUEST=>$method,
@@ -60,7 +61,7 @@ $me=authRequest('POST','/api/auth.php?action=me',null,'b450_session='.$session);
 authCheck($me['status']===200 && ($me['data']['user']['email']??'')===$email,'session restores account on another browser profile');
 authCheck(($me['cookies']['baloot_guest']??'')===$guest,'session restores the saved guest identity without the old guest cookie');
 
-$profile=authRequest('POST','/api/auth.php?action=profile',['displayName'=>'QA Profile','avatar'=>'🏆','bio'=>'لاعب تجريبي'],'b450_session='.$session);
+$profile=authRequest('POST','/api/auth.php?action=profile',['displayName'=>'QA Profile','avatar'=>'🏆','bio'=>'لاعب تجريبي'],'b450_session='.$session,(string)$login['data']['csrf']);
 authCheck($profile['status']===200 && ($profile['data']['user']['displayName']??'')==='QA Profile','profile update saves the player display name');
 authCheck(($profile['data']['user']['avatar']??'')==='🏆','profile update saves the avatar');
 authCheck(($profile['data']['user']['stats']['points']??-1)===0,'new player starts with zero accumulated points');
@@ -68,7 +69,7 @@ authCheck(($profile['data']['user']['stats']['points']??-1)===0,'new player star
 $forgot=authRequest('POST','/api/auth.php?action=forgot',['email'=>$email]);
 authCheck($forgot['status']===200,'password recovery request is accepted');
 $mail=@file_get_contents($mailFile);
-authCheck(is_string($mail)&&preg_match('~https://example\\.test/\\?reset=([a-f0-9]{64})~',$mail,$resetMatch)===1,'recovery email contains a single-use reset link');
+authCheck(is_string($mail)&&preg_match('~https://example\\.test/reset-password\\.html\\?reset=([a-f0-9]{64})~',$mail,$resetMatch)===1,'recovery email contains a single-use reset link');
 $reset=authRequest('POST','/api/auth.php?action=reset',['token'=>$resetMatch[1],'password'=>'NewTestPassword!2026']);
 authCheck($reset['status']===200,'valid reset token changes the password');
 $oldPassword=authRequest('POST','/api/auth.php?action=login',['email'=>$email,'password'=>$password],'baloot_guest='.$guest);
@@ -77,7 +78,7 @@ $newLogin=authRequest('POST','/api/auth.php?action=login',['email'=>$email,'pass
 authCheck($newLogin['status']===200,'new password can log in');
 $newSession=$newLogin['cookies']['b450_session']??'';
 authCheck((bool)preg_match('/^[a-f0-9]{64}$/',$newSession),'password reset invalidates old sessions and allows a fresh session');
-$logout=authRequest('POST','/api/auth.php?action=logout',null,'b450_session='.$newSession);
+$logout=authRequest('POST','/api/auth.php?action=logout',null,'b450_session='.$newSession,(string)$newLogin['data']['csrf']);
 authCheck($logout['status']===200,'logout succeeds');
 $afterLogout=authRequest('POST','/api/auth.php?action=me',null,'b450_session='.$newSession);
 authCheck($afterLogout['status']===401,'logged-out session is invalidated');
