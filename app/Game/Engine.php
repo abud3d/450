@@ -35,6 +35,7 @@ final class Engine
         $room['game'] = $game;
         TurnClock::arm($room, 30);
         $room['lastAction'] = 'وُزعت خمس أوراق لكل لاعب وبدأ الشراء.';
+        self::queueBotTurn($room);
     }
 
     public static function apply(array &$room, int $seat, string $action, array $input = []): array
@@ -129,14 +130,15 @@ final class Engine
                 throw new DomainException('نوع العملية غير مدعوم');
         }
 
-        if (!isset($room['qaidWindow'])) self::advanceBots($room);
+        if (!isset($room['qaidWindow'])) self::queueBotTurn($room);
         if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 30);
         else TurnClock::clear($room);
         return ['ok' => true];
     }
 
-    public static function advanceBots(array &$room, int $limit = 16): int
+    public static function advanceBots(array &$room, int $limit = 1): int
     {
+        unset($room['botActionAt']);
         if (!isset($room['game']) || isset($room['qaidWindow'])) return 0;
         $count = 0;
         while ($count < max(1, min(32, $limit))) {
@@ -172,7 +174,30 @@ final class Engine
         if ($count > 0) $room['lastAction'] = 'اتخذ البوت قراراً تلقائياً.';
         if (in_array($room['game']['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 30);
         else TurnClock::clear($room);
+        self::queueBotTurn($room);
         return $count;
+    }
+
+    /** Schedule, rather than chain, the next computer action so every card is visible. */
+    public static function queueBotTurn(array &$room): void
+    {
+        unset($room['botActionAt']);
+        if (!isset($room['game']) || isset($room['qaidWindow'])) return;
+        $g = $room['game'];
+        $phase = $g['phase'] ?? '';
+        $seat = null;
+        if ($phase === 'projectDeclaration') {
+            foreach ($room['players'] ?? [] as $i => $player) {
+                if ((!empty($player['bot']) || !empty($player['botControl'])) && empty($g['projectDeclared'][$i])) { $seat = (int) $i; break; }
+            }
+        } elseif (in_array($phase, ['buyerConfirm','buyerSelectHukm'], true)) {
+            $seat = (int) ($g['postPurchase']['buyer'] ?? -1);
+        } elseif (in_array($phase, ['auction1','auction2','postPurchase','playing'], true)) {
+            $seat = (int) ($g['turn'] ?? -1);
+        }
+        if ($seat !== null && $seat >= 0 && (!empty($room['players'][$seat]['bot']) || !empty($room['players'][$seat]['botControl']))) {
+            $room['botActionAt'] = time() + 1;
+        }
     }
 
     public static function snapshot(array $room, int $seat): array
