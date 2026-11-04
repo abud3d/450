@@ -44,7 +44,7 @@ $age->execute([$staleRoom['code']]);
 $staleHeartbeat=$pdo->prepare('UPDATE baloot_room_players SET last_seen_at=UTC_TIMESTAMP(6)-INTERVAL 10 MINUTE WHERE guest_id=?');
 $staleHeartbeat->execute([$staleOwner]);
 verify($store->expireStaleLobbies()===1,'abandoned lobby expires after five minutes without active heartbeat');
-verify(($store->read($staleRoom['code'])['status']??'')==='expired','expired lobby is no longer joinable');
+verify(($store->read($staleRoom['code'])['status']??'')==='closed','expired lobby is no longer joinable');
 try{$store->join($staleRoom['code'],str_repeat('8',64),'Late Guest');throw new RuntimeException('expired lobby accepted a new player');}
 catch(RuntimeException $e){verify(str_contains($e->getMessage(),'صلاحية الغرفة'),'expired lobby returns a clear rejection');}
 $quickAfterExpiry=$store->quickJoin(str_repeat('7',64),'Fresh Quick Guest',true);
