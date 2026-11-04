@@ -48,7 +48,11 @@ final class RoomStore
                 if (is_array($player) && hash_equals((string) ($player['guestId'] ?? ''), $guestId)) {
                     $players[$seat]['name'] = $name;
                     $state['players'] = $players;
-                    $this->saveState($pdo, $room, $state);
+                    $afterPhase = (string) ($state['game']['phase'] ?? 'lobby');
+            if ($beforePhase !== 'gameEnd' && $afterPhase === 'gameEnd') {
+                $this->recordCompletedMatch($pdo, (int) $room['id'], $state);
+            }
+            $this->saveState($pdo, $room, $state);
                     $this->upsertPlayer($pdo, (int) $room['id'], (int) $seat, $guestId, $name);
                     return ['code' => $room['room_code'], 'seat' => (int) $seat, 'version' => (int) $room['version'] + 1, 'state' => $state];
                 }
@@ -142,6 +146,7 @@ final class RoomStore
             }
 
             $state = $this->decode((string) $room['state_json']);
+            $beforePhase = (string) ($state['game']['phase'] ?? 'lobby');
             $response = $mutation($state, (int) $seat);
             if (!is_array($response)) {
                 throw new RuntimeException('استجابة العملية غير صالحة.');
@@ -155,6 +160,51 @@ final class RoomStore
         });
     }
 
+
+
+    /**
+     * Award the final team score to each registered human player exactly once.
+     * The unique (match_id, uid) ledger key protects against duplicate requests.
+     */
+    private function recordCompletedMatch(PDO $pdo, int $roomId, array $state): void
+    {
+        $game = $state['game'] ?? [];
+        $matchId = (string) ($state['matchId'] ?? '');
+        if (!preg_match('/^[a-f0-9]{32}$/', $matchId)) {
+            $matchId = bin2hex(random_bytes(16));
+            $state['matchId'] = $matchId;
+        }
+        $scores = array_values($game['scores'] ?? [0, 0]);
+        $scores = [(int) ($scores[0] ?? 0), (int) ($scores[1] ?? 0)];
+        $winner = $scores[0] === $scores[1] ? -1 : ($scores[0] > $scores[1] ? 0 : 1);
+        $players = $state['players'] ?? [];
+        foreach ($players as $seat => $player) {
+            if (!is_array($player) || !empty($player['bot'])) continue;
+            $guestId = (string) ($player['guestId'] ?? '');
+            if (!preg_match('/^[a-f0-9]{64}$/', $guestId)) continue;
+            $lookup = $pdo->prepare('SELECT uid FROM baloot_users WHERE guest_id = ? LIMIT 1');
+            $lookup->execute([$guestId]);
+            $uid = $lookup->fetchColumn();
+            if (!is_string($uid) || $uid === '') continue;
+            $team = ((int) $seat) % 2;
+            $outcome = $winner < 0 ? 'draw' : ($winner === $team ? 'win' : 'loss');
+            $insert = $pdo->prepare(
+                'INSERT IGNORE INTO baloot_match_results (match_id, room_id, uid, guest_id, team, final_score, outcome) VALUES (?, ?, ?, ?, ?, ?, ?)'
+            );
+            $insert->execute([$matchId, $roomId, $uid, $guestId, $team, $scores[$team], $outcome]);
+            if ($insert->rowCount() !== 1) continue;
+            $update = $pdo->prepare(
+                'UPDATE baloot_users SET points = points + ?, matches = matches + 1, wins = wins + ?, losses = losses + ?, draws = draws + ? WHERE uid = ?'
+            );
+            $update->execute([
+                $scores[$team],
+                $outcome === 'win' ? 1 : 0,
+                $outcome === 'loss' ? 1 : 0,
+                $outcome === 'draw' ? 1 : 0,
+                $uid,
+            ]);
+        }
+    }
 
     public function moveSeat(string $code, string $guestId, int $targetSeat, string $actionId): array
     {
