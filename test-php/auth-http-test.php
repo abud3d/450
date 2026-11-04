@@ -30,7 +30,9 @@ function authRequest(string $method,string $path,?array $body=null,string $cooki
 }
 authCheck(extension_loaded('curl'),'curl extension is required for HTTP auth integration');
 $email='qa+'.bin2hex(random_bytes(4)).'@example.test';
-$password='TestPassword!2026';
+$password='Abc123';
+$shortPassword=authRequest('POST','/api/auth.php?action=register',['email'=>'short+'.bin2hex(random_bytes(3)).'@example.test','password'=>'Ab123','displayName'=>'QA Short']);
+authCheck($shortPassword['status']===422,'password shorter than six characters is rejected');
 $register=authRequest('POST','/api/auth.php?action=register',['email'=>$email,'password'=>$password,'displayName'=>'QA Player']);
 authCheck($register['status']===201 && ($register['data']['ok']??false)===true,'register endpoint must create account and hand email to mail transport');
 $guest=$register['cookies']['baloot_guest']??'';
@@ -70,7 +72,7 @@ $forgot=authRequest('POST','/api/auth.php?action=forgot',['email'=>$email]);
 authCheck($forgot['status']===200,'password recovery request is accepted');
 $mail=@file_get_contents($mailFile);
 authCheck(is_string($mail)&&preg_match('~https://example\\.test/reset-password\\.html\\?reset=([a-f0-9]{64})~',$mail,$resetMatch)===1,'recovery email contains a single-use reset link');
-$reset=authRequest('POST','/api/auth.php?action=reset',['token'=>$resetMatch[1],'password'=>'NewTestPassword!2026']);
+$reset=authRequest('POST','/api/auth.php?action=reset',['token'=>$resetMatch[1],'password'=>'Xyz789']);
 authCheck($reset['status']===200,'valid reset token changes the password');
 $oldPassword=authRequest('POST','/api/auth.php?action=login',['email'=>$email,'password'=>$password],'baloot_guest='.$guest);
 authCheck($oldPassword['status']===401,'old password stops working after reset');
