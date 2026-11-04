@@ -240,6 +240,7 @@ final class RoomStore
         }
         return Database::transaction(function (PDO $pdo) use ($code, $guestId, $targetSeat, $actionId): array {
             $room = $this->lockedRoom($pdo, $code);
+            if (($room['status'] ?? '') === 'expired') throw new RuntimeException('انتهت صلاحية الغرفة؛ أنشئ غرفة جديدة.');
             $check = $pdo->prepare('SELECT result_json FROM baloot_room_actions WHERE room_id = ? AND action_id = ?');
             $check->execute([(int) $room['id'], $actionId]);
             $prior = $check->fetchColumn();
