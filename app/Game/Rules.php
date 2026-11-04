@@ -21,9 +21,12 @@ final class Rules {
   $tableTrumps=array_values(array_filter($t,fn($p)=>($p['card']['suit']??null)===$k['trump']));
   if($follow){
    if($lead===$k['trump']&&$tableTrumps){
-    $high=max(array_map(fn($p)=>self::rank($p['card'],$k['trump']),$tableTrumps));
-    $over=array_values(array_filter($follow,fn($c)=>self::rank($c,$k['trump'])>$high));
-    if($over)return $over;
+    $highest=$tableTrumps[0];foreach(array_slice($tableTrumps,1) as $played)if(self::rank($played['card'],$k['trump'])>self::rank($highest['card'],$k['trump']))$highest=$played;
+    if(self::team((int)$highest['seat'])!==self::team($seat)){
+     $high=self::rank($highest['card'],$k['trump']);
+     $over=array_values(array_filter($follow,fn($c)=>self::rank($c,$k['trump'])>$high));
+     if($over)return $over;
+    }
    }
    return $follow;
   }
