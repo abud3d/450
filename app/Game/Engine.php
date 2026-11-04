@@ -397,13 +397,26 @@ final class Engine
         foreach ($history as $play) $qaidGroups[$play['trickIndex']][] = $play;
         $qaidHistory = [];
         foreach ($qaidGroups as $trickIndex => $cards) $qaidHistory[] = ['trickIndex' => (int) $trickIndex, 'cards' => $cards];
+        $legalCardIds = [];
+        if (($g['phase'] ?? '') === 'playing' && (int) ($g['turn'] ?? -1) === $seat) {
+            $hand = $g['hands'][$seat] ?? [];
+            $legalCardIds = array_column(Rules::legal($hand, $g['trick'] ?? [], $g['contract'] ?? ['type' => 'sun'], $seat), 'id');
+            if (!empty($room['qaidEnabled']) && !empty($g['trick'])) {
+                $leadSuit = $g['trick'][0]['card']['suit'] ?? null;
+                $hasLeadSuit = $leadSuit !== null && (bool) array_filter($hand, static fn($card) => ($card['suit'] ?? null) === $leadSuit);
+                if ($hasLeadSuit) foreach ($hand as $card) {
+                    if (($card['suit'] ?? null) !== $leadSuit) $legalCardIds[] = $card['id'];
+                }
+            }
+            $legalCardIds = array_values(array_unique($legalCardIds));
+        }
         return [
             'code' => $room['code'] ?? '',
             'players' => $players,
             'phase' => $g['phase'],
             'turn' => $g['turn'] ?? 0,
             'auctionCalls' => $g['auctionCalls'] ?? [null,null,null,null],
-            'legalCardIds' => (($g['phase'] ?? '') === 'playing' && (int) ($g['turn'] ?? -1) === $seat) ? array_column(Rules::legal($g['hands'][$seat] ?? [], $g['trick'] ?? [], $g['contract'] ?? ['type'=>'sun'], $seat), 'id') : [],
+            'legalCardIds' => $legalCardIds,
             'contract' => $g['contract'] ?? null,
             'upCard' => $g['upCard'] ?? null,
             'qaidEnabled' => !empty($room['qaidEnabled']),
