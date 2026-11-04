@@ -171,6 +171,7 @@ final class Purchase
         $g['turn'] = Rules::next($seat);
         if ($g['auctionPasses'] >= 4) {
             // Four 'ولا' calls complete both auctions: deal immediately and rotate the dealer.
+            $g['phase'] = 'redeal';
             Rules::nextRound($g);
         }
     }
