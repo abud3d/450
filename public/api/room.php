@@ -122,7 +122,7 @@ try {
 
     if ($method === 'GET' && in_array($action, ['state','resume'], true)) {
         $guestId = apiGuestId(Database::connection());
-        if (!$store->allowRate('state', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 90, 60)) apiReply(429, ['ok' => false, 'error' => 'طلبات كثيرة؛ حاول بعد قليل']);
+        if (!$store->allowRate('state', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 180, 60)) apiReply(429, ['ok' => false, 'error' => 'طلبات كثيرة؛ حاول بعد قليل']);
         $code = apiRoomCode($_GET['code'] ?? '');
         $store->advanceRoomBots($code);
         $store->touchPlayer($code, $guestId);
