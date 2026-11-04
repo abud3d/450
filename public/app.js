@@ -207,9 +207,7 @@ $('timeoutBot')?.addEventListener('click',()=>{ $('turnTimeout').classList.add('
 const resultLayer=$('resultPage'),qaidLayer=$('qaidPage');
 if(resultLayer&&resultLayer.parentElement!==document.body)document.body.appendChild(resultLayer);
 if(qaidLayer&&qaidLayer.parentElement!==document.body)document.body.appendChild(qaidLayer);
-const menuToggle=$('menuToggle'),siteMenu=$('siteMenu');
-menuToggle?.addEventListener('click',()=>{const open=siteMenu.classList.toggle('open');menuToggle.setAttribute('aria-expanded',String(open));});
-document.addEventListener('click',e=>{if(siteMenu?.classList.contains('open')&&!e.target.closest('.site-header')){siteMenu.classList.remove('open');menuToggle?.setAttribute('aria-expanded','false');}});
+
 loadBuildInfo();
 restoreAccount();
 document.addEventListener('pointerdown',e=>{if(selectedCardId&&!e.target.closest('#hand [data-card]')){selectedCardId=null;document.querySelectorAll('#hand [data-card].selected').forEach(card=>card.classList.remove('selected'));}});
