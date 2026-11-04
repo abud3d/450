@@ -116,7 +116,7 @@ if ($action==='forgot') {
  $email=strtolower(trim((string)($in['email']??'')));if(limited($db,'auth-forgot',5,3600))done(429,['ok'=>false,'message'=>'طلبات كثيرة؛ حاول لاحقاً']);
  $q=$db->prepare('SELECT uid FROM baloot_users WHERE email=? AND verified=1 LIMIT 1');$q->execute([$email]);$uid=$q->fetchColumn();
  if($uid){$token=randtoken();$q=$db->prepare('INSERT INTO baloot_password_resets (token_hash,uid,expires_at) VALUES (?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 30 MINUTE))');$q->execute([hash('sha256',$token),$uid]);
-  $link=baseurl().'/?reset='.rawurlencode($token);
+  $link=baseurl().'/reset-password.html?reset='.rawurlencode($token);
   if(!mailtoken($email,'إعادة تعيين كلمة مرور بلوت نت',$link))done(503,['ok'=>false,'message'=>'تعذر إرسال رسالة الاستعادة؛ تحقق من إعداد البريد على الخادم']);
  }
  done(200,['ok'=>true,'message'=>'إذا كان البريد مسجلاً ومفعّلاً فستصلك رسالة برابط إعادة التعيين.']);
