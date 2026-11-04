@@ -19,4 +19,21 @@ qaidCheck($result['timeout']===true&&$result['winnerTeam']===1,'Qaid timeout sho
 qaidCheck($game['scores']===[0,26],'Qaid timeout should apply the loss score.');
 $game=qaidGame(true);$game['scores']=[140,130];$result=Qaid::decide($game,1);
 qaidCheck($game['phase']==='gameEnd'&&$game['winner']===1,'Qaid settlement must finish the match when the claimant reaches 152.');
+$game = qaidGame(true);
+$game['turn'] = 1;
+$game['hands'][1] = [
+    ['suit' => 'S', 'rank' => 'A', 'id' => 'SA'],
+    ['suit' => 'H', 'rank' => '7', 'id' => 'H7'],
+];
+$game['trick'] = [['seat' => 0, 'card' => ['suit' => 'S', 'rank' => '7', 'id' => 'S7']]];
+Rules::play($game, 1, 'H7');
+$proof = $game['history'][0] ?? [];
+qaidCheck(!empty($proof['violation']) && ($proof['proofCard']['id'] ?? '') === 'SA', 'History must retain the played violation and the matching-suit proof card.');
+
+$game = qaidGame(false);
+$game['phase'] = 'gameEnd';
+$game['scores'] = [152, 140];
+$game['lastAwarded'] = [26, 0];
+$result = Qaid::expire($game, 0);
+qaidCheck($result['timeout'] === true && $game['phase'] === 'gameEnd' && $game['winner'] === 1, 'A timeout opened on the final-score screen must recalculate the winner.');
 echo "PHP automatic qaid settlement tests passed\n";
