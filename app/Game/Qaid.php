@@ -33,7 +33,7 @@ final class Qaid
   $base=(($game['contract']['type']??'sun')==='sun')?26:16;$total=$base+array_sum($scored['scoredProjectPoints']??[0,0]);
   $awarded=[0,0];$awarded[$winnerTeam]=$total;$game['scores'][$winnerTeam]=($game['scores'][$winnerTeam]??0)+$total;
   $buyer=(int)($game['contract']['buyer']??$claimantSeat);$buyerTeam=isset($game['contract']['buyerTeam'])?(int)$game['contract']['buyerTeam']:Rules::team($buyer);
-  $game['lastAwarded']=$awarded;$game['qaidResult']=['claimantSeat'=>$claimantSeat,'winnerTeam'=>$winnerTeam,'claimantTeam'=>$claimantTeam,'success'=>$actualViolation,'actualViolation'=>$actualViolation,'verdict'=>$verdict,'timeout'=>$timeout,'total'=>$total,'base'=>$base];
+  $game['lastAwarded']=$awarded;$game['qaidResult']=['claimantSeat'=>$claimantSeat,'winnerTeam'=>$winnerTeam,'claimantTeam'=>$claimantTeam,'success'=>$winnerTeam===$claimantTeam,'actualViolation'=>$actualViolation,'verdict'=>$verdict,'timeout'=>$timeout,'total'=>$total,'base'=>$base];
   $game['lastScoring']=array_merge(in_array($game['phase'],['roundEnd','gameEnd'],true)?($game['lastScoring']??[]):[],[
    'raw'=>in_array($game['phase'],['roundEnd','gameEnd'],true)?($game['lastScoring']['raw']??$game['lastRaw']??[0,0]):[0,0],
    'projects'=>in_array($game['phase'],['roundEnd','gameEnd'],true)?($game['lastScoring']['projects']??$scored['projects']):$scored['projects'],
