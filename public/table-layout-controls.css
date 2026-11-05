@@ -207,3 +207,16 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   position: relative !important;
   z-index: 5 !important;
 }
+
+
+/* BLT-PHP-19.33: keep the front avatar above the cards, but make the cards tappable. */
+.table-page #table #board > #hand {
+  z-index: 21 !important;
+  pointer-events: auto !important;
+}
+.table-page #table #board > #hand > .playing-card {
+  pointer-events: auto !important;
+}
+.table-page #table #board .seat-bottom .seat-avatar-wrap {
+  z-index: 22 !important;
+}
