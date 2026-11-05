@@ -1626,11 +1626,11 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
 
 /* BLT-PHP-19.10: bring the local avatar and hand down together, behind the info panel. */
 .table-page #table .board{min-height:calc(100dvh - 158px)}
-.table-page .board .seat-bottom .seat-avatar-wrap{top:-30px;z-index:7}
+.table-page .board .seat-bottom .seat-avatar-wrap{top:-18px;z-index:7}
 .table-page .board .seat-bottom .seat-identity{position:relative;z-index:9}
-.table-page .board .hand{transform:translateY(25px)!important}
+.table-page .board .hand{transform:translateY(33px)!important}
 @media(max-width:560px){
   .table-page #table .board{min-height:calc(100dvh - 148px)}
-  .table-page .board .seat-bottom .seat-avatar-wrap{top:-26px}
-  .table-page .board .hand{transform:translateY(23px)!important}
+  .table-page .board .seat-bottom .seat-avatar-wrap{top:-14px}
+  .table-page .board .hand{transform:translateY(31px)!important}
 }
