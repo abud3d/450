@@ -1618,3 +1618,52 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
 @media(max-width:560px){
   .table-page #table .board{min-height:calc(100dvh - 148px)}
 }
+
+
+/* BLT-PHP-19.44: display side players' project cards as a vertical overlapping fan. */
+.table-page .board .seat-left .project-cards,
+.table-page .board .seat-right .project-cards{
+  flex-direction:column !important;
+  flex-wrap:nowrap !important;
+  justify-content:flex-start !important;
+  align-items:center !important;
+  gap:0 !important;
+  width:max-content !important;
+  height:max-content !important;
+  margin:4px auto 0 !important;
+}
+.table-page .board .seat-left .project-card,
+.table-page .board .seat-right .project-card{
+  flex:0 0 34px !important;
+  width:23px !important;
+  height:34px !important;
+  margin:0 0 -22px !important;
+  position:relative !important;
+}
+.table-page .board .seat-left .project-card:first-child,
+.table-page .board .seat-right .project-card:first-child{
+  margin-top:0 !important;
+}
+.table-page .board .seat-left .project-card:last-child,
+.table-page .board .seat-right .project-card:last-child{
+  margin-bottom:0 !important;
+}
+.table-page .board .seat-left .project-card:nth-child(1),
+.table-page .board .seat-right .project-card:nth-child(1){z-index:1}
+.table-page .board .seat-left .project-card:nth-child(2),
+.table-page .board .seat-right .project-card:nth-child(2){z-index:2}
+.table-page .board .seat-left .project-card:nth-child(3),
+.table-page .board .seat-right .project-card:nth-child(3){z-index:3}
+.table-page .board .seat-left .project-card:nth-child(4),
+.table-page .board .seat-right .project-card:nth-child(4){z-index:4}
+.table-page .board .seat-left .project-card:nth-child(5),
+.table-page .board .seat-right .project-card:nth-child(5){z-index:5}
+@media(max-width:560px){
+  .table-page .board .seat-left .project-card,
+  .table-page .board .seat-right .project-card{
+    flex-basis:37px !important;
+    width:25px !important;
+    height:37px !important;
+    margin-bottom:-24px !important;
+  }
+}
