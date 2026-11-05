@@ -72,62 +72,31 @@
 /* Result and qaid actions must receive taps even while the timeout layer is being dismissed. */
 .table-page #resultPage:not(.hidden),.table-page #qaidPage:not(.hidden),.table-page #resultPage .round-summary-actions,.table-page #resultPage .round-summary-actions button{pointer-events:auto;touch-action:manipulation}
 
-
-/* BLT-PHP-19.16: lower both opponent card backs and the local hand; tuck avatars behind player plaques. */
+/* BLT-PHP-19.20: consolidated seat and hand layering. */
 .table-page .board .seat-top,
 .table-page .board .seat-bottom{position:relative}
-.table-page .board .seat-top,
-.table-page .board .seat-left,
-.table-page .board .seat-right{transform:translateY(0)!important}
-.table-page .board .seat-top .opponent-hand{
-  transform:translateY(8px)!important;
-  margin-bottom:0!important;
-}
-.table-page .board .seat-top .seat-avatar-wrap{
-  position:absolute!important;
-  left:50%!important;
-  right:auto!important;
-  top:27px!important;
-  transform:translateX(-50%)!important;
-  z-index:7!important;
-  margin:0!important;
-}
+.table-page .board .seat-top .opponent-hand{transform:translateY(8px)!important;margin-bottom:0!important}
+.table-page .board .seat-top .seat-avatar-wrap,
 .table-page .board .seat-bottom .seat-avatar-wrap{
-  position:absolute!important;
-  left:50%!important;
-  right:auto!important;
-  top:-12px!important;
-  transform:translateX(-50%)!important;
-  z-index:7!important;
-  margin:0!important;
+ position:absolute!important;left:50%!important;right:auto!important;
+ transform:translateX(-50%)!important;z-index:7!important;margin:0!important
 }
+.table-page .board .seat-top .seat-avatar-wrap{top:27px!important}
+.table-page .board .seat-bottom .seat-avatar-wrap{top:-12px!important}
 .table-page .board .seat-top .seat-identity,
 .table-page .board .seat-bottom .seat-identity{
-  position:relative!important;
-  z-index:9!important;
-  margin-top:18px!important;
+ position:relative!important;z-index:9!important;margin-top:18px!important
 }
-.table-page .board .hand{transform:translateY(43px)!important}
-@media(max-width:560px){
-  .table-page .board .seat-top .opponent-hand{transform:translateY(7px)!important}
-  .table-page .board .seat-top .seat-avatar-wrap{top:25px!important}
-  .table-page .board .seat-bottom .seat-avatar-wrap{top:-10px!important}
-  .table-page .board .seat-top .seat-identity,
-  .table-page .board .seat-bottom .seat-identity{margin-top:16px!important}
-  .table-page .board .hand{transform:translateY(41px)!important}
-}
-
-
-/* BLT-PHP-19.19: keep the local hand below the center-play area.
-   Move only the hand container down; preserve card size, fan and overlap. */
+.table-page .board .seat-bottom{z-index:10!important}
 .table-page #table .board>#hand{
-  position:relative!important;
-  z-index:12!important;
-  margin-top:0!important;
-  transform:translateY(16px)!important;
+ position:relative!important;z-index:8!important;margin-top:0!important;
+ transform:translateY(-8px)!important
 }
 @media(max-width:560px){
-  .table-page #table .board>#hand{
-    transform:translateY(12px)!important;
-  }
+ .table-page .board .seat-top .opponent-hand{transform:translateY(7px)!important}
+ .table-page .board .seat-top .seat-avatar-wrap{top:25px!important}
+ .table-page .board .seat-bottom .seat-avatar-wrap{top:-10px!important}
+ .table-page .board .seat-top .seat-identity,
+ .table-page .board .seat-bottom .seat-identity{margin-top:16px!important}
+ .table-page #table .board>#hand{transform:translateY(-6px)!important}
 }
