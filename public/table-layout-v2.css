@@ -1,0 +1,44 @@
+/* BLT-PHP-19.14: board refinements */
+.table-page .site-header{position:relative;justify-content:center}
+.table-page .site-header .header-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+.table-page .site-header .header-center .brand{position:static;display:flex;align-items:center;gap:5px}
+.table-page .site-header .header-room-code{position:static;display:inline-flex;align-items:center;gap:4px;margin:0;padding:4px 8px;border:1px solid #c6a15d;border-radius:7px;background:#092f24;color:#ffe8ad;font-size:10px;cursor:pointer}
+.table-page .site-header .header-room-code strong{color:#ffe8ad;font-size:12px}
+.table-page .site-header .menu-toggle{position:absolute;left:7px;right:auto;top:50%;transform:translateY(-50%);margin:0;z-index:5}
+.table-page .site-header .site-menu{left:7px;right:auto;top:calc(100% + 4px)}
+.table-page #table .game-info{flex:0 0 20px;min-height:20px;padding:0}
+.table-page #table .table-head{display:none!important}
+.table-page #table .board{position:relative;flex:1 1 auto;min-height:0;height:auto;margin-top:0;grid-template-rows:minmax(42px,.58fr) minmax(90px,1.18fr) minmax(42px,.58fr) auto;overflow:visible}
+.table-page #score.score-panel-wrap{position:absolute;z-index:14;inset:4px 4px auto 4px;width:auto;height:27px;margin:0;padding:0;border:0;background:transparent;box-shadow:none;pointer-events:none}
+.table-page #score .score-teams{position:absolute;left:0;top:0;display:flex;gap:6px;padding:3px 6px;border:1px solid #d9bd78;border-radius:7px;background:#092f24;color:#ffe8ad}
+.table-page #score .score-team{font-size:10px;white-space:nowrap}
+.table-page #score .score-points{position:absolute;right:0;top:0;display:flex;align-items:center;gap:5px;padding:3px 7px;border:1px solid #d9bd78;border-radius:7px;background:#092f24;color:#ffe8ad}
+.table-page #score .score-points small{font-size:9px;color:#ffe8ad}
+.table-page #score .score-points b{font-size:11px}
+.table-page .board-qaid{position:absolute;z-index:15;top:34px;right:4px;left:auto;min-width:42px;padding:4px 8px;border:1px solid #e7c76b;border-radius:7px;background:#f0d078;color:#243b2e;font-size:10px}
+.table-page .board-start{position:absolute;z-index:20;left:50%;top:50%;transform:translate(-50%,-50%);min-width:110px}
+.table-page .board [hidden]{display:none!important}
+.table-page .board .seat-top,.table-page .board .seat-bottom{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;max-width:none;text-align:center;direction:rtl}
+.table-page .board .seat-top .seat-avatar-wrap,.table-page .board .seat-bottom .seat-avatar-wrap{position:relative;inset:auto;left:auto;top:auto;transform:none;flex:0 0 48px;width:48px;height:48px}
+.table-page .board .seat-top .seat-avatar-wrap .seat-avatar,.table-page .board .seat-bottom .seat-avatar-wrap .seat-avatar{position:absolute;inset:0;width:48px;height:48px;font-size:24px}
+.table-page .board .seat-top .seat-identity,.table-page .board .seat-bottom .seat-identity{flex:0 1 190px;min-width:105px;max-width:190px;margin:0!important;padding:4px 7px!important;text-align:center;background:#0b3025!important;border:1px solid #c6a15d!important;border-radius:8px!important}
+.table-page .board .seat-top .seat-name,.table-page .board .seat-bottom .seat-name{font-size:11px!important;text-align:center}
+.table-page .board .seat-top .seat-badges,.table-page .board .seat-bottom .seat-badges{justify-content:center;text-align:center}
+.table-page .board .seat-top .seat-identity:after,.table-page .board .seat-bottom .seat-identity:after{display:none}
+.table-page #table #board>#turnTimeout.return-overlay{pointer-events:auto;cursor:pointer}
+.table-page #table #board>#turnTimeout .timeout-modal{cursor:pointer}
+.table-page #table #board>#turnTimeout button:disabled{cursor:wait}
+@media(max-width:560px){
+ .table-page .site-header .header-center{gap:5px}
+ .table-page .site-header .header-center .brand{font-size:16px}
+ .table-page .site-header .header-room-code{font-size:9px;padding:3px 5px}
+ .table-page .site-header .menu-toggle{left:4px}
+ .table-page #table .board{grid-template-rows:minmax(38px,.55fr) minmax(82px,1.1fr) minmax(38px,.55fr) auto}
+ .table-page .board .seat-top,.table-page .board .seat-bottom{gap:6px}
+ .table-page .board .seat-top .seat-avatar-wrap,.table-page .board .seat-bottom .seat-avatar-wrap{flex-basis:46px;width:46px;height:46px}
+ .table-page .board .seat-top .seat-avatar-wrap .seat-avatar,.table-page .board .seat-bottom .seat-avatar-wrap .seat-avatar{width:46px;height:46px;font-size:23px}
+ .table-page .board .seat-top .seat-identity,.table-page .board .seat-bottom .seat-identity{flex-basis:160px;max-width:160px;min-width:95px;padding:3px 5px!important}
+ .table-page .board .seat-top .seat-name,.table-page .board .seat-bottom .seat-name{font-size:10px!important}
+ .table-page #score .score-teams,.table-page #score .score-points{padding:2px 5px}
+ .table-page .board-qaid{top:31px;right:4px}
+}
