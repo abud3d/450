@@ -17,7 +17,7 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
 
   /* اللاعب السفلي */
-  --bottom-avatar-x: -12px; --bottom-avatar-y: 34px; --bottom-avatar-z: 5; --bottom-avatar-s: 1;
+  --bottom-avatar-x: 0px; --bottom-avatar-y: 48px; --bottom-avatar-z: 5; --bottom-avatar-s: 1;
   --bottom-info-x: 0px; --bottom-info-y: 34px; --bottom-info-z: 20; --bottom-info-s: 1;
 
   /* اللاعب الأيسر */
@@ -54,7 +54,7 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
     --top-avatar-x: 0px; --top-avatar-y: 0px; --top-avatar-z: 10; --top-avatar-s: 1;
     --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
 
-    --bottom-avatar-x: -10px; --bottom-avatar-y: 26px; --bottom-avatar-z: 5; --bottom-avatar-s: 1;
+    --bottom-avatar-x: 0px; --bottom-avatar-y: 38px; --bottom-avatar-z: 5; --bottom-avatar-s: 1;
     --bottom-info-x: 0px; --bottom-info-y: 26px; --bottom-info-z: 20; --bottom-info-s: 1;
 
     --left-seat-x: 0px; --left-seat-y: 0px; --left-seat-z: 5;
