@@ -118,8 +118,16 @@
 }
 
 
-/* BLT-PHP-19.17: move only the bottom player's open hand closer to the player plaque. Card dimensions and overlap remain unchanged. */
-.table-page .board .hand{transform:translateY(57px)!important}
+/* BLT-PHP-19.18: explicitly overlap the local hand upward into the bottom player's info area.
+   Target #hand (not the generic .hand class); preserve card dimensions, fan and card spacing. */
+.table-page #table .board>#hand{
+  position:relative!important;
+  z-index:12!important;
+  margin-top:-68px!important;
+  transform:none!important;
+}
 @media(max-width:560px){
-  .table-page .board .hand{transform:translateY(55px)!important}
+  .table-page #table .board>#hand{
+    margin-top:-58px!important;
+  }
 }
