@@ -318,3 +318,9 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
     top: 96px !important;
   }
 }
+
+
+/* BLT-PHP-19.47: move all played cards in the center trick 20px down. */
+.table-page .board #trick{
+  translate:var(--trick-x) calc(var(--trick-y) + 20px) !important;
+}
