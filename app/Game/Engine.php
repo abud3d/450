@@ -46,7 +46,7 @@ final class Engine
         Rules::deal($game);
         $room['players'] = array_values($players);
         $room['game'] = $game;
-        TurnClock::arm($room, 10);
+        TurnClock::arm($room, 5);
         $room['lastAction'] = 'وُزعت خمس أوراق لكل لاعب وبدأ الشراء.';
         self::queueBotTurn($room);
     }
@@ -126,13 +126,13 @@ final class Engine
             case 'timeout_return':
                 if (($room['timeoutSeat'] ?? $seat) !== $seat && empty($room['players'][$seat]['botControl'])) throw new DomainException('لا يوجد طلب عودة لهذا المقعد');
                 $room['players'][$seat]['botControl'] = false;
-                unset($room['timeoutSeat']);
+                unset($room['timeoutSeat'], $room['timeoutNoticeSeat'], $room['timeoutNoticeUntil']);
                 $room['lastAction'] = 'عاد اللاعب لمقعده.';
                 break;
             case 'timeout_bot':
                 if (($room['timeoutSeat'] ?? -1) !== $seat) throw new DomainException('انتهت مهلة الاختيار أو لم يحن وقتها');
                 $room['players'][$seat]['botControl'] = true;
-                unset($room['timeoutSeat']);
+                unset($room['timeoutSeat'], $room['timeoutNoticeSeat'], $room['timeoutNoticeUntil']);
                 $room['lastAction'] = 'البوت يكمل اللعب بدلاً من اللاعب.';
                 break;
             case 'replay':
@@ -153,7 +153,7 @@ final class Engine
             TurnClock::clear($room);
         } else {
             self::queueBotTurn($room);
-            if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 10);
+            if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 5);
             else TurnClock::clear($room);
         }
         return ['ok' => true];
@@ -231,7 +231,7 @@ final class Engine
             $count++;
         }
         if ($count > 0) $room['lastAction'] = 'اتخذ البوت قراراً تلقائياً.';
-        if (in_array($room['game']['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 30);
+        if (in_array($room['game']['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 5);
         else TurnClock::clear($room);
         self::queueBotTurn($room);
         return $count;
@@ -290,7 +290,7 @@ final class Engine
         }
         if (in_array($g['phase'], ['roundEnd','gameEnd'], true)) $room['roundResultReadyAt'] = time() + 6;
         $room['lastAction'] = 'لُعبت الورقة الأخيرة تلقائياً.';
-        if (in_array($g['phase'], ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 10);
+        if (in_array($g['phase'], ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 5);
         else TurnClock::clear($room);
         self::queueBotTurn($room);
         return true;
@@ -420,6 +420,7 @@ final class Engine
             'players' => $players,
             'phase' => $g['phase'],
             'turn' => $g['turn'] ?? 0,
+            'turnClockStartedAt' => $room['turnClockStartedAt'] ?? null,
             'auctionCalls' => $g['auctionCalls'] ?? [null,null,null,null],
             'legalCardIds' => $legalCardIds,
             'contract' => $g['contract'] ?? null,
@@ -461,6 +462,7 @@ final class Engine
             'postPurchaseBuyer' => $g['postPurchase']['buyer'] ?? $g['contract']['buyer'] ?? null,
             'postPurchaseTurn' => $g['turn'] ?? null,
             'timeoutPrompt' => ($room['timeoutSeat'] ?? -1) === $seat,
+            'timeoutNoticeUntil' => (int) ($room['timeoutNoticeSeat'] ?? -1) === $seat ? ($room['timeoutNoticeUntil'] ?? null) : null,
             'timeoutSeat' => isset($room['timeoutSeat']) ? (int) $room['timeoutSeat'] : null,
             'turnDeadlineAt' => isset($room['turnDeadlineAt']) ? (int) $room['turnDeadlineAt'] : null,
             'turnDeadlineDuration' => (int) ($room['turnDeadlineDuration'] ?? 10),
