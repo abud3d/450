@@ -46,7 +46,7 @@ final class Engine
         Rules::deal($game);
         $room['players'] = array_values($players);
         $room['game'] = $game;
-        TurnClock::arm($room, 10);
+        TurnClock::arm($room, 5);
         $room['lastAction'] = 'وُزعت خمس أوراق لكل لاعب وبدأ الشراء.';
         self::queueBotTurn($room);
     }
@@ -153,7 +153,7 @@ final class Engine
             TurnClock::clear($room);
         } else {
             self::queueBotTurn($room);
-            if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 10);
+            if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 5);
             else TurnClock::clear($room);
         }
         return ['ok' => true];
@@ -290,7 +290,7 @@ final class Engine
         }
         if (in_array($g['phase'], ['roundEnd','gameEnd'], true)) $room['roundResultReadyAt'] = time() + 6;
         $room['lastAction'] = 'لُعبت الورقة الأخيرة تلقائياً.';
-        if (in_array($g['phase'], ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 10);
+        if (in_array($g['phase'], ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 5);
         else TurnClock::clear($room);
         self::queueBotTurn($room);
         return true;
