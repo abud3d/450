@@ -1350,17 +1350,25 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
 @keyframes auction-call-float-a{50%{transform:translate(-50%,-7px);box-shadow:0 0 0 4px #f4d46b66,0 7px 18px #0009}}
 @keyframes auction-call-float-b{50%{transform:translate(-50%,7px);box-shadow:0 0 0 4px #8ebeff66,0 7px 18px #0009}}
 .table-page #table #seat0 #turnTimeout{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  z-index:30;width:min(88vw,390px);max-width:none;margin:0;padding:12px 14px;
-  border:2px solid #ff6b55;border-radius:14px;
-  background:linear-gradient(145deg,#fff1e9,#ffe0d5);color:#76251d;
-  box-shadow:0 9px 28px #0009,0 0 0 5px #f04b3530;
+  position:absolute;left:50%;right:auto;top:auto;bottom:12px;
+  transform:translateX(-50%);z-index:40;
+  width:min(92vw,440px);max-width:none;min-height:clamp(118px,22vh,170px);
+  margin:0;padding:16px 14px;
+  border:2px solid #e7c76b;border-radius:14px;
+  background:#fff7dc;color:#382b0c;text-align:center;
+  box-shadow:0 8px 24px #0006;
 }
-.table-page #table #seat0 #turnTimeout strong{color:#b42318;font-size:17px}
-.table-page #table #seat0 #turnTimeout span{color:#76251d}
-.table-page #table #seat0 #turnTimeout button{background:#b42318;color:#fff}
-.table-page #table #seat0 #turnTimeout button.secondary{background:#ffe3dc;color:#84251b;border:1px solid #e98b78}
+.table-page #table #seat0 #turnTimeout:not(.hidden){animation:timeout-rise .38s cubic-bezier(.2,.8,.25,1) both}
+@keyframes timeout-rise{
+  from{opacity:0;transform:translate(-50%,28px)}
+  to{opacity:1;transform:translate(-50%,0)}
+}
+.table-page #table #seat0 #turnTimeout strong{color:#382b0c;font-size:17px}
+.table-page #table #seat0 #turnTimeout span{color:#51421d}
+.table-page #table #seat0 #turnTimeout button{background:#8b6a1c;color:#fff}
+.table-page #table #seat0 #turnTimeout button.secondary{background:#f4e7bd;color:#59451a;border:1px solid #d8bd70}
 .table-page #table #seat0 #turnTimeout.hidden{display:none!important}
+@media(prefers-reduced-motion:reduce){.table-page #table #seat0 #turnTimeout:not(.hidden){animation:none}}
 
 /* The lower strip reports the current player's real record or the active call. */
 .table-page #table #gameNotice{
@@ -1418,3 +1426,7 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
   .table-page #table #seat0 #turnTimeout{width:min(92vw,360px);padding:10px}
   .table-page #table #seat0 #turnTimeout strong{font-size:15px}
 }
+
+
+/* Compact release identifier inside the fixed game table. */
+.table-page #table .game-release-version{flex:0 0 auto;display:block;width:100%;padding:2px 0 0;margin:0;text-align:center;color:#d8c99d;font:700 9px/1.2 Tahoma,Arial,sans-serif;direction:rtl;opacity:.82;letter-spacing:.02em;pointer-events:none}
