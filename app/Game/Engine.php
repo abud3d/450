@@ -60,7 +60,7 @@ final class Engine
         if (isset($room['qaidWindow']) && !in_array($action, ['qaid_claim','qaid_cancel'], true)) {
             throw new DomainException('اللعب متوقف حتى يختار فاتح القيد؛ لا يمكن تنفيذ حركات أخرى.');
         }
-        if (!in_array($action, ['timeout_return','timeout_bot'], true)) unset($room['timeoutSeat'], $room['timeoutGraceUntil']);
+        if ($action !== 'timeout_return') unset($room['timeoutSeat'], $room['timeoutGraceUntil']);
 
         switch ($action) {
             case 'bid':
@@ -126,14 +126,8 @@ final class Engine
             case 'timeout_return':
                 if (($room['timeoutSeat'] ?? $seat) !== $seat && empty($room['players'][$seat]['botControl'])) throw new DomainException('لا يوجد طلب عودة لهذا المقعد');
                 $room['players'][$seat]['botControl'] = false;
-                unset($room['timeoutSeat'], $room['timeoutNoticeSeat'], $room['timeoutNoticeUntil']);
+                unset($room['timeoutSeat'], $room['timeoutGraceUntil']);
                 $room['lastAction'] = 'عاد اللاعب لمقعده.';
-                break;
-            case 'timeout_bot':
-                if (($room['timeoutSeat'] ?? -1) !== $seat) throw new DomainException('انتهت مهلة الاختيار أو لم يحن وقتها');
-                $room['players'][$seat]['botControl'] = true;
-                unset($room['timeoutSeat'], $room['timeoutNoticeSeat'], $room['timeoutNoticeUntil']);
-                $room['lastAction'] = 'البوت يكمل اللعب بدلاً من اللاعب.';
                 break;
             case 'replay':
                 if (($g['phase'] ?? '') !== 'gameEnd') throw new DomainException('إعادة اللعب متاحة بعد انتهاء الصكة فقط');
@@ -462,11 +456,9 @@ final class Engine
             'postPurchaseBuyer' => $g['postPurchase']['buyer'] ?? $g['contract']['buyer'] ?? null,
             'postPurchaseTurn' => $g['turn'] ?? null,
             'timeoutPrompt' => ($room['timeoutSeat'] ?? -1) === $seat,
-            'timeoutNoticeUntil' => (int) ($room['timeoutNoticeSeat'] ?? -1) === $seat ? ($room['timeoutNoticeUntil'] ?? null) : null,
             'timeoutSeat' => isset($room['timeoutSeat']) ? (int) $room['timeoutSeat'] : null,
             'turnDeadlineAt' => isset($room['turnDeadlineAt']) ? (int) $room['turnDeadlineAt'] : null,
             'turnDeadlineDuration' => (int) ($room['turnDeadlineDuration'] ?? 10),
-            'timeoutDeadlineAt' => isset($room['timeoutGraceUntil']) ? (int) $room['timeoutGraceUntil'] : null,
             'qaidWindowActive' => isset($room['qaidWindow']),
             'lastAction' => $room['lastAction'] ?? '',
         ];
