@@ -33,7 +33,7 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   --opponent-cards-z: 4; --opponent-cards-s: 1;
 
   /* أوراق اللاعب الحالي */
-  --my-cards-x: 0px; --my-cards-y: 124px;
+  --my-cards-x: 0px; --my-cards-y: 93px;
   --my-cards-z: 3; --my-cards-s: 1;
 
   /* الأوراق الملعوبة في الوسط */
@@ -66,7 +66,7 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
     --opponent-cards-x: 0px; --opponent-cards-y: 0px;
     --opponent-cards-z: 4; --opponent-cards-s: 1;
 
-    --my-cards-x: 0px; --my-cards-y: 104px;
+    --my-cards-x: 78px;
     --my-cards-z: 8; --my-cards-s: 1;
 
     --trick-x: 0px; --trick-y: 0px; --trick-z: 12; --trick-s: 1;
