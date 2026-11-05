@@ -118,16 +118,16 @@
 }
 
 
-/* BLT-PHP-19.18: explicitly overlap the local hand upward into the bottom player's info area.
-   Target #hand (not the generic .hand class); preserve card dimensions, fan and card spacing. */
+/* BLT-PHP-19.19: keep the local hand below the center-play area.
+   Move only the hand container down; preserve card size, fan and overlap. */
 .table-page #table .board>#hand{
   position:relative!important;
   z-index:12!important;
-  margin-top:-68px!important;
-  transform:none!important;
+  margin-top:0!important;
+  transform:translateY(16px)!important;
 }
 @media(max-width:560px){
   .table-page #table .board>#hand{
-    margin-top:-58px!important;
+    transform:translateY(12px)!important;
   }
 }
