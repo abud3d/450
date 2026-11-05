@@ -73,7 +73,7 @@ $('shareRoom')?.addEventListener('click',async()=>{if(!roomCode)return;const url
 const roomFromUrl=new URLSearchParams(location.search).get('room');if(roomFromUrl&&$('roomCode'))$('roomCode').value=roomFromUrl.toUpperCase();
 transport.on('connect',()=>{if($('status'))status('متصل بالخادم.');const target=roomFromUrl?.toUpperCase()||getRecentRoom();if(target){roomCode=target;if($('roomCode'))$('roomCode').value=target;transport.emit('room:resume',{code:target,guestId},r=>{if(r.ok){mySeat=r.seat;if($('status'))status('تم استعادة مقعدك.');}else if($('status'))status(r.error||'تعذر فتح الغرفة.');});}});
 transport.on('disconnect',()=>status('انقطع الاتصال؛ نحاول إعادة الاتصال.'));
-function playCardNow(id){if(playRequestInFlight)return;playRequestInFlight=true;selectedCardId=null;queuedCardId=null;const button=document.querySelector('[data-card="'+CSS.escape(id)+'"]');if(button){button.disabled=true;button.classList.add('is-playing','is-pending');button.setAttribute('aria-busy','true');}status('جارٍ إرسال الورقة...');transport.emit('room:play',{code:roomCode,cardId:id},result=>{playRequestInFlight=false;if(!result?.ok){if(button){button.disabled=false;button.classList.remove('is-playing','is-pending');button.removeAttribute('aria-busy');}status(result?.error||'تعذر لعب الورقة');if(latest)renderControls(latest);}else status('تم استلام الورقة.');});}
+function playCardNow(id){document.getElementById('turnTimeout')?.classList.add('hidden');if(playRequestInFlight)return;playRequestInFlight=true;selectedCardId=null;queuedCardId=null;const button=document.querySelector('[data-card="'+CSS.escape(id)+'"]');if(button){button.disabled=true;button.classList.add('is-playing','is-pending');button.setAttribute('aria-busy','true');}status('جارٍ إرسال الورقة...');transport.emit('room:play',{code:roomCode,cardId:id},result=>{playRequestInFlight=false;if(!result?.ok){if(button){button.disabled=false;button.classList.remove('is-playing','is-pending');button.removeAttribute('aria-busy');}status(result?.error||'تعذر لعب الورقة');if(latest)renderControls(latest);}else status('تم استلام الورقة.');});}
 
 function animatePurchasedUpcard(s,previous){
  if(!previous||!['postPurchase','buyerConfirm','buyerSelectHukm'].includes(previous.phase)||!['projectDeclaration','playing'].includes(s.phase)||!s.contract||!Number.isInteger(s.contract.buyer))return;
@@ -233,7 +233,8 @@ async function loadBuildInfo(){
  try{const r=await fetch('/build.json',{cache:'no-store'});if(!r.ok)throw new Error('build info unavailable');const b=await r.json();$('buildVersion').textContent='نسخة '+b.version+' · Build '+b.commit;}
  catch{$('buildVersion').textContent='نسخة 0.3.0-preview · Build preview-2026-11-02.2 (واجهة)';}
 }
-$('timeoutReturn')?.addEventListener('click',()=>sendButtonAction($('timeoutReturn'),'room:timeout-return'));
+$('timeoutReturn')?.addEventListener('click',()=>{document.getElementById('turnTimeout')?.classList.add('hidden');sendButtonAction($('timeoutReturn'),'room:timeout-return');});
+document.addEventListener('click',event=>{if(event.target.closest('button,a,[role="button"]'))document.getElementById('turnTimeout')?.classList.add('hidden');},true);
 
 // Keep modal layers outside the scrolling table so touch/click targets are never clipped by table ancestors.
 const resultLayer=$('resultPage'),qaidLayer=$('qaidPage');
