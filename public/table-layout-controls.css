@@ -1,0 +1,161 @@
+/*
+============================================================
+BLT TABLE LAYOUT CONTROLS — 19.24
+ملف مستقل للتحكم في مواقع عناصر الطاولة وطبقاتها وأحجامها.
+X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
+لا نغيّر transform الخاص بأوراق اللعب الفردية أو حركة الاختيار.
+============================================================
+*/
+
+/* 1) إعدادات سطح المكتب */
+:root {
+  /* الطاولة */
+  --board-x: 0px; --board-y: 0px;
+
+  /* اللاعب العلوي */
+  --top-avatar-x: 0px; --top-avatar-y: 0px; --top-avatar-z: 10; --top-avatar-s: 1;
+  --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
+
+  /* اللاعب السفلي */
+  --bottom-avatar-x: 0px; --bottom-avatar-y: 0px; --bottom-avatar-z: 10; --bottom-avatar-s: 1;
+  --bottom-info-x: 0px; --bottom-info-y: 0px; --bottom-info-z: 11; --bottom-info-s: 1;
+
+  /* اللاعب الأيسر */
+  --left-seat-x: 0px; --left-seat-y: 0px; --left-seat-z: 5;
+  --left-avatar-s: 1; --left-info-s: 1;
+
+  /* اللاعب الأيمن */
+  --right-seat-x: 0px; --right-seat-y: 0px; --right-seat-z: 5;
+  --right-avatar-s: 1; --right-info-s: 1;
+
+  /* أوراق الخصوم */
+  --opponent-cards-x: 0px; --opponent-cards-y: 0px;
+  --opponent-cards-z: 4; --opponent-cards-s: 1;
+
+  /* أوراق اللاعب الحالي */
+  --my-cards-x: 0px; --my-cards-y: 0px;
+  --my-cards-z: 8; --my-cards-s: 1;
+
+  /* الأوراق الملعوبة في الوسط */
+  --trick-x: 0px; --trick-y: 0px; --trick-z: 12; --trick-s: 1;
+
+  /* ورقة العرض */
+  --upcard-x: 0px; --upcard-y: 0px; --upcard-z: 9; --upcard-s: 1;
+
+  /* المشاريع/الإعلانات */
+  --projects-x: 0px; --projects-y: 0px; --projects-z: 12; --projects-s: 1;
+}
+
+/* 2) إعدادات الهاتف — غيّرها هنا دون التأثير على الكمبيوتر */
+@media (max-width:560px) {
+  :root {
+    --board-x: 0px; --board-y: 0px;
+
+    --top-avatar-x: 0px; --top-avatar-y: 0px; --top-avatar-z: 10; --top-avatar-s: 1;
+    --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
+
+    --bottom-avatar-x: 0px; --bottom-avatar-y: 0px; --bottom-avatar-z: 10; --bottom-avatar-s: 1;
+    --bottom-info-x: 0px; --bottom-info-y: 0px; --bottom-info-z: 11; --bottom-info-s: 1;
+
+    --left-seat-x: 0px; --left-seat-y: 0px; --left-seat-z: 5;
+    --left-avatar-s: 1; --left-info-s: 1;
+
+    --right-seat-x: 0px; --right-seat-y: 0px; --right-seat-z: 5;
+    --right-avatar-s: 1; --right-info-s: 1;
+
+    --opponent-cards-x: 0px; --opponent-cards-y: 0px;
+    --opponent-cards-z: 4; --opponent-cards-s: 1;
+
+    --my-cards-x: 0px; --my-cards-y: 0px;
+    --my-cards-z: 8; --my-cards-s: 1;
+
+    --trick-x: 0px; --trick-y: 0px; --trick-z: 12; --trick-s: 1;
+    --upcard-x: 0px; --upcard-y: 0px; --upcard-z: 9; --upcard-s: 1;
+    --projects-x: 0px; --projects-y: 0px; --projects-z: 12; --projects-s: 1;
+  }
+}
+
+/* 3) الطاولة */
+.table-page #table .board {
+  translate: var(--board-x) var(--board-y);
+}
+
+/* 4) صورة ومعلومات اللاعب العلوي */
+.table-page .board .seat-top .seat-avatar-wrap {
+  top: 0 !important;
+  translate: var(--top-avatar-x) var(--top-avatar-y) !important;
+  scale: var(--top-avatar-s);
+  z-index: var(--top-avatar-z) !important;
+}
+.table-page .board .seat-top .seat-identity {
+  translate: var(--top-info-x) var(--top-info-y) !important;
+  scale: var(--top-info-s);
+  z-index: var(--top-info-z) !important;
+}
+
+/* 5) صورة ومعلومات اللاعب السفلي */
+.table-page .board .seat-bottom .seat-avatar-wrap {
+  top: 0 !important;
+  translate: var(--bottom-avatar-x) var(--bottom-avatar-y) !important;
+  scale: var(--bottom-avatar-s);
+  z-index: var(--bottom-avatar-z) !important;
+}
+.table-page .board .seat-bottom .seat-identity {
+  transform: none !important;
+  translate: var(--bottom-info-x) var(--bottom-info-y) !important;
+  scale: var(--bottom-info-s);
+  z-index: var(--bottom-info-z) !important;
+}
+
+/* 6) اللاعبان الأيسر والأيمن */
+.table-page .board .seat-left {
+  translate: var(--left-seat-x) var(--left-seat-y);
+  z-index: var(--left-seat-z);
+}
+.table-page .board .seat-left .seat-avatar-wrap { scale: var(--left-avatar-s); }
+.table-page .board .seat-left .seat-identity { scale: var(--left-info-s); }
+
+.table-page .board .seat-right {
+  translate: var(--right-seat-x) var(--right-seat-y);
+  z-index: var(--right-seat-z);
+}
+.table-page .board .seat-right .seat-avatar-wrap { scale: var(--right-avatar-s); }
+.table-page .board .seat-right .seat-identity { scale: var(--right-info-s); }
+
+/* 7) أوراق الخصوم */
+.table-page .board .opponent-hand {
+  translate: var(--opponent-cards-x) var(--opponent-cards-y);
+  scale: var(--opponent-cards-s);
+  z-index: var(--opponent-cards-z);
+  position: relative;
+}
+
+/* 8) أوراق اللاعب الحالي — إلغاء إزاحات transform القديمة للحاوية فقط.
+   لا تتغير transforms الخاصة بكل ورقة أو التحديد/الرفع عند الضغط. */
+.table-page #table .board > #hand {
+  transform: none !important;
+  translate: var(--my-cards-x) var(--my-cards-y) !important;
+  scale: var(--my-cards-s);
+  z-index: var(--my-cards-z) !important;
+  position: relative;
+}
+
+/* 9) أوراق الوسط وورقة العرض */
+.table-page .board #trick {
+  translate: var(--trick-x) var(--trick-y);
+  scale: var(--trick-s);
+  z-index: var(--trick-z);
+}
+.table-page .board #upcard {
+  translate: var(--upcard-x) var(--upcard-y);
+  scale: var(--upcard-s);
+  z-index: var(--upcard-z);
+}
+
+/* 10) بطاقات المشاريع */
+.table-page .board .project-cards {
+  translate: var(--projects-x) var(--projects-y);
+  scale: var(--projects-s);
+  z-index: var(--projects-z);
+  position: relative;
+}
