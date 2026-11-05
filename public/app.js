@@ -1,6 +1,6 @@
 const transport=new BalootHttpClient(),$=id=>document.getElementById(id);
 let roomCode=null,mySeat=null,latest=null,account=null,csrfToken=null,selectedCardId=null,queuedCardId=null,playRequestInFlight=false,qaidState=null,qaidTimer=null,lastSeenPlayCount=null,dismissedResultRound=null;
-let lastRenderedHandIds=[],dealAnimationToken=0,timeoutOverlay=$('turnTimeout');
+let lastRenderedHandIds=[],dealAnimationToken=0,timeoutOverlay=$('turnTimeout'),timeoutNoticeUntil=0,timeoutPromptWasActive=false;
 let auctionCallUntil=[0,0,0,0],auctionCallPulse=[0,0,0,0],auctionCallText=['','','',''],auctionCallTimers=[null,null,null,null];
 function trackAuctionCalls(s){
  if(s.phase==='playing'||['roundEnd','gameEnd','lobby'].includes(s.phase)){
@@ -101,7 +101,7 @@ transport.on('room:update',s=>{if(!$('table'))return;trackAuctionCalls(s);if(s.q
  $('myProjects').innerHTML='';
  document.querySelectorAll('[data-card]').forEach(b=>{b.disabled=!!s.players[s.mySeat]?.botControl;b.onclick=()=>{if(s.phase!=='playing'||s.players[s.mySeat]?.botControl)return;const id=b.dataset.card;const mobile=window.matchMedia('(max-width: 560px)').matches;if(s.turn!==s.mySeat){if(selectedCardId!==id){selectedCardId=id;queuedCardId=null;document.querySelectorAll('[data-card]').forEach(x=>x.classList.toggle('selected',x.dataset.card===id));}else{queuedCardId=id;status('تم اعتماد الورقة المحددة؛ ستنزل تلقائياً عند وصول دورك إذا كانت نظامية.');}return;}if(mobile&&selectedCardId!==id){selectedCardId=id;document.querySelectorAll('[data-card]').forEach(x=>x.classList.toggle('selected',x.dataset.card===id));return;}playCardNow(id);};});
  if(queuedCardId&&s.phase==='playing'&&s.turn===s.mySeat&&handCards.some(card=>card.id===queuedCardId)){const queued=queuedCardId;if((s.legalCardIds||[]).includes(queued)){playCardNow(queued);}else{queuedCardId=null;status('الورقة المحددة مخالفة؛ اختر ورقة مسموحاً بها حسب قواعد اللعب.');}}
- const timeout=$('turnTimeout');if(timeout)timeout.classList.toggle('hidden',!s.timeoutPrompt);renderPlayerStatusStrip(s);renderControls(s);
+ const timeout=$('turnTimeout');if(timeout){if(s.timeoutPrompt&&!timeoutPromptWasActive)timeoutNoticeUntil=Date.now()+10000;timeoutPromptWasActive=!!s.timeoutPrompt;const botNow=!!s.players[s.mySeat]?.botControl;const showTimeout=!!s.timeoutPrompt||Date.now()<timeoutNoticeUntil;timeout.classList.toggle('hidden',!showTimeout);const message=timeout.querySelector('span');if(message)message.textContent=botNow?'بدأ الكمبيوتر اللعب الآن. يمكنك العودة فوراً.':'سيبدأ الكمبيوتر اللعب بعد 5 ثوانٍ. يمكنك العودة فوراً.';const botButton=$('timeoutBot');if(botButton)botButton.hidden=botNow;}renderPlayerStatusStrip(s);renderControls(s);
 });
 function renderControls(s){const el=$('controls');el.innerHTML='';const top=$('qaidTopControl');if(top)top.innerHTML='';if(qaidState&&s.qaidEnabled&&['playing','roundEnd','gameEnd'].includes(s.phase)&&!s.qaidResult){renderQaidChooser(s,$('qaidPage'));$('board').classList.add('hidden');$('controls').classList.add('hidden');return;}else if(s.qaidResult&&qaidState){qaidState=null;if(qaidTimer)clearInterval(qaidTimer);qaidTimer=null;$('qaidPage').classList.add('hidden');$('resultPage').classList.remove('hidden');}
  if(s.players[s.mySeat]?.botControl){const back=document.createElement('button');back.textContent='العودة للعب';back.className='secondary bot-return';back.onclick=()=>{back.disabled=true;emit('room:timeout-return',{code:roomCode});};el.appendChild(back);return;}
@@ -215,8 +215,8 @@ async function loadBuildInfo(){
  try{const r=await fetch('/build.json',{cache:'no-store'});if(!r.ok)throw new Error('build info unavailable');const b=await r.json();$('buildVersion').textContent='نسخة '+b.version+' · Build '+b.commit;}
  catch{$('buildVersion').textContent='نسخة 0.3.0-preview · Build preview-2026-11-02.2 (واجهة)';}
 }
-$('timeoutReturn')?.addEventListener('click',()=>{ $('turnTimeout').classList.add('hidden');emit('room:timeout-return',{code:roomCode});});
-$('timeoutBot')?.addEventListener('click',()=>{ $('turnTimeout').classList.add('hidden');emit('room:timeout-bot',{code:roomCode});});
+$('timeoutReturn')?.addEventListener('click',()=>{timeoutNoticeUntil=0;timeoutPromptWasActive=false;$('turnTimeout').classList.add('hidden');emit('room:timeout-return',{code:roomCode});});
+$('timeoutBot')?.addEventListener('click',()=>{timeoutNoticeUntil=0;timeoutPromptWasActive=false;$('turnTimeout').classList.add('hidden');emit('room:timeout-bot',{code:roomCode});});
 
 // Keep modal layers outside the scrolling table so touch/click targets are never clipped by table ancestors.
 const resultLayer=$('resultPage'),qaidLayer=$('qaidPage');
