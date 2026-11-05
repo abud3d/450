@@ -1711,3 +1711,22 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
     margin-bottom:-19px !important;
   }
 }
+
+
+/* BLT-PHP-19.49: expand the turn countdown number to fill the avatar circle. */
+.table-page .board .seat-avatar-wrap .avatar-countdown b{
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  margin:0 !important;
+  border-radius:50% !important;
+  display:grid !important;
+  place-items:center !important;
+  font-size:24px !important;
+  background:#0b3d2d99 !important;
+}
+@media(max-width:560px){
+  .table-page .board .seat-avatar-wrap .avatar-countdown b{
+    font-size:22px !important;
+  }
+}
