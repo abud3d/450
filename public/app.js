@@ -80,28 +80,26 @@ function animatePurchasedUpcard(s,previous){
  if(!previous||!s.contract||!Number.isInteger(s.contract.buyer))return;
  const receiver=Number.isInteger(s.contract.cardReceiver)?s.contract.cardReceiver:s.contract.buyer;
  if(!Number.isInteger(receiver)||receiver<0||receiver>3)return;
- const cardId=s.upCard?.id||previous.upCard?.id||'card';
- const oldReceiver=previous.contract?(Number.isInteger(previous.contract.cardReceiver)?previous.contract.cardReceiver:previous.contract.buyer):null;
+ const enteredPurchase=['auction1','auction2'].includes(previous.phase)&&['postPurchase','buyerConfirm','buyerSelectHukm'].includes(s.phase);
  const completed=['postPurchase','buyerConfirm','buyerSelectHukm'].includes(previous.phase)&&['projectDeclaration','playing'].includes(s.phase);
+ const oldReceiver=previous.contract?(Number.isInteger(previous.contract.cardReceiver)?previous.contract.cardReceiver:previous.contract.buyer):null;
  const handedOff=Number.isInteger(oldReceiver)&&oldReceiver!==receiver;
- if(!completed&&!handedOff)return;
+ if(!enteredPurchase&&!completed&&!handedOff)return;
+ const cardId=s.upCard?.id||previous.upCard?.id||'card';
  const key=[s.code,cardId,receiver].join(':');
  if(lastPurchaseAnimationKey===key)return;
  lastPurchaseAnimationKey=key;
  const relative=(receiver-Number(s.mySeat)+4)%4;
  const target=document.getElementById('seat'+relative)?.querySelector('.seat-avatar');
- const board=document.getElementById('board');
- if(!target||!board)return;
  const sourceCard=document.getElementById('upcard')?.querySelector('.upcard-visible');
- const source=sourceCard||document.getElementById('upcard')||document.getElementById('trick')||board;
- const sr=source.getBoundingClientRect(),tr=target.getBoundingClientRect();
- const width=sourceCard?sr.width:42,height=sourceCard?sr.height:59;
- const left=sr.left+sr.width/2-width/2,top=sr.top+sr.height/2-height/2;
+ if(!target||!sourceCard)return;
+ const sr=sourceCard.getBoundingClientRect(),tr=target.getBoundingClientRect();
+ const width=sr.width,height=sr.height,left=sr.left,top=sr.top;
  const dx=tr.left+tr.width/2-(left+width/2),dy=tr.top+tr.height/2-(top+height/2);
  const flight=document.createElement('div');flight.className='purchase-flight-card';
  flight.style.left=left+'px';flight.style.top=top+'px';flight.style.width=width+'px';flight.style.height=height+'px';
- flight.innerHTML=sourceCard?sourceCard.innerHTML:cardFace(s.upCard||previous.upCard);document.body.appendChild(flight);
- const animation=flight.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px) scale(.58)',opacity:.92}],{duration:680,easing:'cubic-bezier(.22,.75,.25,1)'});
+ flight.innerHTML=sourceCard.innerHTML;document.body.appendChild(flight);
+ const animation=flight.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px) scale(.58)',opacity:.96}],{duration:720,easing:'cubic-bezier(.22,.75,.25,1)'});
  animation.onfinish=()=>flight.remove();animation.oncancel=()=>flight.remove();
 }
 function updateAvatarCountdowns(){
@@ -131,8 +129,8 @@ transport.on('room:update',s=>{if(!$('table'))return;trackAuctionCalls(s);if(s.q
  const newPlay=lastSeenPlayCount!==null&&playCount>lastSeenPlayCount;
  lastSeenPlayCount=playCount;
  $('phase').innerHTML=phaseDisplay(s.phase,s.contract);$('score').innerHTML='<div class="score-panel"><div class="score-points"><small>الأبناط</small><b>'+(s.mySeat%2===0?(s.runningRaw?.[0]||0):(s.runningRaw?.[1]||0))+' - '+(s.mySeat%2===0?(s.runningRaw?.[1]||0):(s.runningRaw?.[0]||0))+'</b></div><div class="score-teams"><span class="score-team">لنا <b>'+(s.mySeat%2===0?s.scores[0]:s.scores[1])+'</b></span><span class="score-team">لهم <b>'+(s.mySeat%2===0?s.scores[1]:s.scores[0])+'</b></span></div></div><div id="qaidTopControl"></div>';
- animatePurchasedUpcard(s,previousSnapshot);
  $('upcard').innerHTML=['postPurchase','buyerConfirm','buyerSelectHukm'].includes(s.phase)&&s.upCard?'<span class="upcard-visible '+('HD'.includes(s.upCard.suit)?'red':'')+'">'+cardFace(s.upCard)+'</span>':'';
+ animatePurchasedUpcard(s,previousSnapshot);
  const sc=s.lastScoring;
  const visibleTrick=s.trick.length?s.trick:(s.lastTrick||[]);const announcement=['roundEnd','gameEnd'].includes(s.phase)&&!s.trickClearing?(s.lastScoring?.buyerSucceeded?'مشتري ناجح':(s.contract?.level>=2?'دبل ناجح':'المشتري خسر')):'';const totalWon=(s.tricksWonBySeat||[]).reduce((sum,n)=>sum+(n||0),0);const pileCount=Math.min(52,totalWon*4);const wonBackdrop=pileCount?'<div class="won-backdrop" aria-hidden="true">'+Array.from({length:pileCount},(_,i)=>'<i class="back-card" style="transform:translate('+((i-(pileCount-1)/2)*1.1)+'px,'+((i%5)*.45)+'px) rotate('+((i-(pileCount-1)/2)*.28)+'deg)"></i>').join('')+'</div>':'';$('trick').innerHTML=wonBackdrop+(announcement&&s.resultVisible?'<div class="center-announcement">'+announcement+'</div>':visibleTrick.length?visibleTrick.map((x,i)=>'<span class="played-card '+(s.trickClearing?'clearing ':'')+(newPlay&&i===visibleTrick.length-1?'card-arriving ':'')+'at-'+((x.seat-s.mySeat+4)%4)+' '+('HD'.includes(x.card.suit)?'red':'')+'">'+cardFace(x.card)+'</span>').join(''):(['auction1','auction2'].includes(s.phase)&&s.upCard?'<span class="played-card '+('HD'.includes(s.upCard.suit)?'red':'')+'">'+cardFace(s.upCard)+'</span>':''));
  const resultPage=$('resultPage'),qaidPage=$('qaidPage');const showResult=['roundEnd','gameEnd'].includes(s.phase)&&s.resultVisible;const showQaid=!!qaidState&&!!s.qaidWindowActive&&!s.qaidResult;if(showResult||showQaid)hideTimeoutPrompt();resultPage.innerHTML=showResult?roundSummary(s):'';resultPage.classList.toggle('hidden',!showResult||showQaid);qaidPage.classList.toggle('hidden',!showQaid);$('board').classList.toggle('hidden',showResult||showQaid);$('controls').classList.toggle('hidden',showResult||showQaid);$('qaidHeaderButton').hidden=!s.qaidEnabled||!['playing','roundEnd','gameEnd'].includes(s.phase);$('qaidHeaderButton').disabled=!!s.qaidWindowActive;$('qaidHeaderButton').title='طلب القيد متاح';
