@@ -10,7 +10,7 @@
       this.timer = null;
       this.busy = false;
       this.stopped = false;
-      this.delay = 1000;
+      this.delay = 1800;
       this.identityPromise = null;
       queueMicrotask(() => this.dispatch('connect'));
     }
@@ -91,7 +91,7 @@
         if (result.snapshot) this.acceptSnapshot(result.snapshot);
         if (result.seat !== undefined) result.seat = Number(result.seat);
         ack({ ...result, ok: true });
-        if (this.code) this.schedule(400);
+        if (this.code) this.schedule(this.delay);
       } catch (error) {
         ack({ ok: false, error: error.message || 'تعذر تنفيذ الطلب' });
       }
@@ -114,7 +114,6 @@
       if (!snapshot || typeof snapshot !== 'object') return;
       this.code = snapshot.code || this.code;
       this.version = Number.isInteger(snapshot.version) ? snapshot.version : this.version;
-      this.delay = 1000;
       this.dispatch('room:update', snapshot);
     }
 
@@ -130,7 +129,7 @@
       try {
         const result = await this.request('/api/room.php?action=state&code=' + encodeURIComponent(this.code));
         if (result.snapshot) this.acceptSnapshot(result.snapshot);
-        this.delay = document.hidden ? 5000 : (result.snapshot?.phase === 'lobby' ? 2500 : 1000);
+        this.delay = document.hidden ? 5000 : (result.snapshot?.phase === 'lobby' ? 2500 : 1800);
       } catch (error) {
         this.delay = Math.min(12000, Math.max(2500, this.delay * 1.7));
         if (/الغرفة غير موجودة|لا يوجد مقعد محفوظ/.test(error.message)) this.dispatch('disconnect');
