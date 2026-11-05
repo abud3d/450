@@ -33,7 +33,7 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   --opponent-cards-z: 4; --opponent-cards-s: 1;
 
   /* أوراق اللاعب الحالي */
-  --my-cards-x: 0px; --my-cards-y: 83px;
+  --my-cards-x: 0px; --my-cards-y: 63px;
   --my-cards-z: 3; --my-cards-s: 1;
 
   /* الأوراق الملعوبة في الوسط */
@@ -345,5 +345,13 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   .table-page #table #board .seat-right .project-card{
     flex-basis:58px !important;
     height:58px !important;
+  }
+}
+
+
+/* BLT-PHP-19.52: lift the bottom player's hand 20px on landscape phones only. */
+@media (max-width:560px) and (orientation:landscape){
+  :root{
+    --my-cards-y:48px;
   }
 }
