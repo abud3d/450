@@ -1,3 +1,1124 @@
 *{box-sizing:border-box}body{margin:0;background:#f3f5f2;color:#17231e;font-family:Tahoma,Arial,sans-serif}.shell{max-width:900px;margin:auto;padding:24px 18px}header,.table-head,.game-info{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-size:25px;font-weight:800;color:#174d3c}.brand b{font-size:14px;background:#e4b84f;color:#34270b;border-radius:8px;padding:4px 7px}.tag,.eyebrow{color:#638174}.intro{padding:42px 0 22px}.intro h1{font-size:clamp(30px,6vw,48px);margin:8px 0}.intro p{line-height:1.8}.panel,.table{background:white;border:1px solid #e0e7e1;border-radius:18px;padding:22px;box-shadow:0 8px 30px #1a38200a}.panel label{display:block;margin-bottom:8px;font-weight:bold}input{width:100%;padding:13px;border:1px solid #d5ded7;border-radius:10px;font:inherit}.actions,.join{display:flex;gap:10px;margin-top:14px}.join{margin:0;flex:1}.join input{min-width:0}button{border:0;border-radius:10px;background:#174d3c;color:white;padding:13px 18px;font:inherit;font-weight:bold;cursor:pointer}.secondary{background:#e8efe9;color:#174d3c}#status{color:#66776c;font-size:13px}.table{margin-top:20px;background:#164b39;color:white}.table-head{flex-wrap:wrap}.table-head button{background:#e4b84f;color:#34270b}.seats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:20px 0}.seat{background:#ffffff18;padding:16px;border-radius:12px}.seat small{display:block;color:#c6d9ce;margin-top:5px}.game-info{border-top:1px solid #ffffff30;padding:12px 0}.trick{min-height:90px;display:flex;justify-content:center;align-items:center;gap:10px;background:#0f3d2e;border-radius:14px;padding:15px}.hand{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:20px 0}.card{background:#fff;color:#17231e;border-radius:9px;padding:13px 10px;min-width:42px;text-align:center;font-weight:bold}.red{color:#c33}.hidden{display:none}footer{text-align:center;color:#839087;font-size:12px;padding:28px}small{color:#d6e3dc}@media(max-width:560px){.shell{padding:16px 12px}.actions{flex-direction:column}.join{width:100%}.panel{padding:16px}.intro{padding-top:30px}}
 .controls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:12px 0}.controls button{min-width:90px}.card{border:0;cursor:pointer}.card small{display:block;color:#718078;font-size:9px}.hand .card{box-shadow:0 3px 8px #0002}.hand .card:active{transform:translateY(-5px)}
 .upcard{display:flex;justify-content:center;align-items:center;gap:10px;min-height:54px;color:#f4e8c8}.round-result{text-align:center;padding:10px;font-weight:bold;color:#f4e8c8}.upcard .card{color:#17231e}
+.account-panel{margin-bottom:18px}.account-panel h2{margin-top:0}.account-panel p{color:#65766b}.account-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px}.account-fields input:first-child{grid-column:1/-1}.account-panel .actions{flex-wrap:wrap}.account-panel button{flex:1}@media(max-width:560px){.account-fields{grid-template-columns:1fr}.account-fields input:first-child{grid-column:auto}.account-panel .actions{flex-direction:column}}
+/* Square Baloot table and realistic playing cards */
+.table{max-width:100%;overflow:hidden}
+.table-meta{display:flex;flex-wrap:wrap;justify-content:space-around;gap:8px;margin:12px 0;padding:10px;background:#ffffff12;border-radius:12px;font-size:13px}
+.points-live{text-align:center;color:#f7df9e;font-weight:800;padding:8px}
+.board{direction:ltr;display:grid;grid-template-columns:minmax(76px,1fr) minmax(120px,1.6fr) minmax(76px,1fr);grid-template-rows:minmax(78px,auto) minmax(130px,auto) minmax(78px,auto);gap:8px;align-items:center;justify-items:center;padding:12px 0;background:radial-gradient(ellipse at center,#23664b 0%,#12432f 68%,#0c3527 100%);border:8px solid #80552f;border-radius:28px;box-shadow:inset 0 0 0 3px #c49a61,inset 0 0 28px #071f17,0 8px 20px #0004}
+.board .seat{direction:rtl;min-width:0;width:100%;max-width:160px;text-align:center;padding:9px 5px;background:#ffffff18;border:1px solid #ffffff20;border-radius:12px}
+.seat-top{grid-column:2;grid-row:1}.seat-left{grid-column:1;grid-row:2}.seat-right{grid-column:3;grid-row:2}.seat-bottom{grid-column:2;grid-row:3}
+.board .seat b{display:block;font-size:12px;overflow-wrap:anywhere}.board .seat small{display:block;font-size:10px;margin-top:4px}.board .seat em{display:inline-block;font-size:9px;font-style:normal;color:#2c2412;background:#edc96f;border-radius:5px;padding:2px 5px;margin:3px}
+.active-turn{outline:2px solid #f4d477;background:#ffffff2b!important;box-shadow:0 0 14px #f4d47755}.turn-label{display:block;color:#ffe08a;font-size:10px;margin-top:3px}
+.center-play{grid-column:2;grid-row:2;direction:ltr;position:relative;display:grid;grid-template-columns:repeat(2,64px);grid-template-rows:repeat(2,88px);gap:0;align-items:center;justify-items:center;min-width:128px;min-height:176px}
+.played-card{width:58px;height:82px;background:linear-gradient(145deg,#fff,#f3f0e8);color:#18221d;border:1px solid #d5d0c5;border-radius:7px;box-shadow:0 3px 8px #001b10aa;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.played-card b{font-size:22px}.played-card strong{font-size:25px}.played-card.at-0{grid-column:1;grid-row:2}.played-card.at-1{grid-column:1;grid-row:1}.played-card.at-2{grid-column:2;grid-row:1}.played-card.at-3{grid-column:2;grid-row:2}
+.playing-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;width:62px;height:92px;padding:7px 8px;background:linear-gradient(145deg,#fff 0%,#f8f6ef 70%,#e8e4d9 100%);color:#17231e;border:1px solid #d5d0c5;border-radius:8px;box-shadow:0 3px 7px #0003;font-size:17px;line-height:1}
+.playing-card b{font-size:24px;align-self:center}.playing-card small{font-size:15px;align-self:flex-end;color:inherit}.playing-card.red,.played-card.red{color:#c62828}
+.hand{gap:5px;direction:ltr;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding:14px 4px 20px}.playing-card:active{transform:translateY(-8px)}.playing-card:hover{transform:translateY(-5px)}
+@media(max-width:560px){.board{grid-template-columns:68px minmax(112px,1fr) 68px;grid-template-rows:70px 142px 70px;gap:3px;padding:7px;border-width:5px;border-radius:20px}.board .seat{padding:6px 2px}.center-play{grid-template-columns:repeat(2,53px);grid-template-rows:repeat(2,70px);min-width:106px;min-height:140px}.played-card{width:47px;height:66px}.played-card b{font-size:18px}.played-card strong{font-size:21px}.playing-card{flex:0 0 54px;width:54px;height:82px}.table-meta{font-size:11px}}
+
+/* Card artwork, fan hands and backs */
+.playing-card{flex:0 0 66px;width:66px;height:100px;border-radius:9px;background:linear-gradient(145deg,#fff 0%,#fffdf8 62%,#e6e1d4 100%);border:1px solid #c9c4b9;box-shadow:0 4px 9px #001b1055;padding:7px 6px}
+.playing-card img{width:31px;height:31px;align-self:center;object-fit:contain}
+.playing-card span,.playing-card small{font-weight:900;font-size:15px;color:inherit}.playing-card small{align-self:flex-end}
+.hand{direction:ltr;justify-content:center;overflow:visible;gap:0;padding:22px 6px 30px;min-height:132px}
+.hand .playing-card{margin-left:-17px;transform-origin:50% 125%;transition:transform .12s}
+.hand .playing-card:first-child{margin-left:0}
+.hand .playing-card:nth-child(1){transform:rotate(-20deg) translateY(13px)}
+.hand .playing-card:nth-child(2){transform:rotate(-15deg) translateY(7px)}
+.hand .playing-card:nth-child(3){transform:rotate(-10deg) translateY(3px)}
+.hand .playing-card:nth-child(4){transform:rotate(-5deg)}
+.hand .playing-card:nth-child(5){transform:rotate(0)}
+.hand .playing-card:nth-child(6){transform:rotate(5deg)}
+.hand .playing-card:nth-child(7){transform:rotate(10deg) translateY(3px)}
+.hand .playing-card:nth-child(8){transform:rotate(15deg) translateY(7px)}
+.hand .playing-card:nth-child(9){transform:rotate(20deg) translateY(13px)}
+.hand .playing-card:hover,.hand .playing-card:focus{z-index:5;transform:translateY(-15px) rotate(0)}
+.opponent-hand{direction:ltr;display:flex;justify-content:center;align-items:flex-end;height:38px;margin:5px auto 0;max-width:130px;overflow:visible}
+.back-card{display:block;flex:0 0 19px;width:24px;height:32px;margin-left:-8px;border:1px solid #e7d6ad;border-radius:4px;background:repeating-linear-gradient(45deg,#b63b35 0 3px,#f2dfbd 3px 4px,#214e43 4px 7px);box-shadow:0 2px 4px #0019;transform:rotate(0deg);}
+.back-card:first-child{margin-left:0}
+.board .seat{min-height:70px}
+@media(max-width:560px){.playing-card{flex-basis:54px;width:54px;height:84px}.playing-card img{width:26px;height:26px}.hand .playing-card{margin-left:-22px}.hand .playing-card:first-child{margin-left:0}.opponent-hand{height:30px}.back-card{flex-basis:15px;width:19px;height:26px;margin-left:-7px}.board .seat{min-height:65px}}
+
+/* Clean responsive player labels and persistent table instructions */
+.board .seat{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:5px 2px!important;outline:0!important;min-height:0}
+.board .seat.active-turn{background:transparent!important;box-shadow:none!important}
+.board .seat-name{font-size:13px;font-weight:800;line-height:1.35;overflow-wrap:anywhere}
+.board .seat.active-turn .seat-name{color:#ffe08a;text-shadow:0 0 8px #f4d47788}
+.board .seat-tags{font-size:10px;line-height:1.5;color:#f5dfaa;min-height:14px}
+.board .seat small{display:none}
+.game-notice{min-height:42px;margin:4px auto 8px;padding:10px 12px;text-align:center;color:#ffe08a;font-weight:800;font-size:14px;line-height:1.5;border-top:1px solid #ffffff2b;border-bottom:1px solid #ffffff2b}
+.table-hint{grid-column:1/-1;align-self:center;justify-self:center;color:#f5dfaa;font-size:12px}
+.played-card.red,.playing-card.red{color:#e02020!important}
+@media(max-width:560px){.board .seat-name{font-size:11px}.board .seat-tags{font-size:9px}.game-notice{font-size:13px;min-height:38px;padding:8px}}
+
+/* Table score, turn marker, projects and center announcements */
+.game-info{flex-wrap:wrap}
+#score{font-weight:900}
+.points-live{padding:3px 0 10px;font-size:12px;color:#fff}
+.board .seat.active-turn{outline:0!important}
+.turn-dot{display:block;width:11px;height:11px;margin:5px auto 0;border-radius:50%;background:#ffd84d;box-shadow:0 0 0 3px #ffd84d33,0 0 12px #ffe36b}
+.seat-project{font-size:11px;font-weight:900;color:#ffe08a;margin-top:3px;line-height:1.3}
+.center-announcement{grid-column:1/-1;grid-row:1/-1;align-self:center;justify-self:center;text-align:center;padding:12px 16px;border-radius:12px;background:#f3d16e;color:#3b2b08;font-weight:900;font-size:18px;box-shadow:0 5px 18px #0005;z-index:8}
+.center-play{grid-template-columns:repeat(2,48px);grid-template-rows:repeat(2,70px);min-width:96px;min-height:140px}
+.played-card{width:64px;height:90px;position:relative}
+.played-card.at-0{margin-left:0;margin-top:0}
+.played-card.at-1{margin-left:0;margin-top:0}
+.played-card.at-2{margin-left:-16px;margin-top:0}
+.played-card.at-3{margin-left:-16px;margin-top:-20px}
+@media(max-width:560px){
+ .center-play{grid-template-columns:repeat(2,42px);grid-template-rows:repeat(2,62px);min-width:84px;min-height:124px}
+ .played-card{width:57px;height:80px}
+ .played-card.at-2,.played-card.at-3{margin-left:-15px}
+ .played-card.at-3{margin-top:-18px}
+ .center-announcement{font-size:15px;padding:9px 12px}
+ .seat-project{font-size:9px}
+}
+
+/* Four played cards fan around the center, oriented toward their owners. */
+.center-play{display:block;position:relative;width:190px;height:176px;min-width:190px;min-height:176px;direction:ltr}
+.played-card{position:absolute;width:66px;height:92px;display:flex;z-index:2;transform-origin:50% 50%;border-radius:8px}
+.played-card.at-0{left:62px;top:84px;transform:rotate(-12deg)}
+.played-card.at-1{left:8px;top:42px;transform:rotate(-78deg)}
+.played-card.at-2{left:62px;top:0;transform:rotate(168deg)}
+.played-card.at-3{left:116px;top:42px;transform:rotate(78deg)}
+.played-card b{font-size:21px}.played-card strong{font-size:24px}
+.played-card.clearing{animation:trickFlip 2.3s ease-in forwards;transform-style:preserve-3d}
+@keyframes trickFlip{0%,78%{filter:brightness(1);opacity:1}90%{transform:rotateY(90deg) scale(.9);opacity:.85}100%{transform:rotateY(180deg) scale(.55);opacity:0}}
+@media(max-width:560px){.center-play{width:156px;height:140px;min-width:156px;min-height:140px}.played-card{width:54px;height:76px}.played-card.at-0{left:51px;top:67px}.played-card.at-1{left:4px;top:33px}.played-card.at-2{left:51px;top:0}.played-card.at-3{left:98px;top:33px}.played-card b{font-size:18px}.played-card strong{font-size:21px}}
+
+/* Card faces: corner indices, true pip counts and illustrated court cards */
+.card-face{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;overflow:hidden}
+.card-corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0;line-height:.92;font-weight:900;z-index:2}
+.card-corner b{font-size:13px}.card-corner i{font-style:normal;font-size:12px}
+.card-corner-top{top:4px;left:5px}.card-corner-bottom{right:5px;bottom:4px;transform:rotate(180deg)}
+.card-pips{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;align-items:center;justify-items:center;gap:1px;width:70%;height:72%;padding:10px 0 7px;font-size:11px;line-height:1}
+.card-pips i{font-style:normal}
+.card-pips.pips-7 i:nth-child(4){grid-column:2}
+.card-pips.pips-8 i:nth-child(4){grid-column:1}.card-pips.pips-8 i:nth-child(5){grid-column:3}
+.card-pips.pips-9 i:nth-child(5){grid-column:2}
+.card-pips.pips-10 i:nth-child(4){grid-column:1}.card-pips.pips-10 i:nth-child(5){grid-column:3}.card-pips.pips-10 i:nth-child(6){grid-column:2}
+.court-art{width:58%;height:66%;object-fit:contain;margin-top:7px}
+.ace-art{font-size:37px;font-weight:900}
+.played-card .card-corner b{font-size:11px}.played-card .card-corner i{font-size:10px}
+.played-card .card-corner-top{top:3px;left:4px}.played-card .card-corner-bottom{right:4px;bottom:3px}
+.played-card .card-pips{font-size:9px;width:68%;height:70%;padding-top:8px}
+.played-card .court-art{width:54%;height:62%}.played-card .ace-art{font-size:31px}
+@media(max-width:560px){.card-corner b{font-size:11px}.card-corner i{font-size:10px}.card-pips{font-size:9px}.court-art{width:56%;height:62%}.ace-art{font-size:30px}}
+
+/* Refined card indices: symbols larger, tucked into the extreme corners */
+.card-corner-top{top:1px;left:2px;gap:1px}
+.card-corner-bottom{right:2px;bottom:1px;gap:1px}
+.card-corner b{font-size:15px;line-height:.9}
+.card-corner i{font-size:15px;line-height:.9}
+.card-pips{font-size:14px;gap:0}
+.played-card .card-corner-top{top:1px;left:2px}
+.played-card .card-corner-bottom{right:2px;bottom:1px}
+.played-card .card-corner b,.played-card .card-corner i{font-size:13px}
+.played-card .card-pips{font-size:12px}
+.my-projects{display:flex;justify-content:center;align-items:center;gap:7px;min-height:24px;margin:-8px 0 5px}
+.my-project{display:inline-block;background:#f1d47d;color:#49350a;border:1px solid #d6b85e;border-radius:7px;padding:3px 9px;font-weight:900;font-size:12px}
+@media(max-width:560px){.card-corner-top{top:1px;left:2px}.card-corner-bottom{right:2px;bottom:1px}.card-corner b,.card-corner i{font-size:12px}.card-pips{font-size:11px}.played-card .card-corner b,.played-card .card-corner i{font-size:11px}}
+
+/* Mobile two-tap card selection */
+@media(max-width:560px){.hand .playing-card.selected{transform:translateY(-24px) scale(1.04)!important;z-index:20;box-shadow:0 8px 18px #0007;outline:2px solid #f4d477}}
+
+footer #buildVersion{display:inline-block;color:#53685d;font-weight:700;direction:ltr;unicode-bidi:embed}footer{line-height:1.8}
+
+
+/* Larger, clearer Baloot card faces */
+.card-corner-top,.played-card .card-corner-top{
+  left:5px;right:5px;width:auto;flex-direction:row;justify-content:space-between;align-items:flex-start;
+}
+.card-corner-bottom,.played-card .card-corner-bottom{
+  left:5px;right:5px;width:auto;flex-direction:row;justify-content:space-between;align-items:flex-start;
+}
+.card-corner b{font-size:16px;line-height:1}
+.card-corner i{font-size:16px;line-height:1}
+.card-pips{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-rows:repeat(5,minmax(0,1fr));
+  width:76%;height:78%;padding:13px 0 8px;font-size:15px;
+}
+.card-pips i{display:flex;align-items:center;justify-content:center}
+.card-pips.pips-7 i:nth-child(4){grid-column:2;grid-row:3}
+.card-pips.pips-8 i:nth-child(4){grid-column:1;grid-row:3}
+.card-pips.pips-8 i:nth-child(5){grid-column:3;grid-row:3}
+.card-pips.pips-9 i:nth-child(5){grid-column:2;grid-row:3}
+.card-pips.pips-10 i:nth-child(5){grid-column:2;grid-row:3}
+.court-art{width:70%;height:76%;margin-top:9px}
+.ace-art{font-size:46px}
+.played-card .card-corner-top,.played-card .card-corner-bottom{left:4px;right:4px;width:auto}
+.played-card .card-corner b,.played-card .card-corner i{font-size:13px}
+.played-card .card-pips{width:74%;height:76%;font-size:12px;padding-top:10px}
+.played-card .court-art{width:65%;height:72%}
+.played-card .ace-art{font-size:37px}
+@media(max-width:560px){
+ .card-corner-top,.played-card .card-corner-top,.card-corner-bottom,.played-card .card-corner-bottom{left:4px;right:4px;width:auto}
+ .card-corner b,.card-corner i{font-size:13px}
+ .card-pips{width:76%;height:77%;font-size:12px;padding-top:11px}
+ .court-art{width:67%;height:72%}
+ .ace-art{font-size:37px}
+ .played-card .card-corner b,.played-card .card-corner i{font-size:11px}
+}
+
+/* Clear contract badge and stronger suit marks on table cards */
+.contract-icon{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:25px;margin-inline:3px;font-size:24px;font-weight:900;line-height:1;vertical-align:middle;text-shadow:0 1px 2px #0005}
+.contract-icon.sun{color:#ffd86b}
+.played-card .card-corner i{font-size:16px!important;font-weight:900;text-shadow:0 0 1px currentColor}
+@media(max-width:560px){.contract-icon{font-size:22px;min-width:22px;height:23px}.played-card .card-corner i{font-size:14px!important}}
+
+/* Automatic round result panel */
+.round-summary{grid-column:1/-1;grid-row:1/-1;z-index:9;align-self:center;justify-self:center;width:max-content;max-width:100%;padding:12px 16px;border-radius:14px;background:#f3d16e;color:#3b2b08;text-align:center;box-shadow:0 5px 18px #0007;display:flex;flex-direction:column;gap:8px;font-weight:800}
+.round-summary-title{font-size:15px}.round-summary-points{display:flex;justify-content:center;gap:18px;font-size:15px}.round-summary-points b{font-size:23px;margin-inline-start:4px}.round-summary-result{font-size:17px;border-top:1px solid #795d1e55;padding-top:7px}
+@media(max-width:560px){.round-summary{padding:9px 11px;gap:6px}.round-summary-title{font-size:13px}.round-summary-points{font-size:13px;gap:12px}.round-summary-points b{font-size:20px}.round-summary-result{font-size:15px}}
+
+/* Requested seat status, in-table fan and ten-second turn handoff */
+.board{grid-template-rows:minmax(78px,auto) minmax(130px,auto) minmax(78px,auto) auto}
+.board .hand{grid-column:1/-1;grid-row:4;position:relative;z-index:3;width:100%;max-width:100%;min-width:0;margin:0;padding:12px 8px 18px;min-height:124px;overflow-x:auto;overflow-y:visible;justify-content:center;align-items:flex-end}
+.hand .playing-card{transform:translateY(var(--fan-y,0)) rotate(var(--fan-r,0deg));transform-origin:50% 100%;margin-left:-18px}
+.hand .playing-card:first-child{margin-left:0}
+.hand .playing-card:hover,.hand .playing-card:focus{transform:translateY(-15px) rotate(0);z-index:10}
+.bot-number{display:inline-block;color:#ffe08a;font-size:10px;margin-inline-start:3px}
+.seat-role,.seat-contract{font-size:11px;line-height:1.4;font-weight:900;color:#ffe08a;margin-top:2px}
+.seat-contract{color:#f8df91}
+.seat-project{position:relative;z-index:4;margin-top:1px;color:#fff0b5;text-shadow:0 1px 3px #002}
+.turn-timeout{position:relative;z-index:20;margin:12px auto;padding:16px;border:2px solid #e7c76b;border-radius:14px;background:#fff7dc;color:#382b0c;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;max-width:440px;box-shadow:0 8px 24px #0003}
+.turn-timeout span{font-size:13px;line-height:1.6}
+.turn-timeout div{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.turn-timeout button{min-width:125px}
+@media(max-width:560px){.board{grid-template-rows:70px 142px 70px auto}.board .hand{min-height:110px;padding:9px 4px 14px}.hand .playing-card{margin-left:-23px}.hand .playing-card:first-child{margin-left:0}.seat-role,.seat-contract{font-size:9px}.turn-timeout{padding:12px}.turn-timeout button{min-width:110px}}
+
+/* Final layout corrections */
+.turn-timeout.hidden{display:none!important}
+.seat-badges{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;gap:5px;min-height:16px;white-space:nowrap}
+.seat-badges .seat-role,.seat-badges .seat-contract,.seat-badges .seat-project{display:inline-flex;align-items:center;margin:0;font-size:10px;line-height:1.2;white-space:nowrap}
+.seat-badges .seat-project{color:#fff0b5}
+.board .hand{overflow-x:visible!important;overflow-y:visible!important;scrollbar-width:none;gap:0;padding:12px 6px 16px;justify-content:center}
+.board .hand::-webkit-scrollbar{display:none}
+.hand .playing-card{transform:translateY(var(--fan-y,0)) rotate(var(--fan-r,0deg));margin-left:-18px;transition:transform .12s ease}
+.hand .playing-card:first-child{margin-left:0}
+.played-card.clearing{animation:none!important;opacity:1!important;transform-origin:center;transition:none}
+@media(max-width:560px){.seat-badges{gap:3px}.seat-badges .seat-role,.seat-badges .seat-contract,.seat-badges .seat-project{font-size:8px}.board .hand{overflow:visible!important;padding-inline:2px}.hand .playing-card{margin-left:-22px}}
+
+/* Keep the hand fan stable; only lift a card on hover/selection */
+.board .hand .playing-card{transform:translateY(var(--fan-y,0)) rotate(var(--fan-r,0deg))!important}
+.board .hand .playing-card:hover,.board .hand .playing-card:focus{transform:translateY(-15px) rotate(0)!important;z-index:10}
+.board .hand .playing-card.selected{transform:translateY(-20px) rotate(0) scale(1.03)!important;z-index:20}
+
+/* Turn marker leads the dealer/contract/project badges; winning team projects are shown beside their owners during trick two. */
+.turn-dot{display:inline-block;flex:0 0 9px;width:9px;height:9px;margin:0 2px 0 0;vertical-align:middle}
+.project-cards{direction:ltr;display:flex;justify-content:center;align-items:center;gap:2px;margin:4px auto 2px;max-width:100%;}
+.project-card{display:block;flex:0 0 29px;width:29px;height:42px;background:#fff;border:1px solid #d9d2c4;border-radius:4px;overflow:hidden;box-shadow:0 2px 5px #0018;color:#17231e}
+.project-card .card-corner-top,.project-card .card-corner-bottom{left:2px;right:2px}
+.project-card .card-corner b,.project-card .card-corner i{font-size:7px!important}
+.project-card .card-pips{font-size:7px!important;padding:5px 0 2px;height:78%;width:76%}
+.project-card .court-art{width:68%;height:70%;margin-top:5px}
+.project-card .ace-art{font-size:19px}
+.project-card.red{color:#c62828}
+@media(max-width:560px){.project-card{flex-basis:23px;width:23px;height:34px}.project-card .card-corner b,.project-card .card-corner i{font-size:6px!important}.project-card .card-pips{font-size:6px!important;padding-top:4px}.project-card .ace-art{font-size:15px}}
+
+
+/* Final card-size overrides: table cards grow clearly; hand cards grow subtly. */
+.center-play{
+  width:224px;
+  height:204px;
+  min-width:224px;
+  min-height:204px;
+}
+.played-card{
+  width:78px;
+  height:110px;
+  border-radius:9px;
+}
+.played-card.at-0{left:73px;top:96px}
+.played-card.at-1{left:10px;top:48px}
+.played-card.at-2{left:73px;top:0}
+.played-card.at-3{left:136px;top:48px}
+.played-card .card-corner b,.played-card .card-corner i{font-size:15px}
+.played-card .card-pips{font-size:14px}
+.played-card .court-art{width:67%;height:73%}
+.played-card .ace-art{font-size:42px}
+.hand .playing-card{
+  flex-basis:68px;
+  width:68px;
+  height:102px;
+}
+.board .hand{min-height:130px}
+@media(max-width:560px){
+  .center-play{width:180px;height:162px;min-width:180px;min-height:162px}
+  .played-card{width:64px;height:90px}
+  .played-card.at-0{left:58px;top:78px}
+  .played-card.at-1{left:4px;top:36px}
+  .played-card.at-2{left:58px;top:0}
+  .played-card.at-3{left:112px;top:36px}
+  .played-card .card-corner b,.played-card .card-corner i{font-size:12px}
+  .played-card .card-pips{font-size:11px}
+  .played-card .court-art{width:64%;height:70%}
+  .played-card .ace-art{font-size:34px}
+  .hand .playing-card{flex-basis:56px;width:56px;height:86px}
+  .board .hand{min-height:116px}
+}
+
+
+/* Player layout: card backs/hand first, then name and status underneath. */
+.board{
+  grid-template-rows:minmax(78px,auto) minmax(130px,auto) auto minmax(48px,auto);
+}
+.board .hand{
+  grid-column:1/-1;
+  grid-row:3;
+  align-self:end;
+  margin:0;
+  padding:8px 6px 5px;
+  min-height:124px;
+}
+.board .seat-bottom{
+  grid-column:2;
+  grid-row:4;
+  align-self:start;
+  max-width:100%;
+  padding:3px 2px 8px!important;
+}
+.board .seat-top .opponent-hand,
+.board .seat-left .opponent-hand,
+.board .seat-right .opponent-hand{
+  margin:0 auto 4px;
+  height:38px;
+}
+.board .seat-name{margin-top:1px}
+.board .seat-badges{margin-top:2px}
+.board .seat-bottom .seat-name,
+.board .seat-bottom .seat-badges{justify-content:center}
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+}
+.controls button{order:0}
+@media(max-width:560px){
+  .board{
+    grid-template-rows:70px 142px auto 52px;
+  }
+  .board .hand{
+    grid-row:3;
+    min-height:112px;
+    padding:5px 2px 3px;
+  }
+  .board .seat-bottom{
+    grid-row:4;
+    padding:2px 1px 5px!important;
+  }
+  .board .seat-top .opponent-hand,
+  .board .seat-left .opponent-hand,
+  .board .seat-right .opponent-hand{height:30px;margin-bottom:3px}
+}
+
+
+/* Keep auction and action choices in one framed row, including on mobile. */
+.controls{
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:stretch;
+  justify-content:stretch;
+  gap:6px;
+  width:100%;
+}
+.controls button{
+  flex:1 1 0;
+  min-width:0;
+  padding:11px 6px;
+  border:1px solid #b8c9bd;
+  border-radius:10px;
+  white-space:nowrap;
+  text-align:center;
+}
+@media(max-width:560px){
+  .controls{gap:4px;padding:10px 0}
+  .controls button{padding:10px 3px;font-size:clamp(11px,3.2vw,14px);border-width:1px}
+}
+
+
+/* Full-bleed court portraits, large crisp pips, and tighter player-hand spacing. */
+/* Pip field fills the card instead of floating small in the middle. */
+.card-face{background:#fffdf8}
+.card-pips{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-template-rows:repeat(5,minmax(0,1fr))!important;
+  width:88%!important;
+  height:88%!important;
+  padding:8px 0 6px!important;
+  margin:0 auto!important;
+  gap:0!important;
+  font-family:"DejaVu Sans","Segoe UI Symbol",serif;
+  font-size:clamp(18px,2.5vw,25px)!important;
+  line-height:1!important;
+  font-weight:700;
+}
+.card-pips i{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%;
+  height:100%;
+  font-style:normal;
+  line-height:1;
+  text-shadow:0 0 .35px currentColor;
+}
+/* 7: three on each side, plus one centered. */
+.card-pips.pips-7 i:nth-child(1){grid-column:1;grid-row:1}
+.card-pips.pips-7 i:nth-child(2){grid-column:3;grid-row:1}
+.card-pips.pips-7 i:nth-child(3){grid-column:1;grid-row:3}
+.card-pips.pips-7 i:nth-child(4){grid-column:2;grid-row:3}
+.card-pips.pips-7 i:nth-child(5){grid-column:3;grid-row:3}
+.card-pips.pips-7 i:nth-child(6){grid-column:1;grid-row:5}
+.card-pips.pips-7 i:nth-child(7){grid-column:3;grid-row:5}
+/* 8: three on each side, two centered vertically. */
+.card-pips.pips-8 i:nth-child(1){grid-column:1;grid-row:1}
+.card-pips.pips-8 i:nth-child(2){grid-column:3;grid-row:1}
+.card-pips.pips-8 i:nth-child(3){grid-column:1;grid-row:3}
+.card-pips.pips-8 i:nth-child(4){grid-column:2;grid-row:2}
+.card-pips.pips-8 i:nth-child(5){grid-column:2;grid-row:4}
+.card-pips.pips-8 i:nth-child(6){grid-column:3;grid-row:3}
+.card-pips.pips-8 i:nth-child(7){grid-column:1;grid-row:5}
+.card-pips.pips-8 i:nth-child(8){grid-column:3;grid-row:5}
+/* 9: four on each side and one in the center. */
+.card-pips.pips-9 i:nth-child(1){grid-column:1;grid-row:1}
+.card-pips.pips-9 i:nth-child(2){grid-column:3;grid-row:1}
+.card-pips.pips-9 i:nth-child(3){grid-column:1;grid-row:2}
+.card-pips.pips-9 i:nth-child(4){grid-column:3;grid-row:2}
+.card-pips.pips-9 i:nth-child(5){grid-column:2;grid-row:3}
+.card-pips.pips-9 i:nth-child(6){grid-column:1;grid-row:4}
+.card-pips.pips-9 i:nth-child(7){grid-column:3;grid-row:4}
+.card-pips.pips-9 i:nth-child(8){grid-column:1;grid-row:5}
+.card-pips.pips-9 i:nth-child(9){grid-column:3;grid-row:5}
+/* 10: four on each side and two centered vertically. */
+.card-pips.pips-10 i:nth-child(1){grid-column:1;grid-row:1}
+.card-pips.pips-10 i:nth-child(2){grid-column:3;grid-row:1}
+.card-pips.pips-10 i:nth-child(3){grid-column:1;grid-row:2}
+.card-pips.pips-10 i:nth-child(4){grid-column:3;grid-row:2}
+.card-pips.pips-10 i:nth-child(5){grid-column:2;grid-row:2}
+.card-pips.pips-10 i:nth-child(6){grid-column:2;grid-row:4}
+.card-pips.pips-10 i:nth-child(7){grid-column:1;grid-row:4}
+.card-pips.pips-10 i:nth-child(8){grid-column:3;grid-row:4}
+.card-pips.pips-10 i:nth-child(9){grid-column:1;grid-row:5}
+.card-pips.pips-10 i:nth-child(10){grid-column:3;grid-row:5}
+/* Remove the inset frame/margins from J/Q/K illustrations. */
+.card-face>.court-art{
+  display:block;
+  width:100%!important;
+  height:100%!important;
+  max-width:none;
+  max-height:none;
+  object-fit:cover!important;
+  object-position:center center;
+  margin:0!important;
+  padding:0!important;
+}
+.played-card .card-face>.court-art{
+  width:100%!important;
+  height:100%!important;
+}
+.project-card .court-art{object-fit:cover!important}
+/* Bring the player's hand closer to the name and reclaim room for the trick. */
+.board{
+  row-gap:4px;
+  grid-template-rows:minmax(70px,auto) minmax(142px,1fr) minmax(108px,auto) 42px;
+}
+.board .hand{
+  align-self:end;
+  min-height:108px;
+  padding:2px 4px 0!important;
+  margin:0!important;
+  transform:translateY(5px);
+}
+.board .seat-bottom{
+  align-self:start;
+  padding:0 2px 2px!important;
+  margin:0!important;
+}
+@media(max-width:560px){
+  .card-pips{width:89%!important;height:88%!important;padding:7px 0 5px!important;font-size:clamp(15px,4.4vw,21px)!important}
+  .board{row-gap:3px;grid-template-rows:64px minmax(132px,1fr) minmax(98px,auto) 38px}
+  .board .hand{min-height:98px;padding:0 2px!important;transform:translateY(5px)}
+  .board .seat-bottom{padding:0 1px 1px!important}
+}
+
+
+/* Full original CC0 card faces: no oversized overlays over printed corners. */
+.card-face{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:hidden}
+.full-card-art{display:block;width:100%;height:100%;object-fit:fill;border-radius:inherit}
+.card-corner,.card-pips,.court-art,.ace-art{display:none!important}
+.playing-card,.played-card{position:relative;display:block;padding:0;overflow:hidden;background:#fff}
+.played-card .card-face{position:absolute;inset:0}
+.played-card .full-card-art{width:100%;height:100%}
+
+/* Correct card image sizing and stable, centered trick placement. */
+.playing-card img.full-card-art,
+.played-card img.full-card-art,
+.project-card img.full-card-art{
+  position:absolute!important;inset:0!important;display:block!important;
+  width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
+  object-fit:fill!important;margin:0!important;padding:0!important;
+}
+.playing-card,.played-card,.project-card{position:relative;overflow:hidden}
+.center-play{
+  display:block!important;position:relative!important;
+  width:196px!important;height:184px!important;min-width:196px!important;min-height:184px!important;
+  margin:0 auto!important;justify-self:center!important;align-self:center!important;
+}
+.played-card{
+  position:absolute!important;display:block!important;
+  width:58px!important;height:82px!important;
+  margin:0!important;transform:none!important;
+  border-radius:7px;z-index:2;
+}
+.played-card.at-0{left:calc(50% - 29px)!important;top:calc(100% - 84px)!important}
+.played-card.at-1{left:2px!important;top:calc(50% - 41px)!important}
+.played-card.at-2{left:calc(50% - 29px)!important;top:2px!important}
+.played-card.at-3{left:calc(100% - 60px)!important;top:calc(50% - 41px)!important}
+.played-card.clearing{animation:none!important;opacity:1!important}
+.hand .playing-card{flex-basis:76px!important;width:76px!important;height:108px!important}
+@media(max-width:560px){
+ .center-play{width:164px!important;height:150px!important;min-width:164px!important;min-height:150px!important}
+ .played-card{width:49px!important;height:70px!important}
+ .played-card.at-0{left:calc(50% - 24.5px)!important;top:calc(100% - 72px)!important}
+ .played-card.at-1{left:1px!important;top:calc(50% - 35px)!important}
+ .played-card.at-2{left:calc(50% - 24.5px)!important;top:1px!important}
+ .played-card.at-3{left:calc(100% - 50px)!important;top:calc(50% - 35px)!important}
+ .hand .playing-card{flex-basis:62px!important;width:62px!important;height:90px!important}
+}
+
+.card-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#fff;color:#17231e;font-weight:900;font-size:22px}
+.card-fallback[hidden]{display:none!important}
+.card-fallback i{font-style:normal;font-size:30px}
+.playing-card.red .card-fallback,.played-card.red .card-fallback{color:#c62828}
+
+@media(max-width:560px){
+ .board{grid-template-columns:58px minmax(150px,1fr) 58px!important}
+}
+
+
+/* Requested table refinements. */
+.game-info{justify-content:center;gap:10px;flex-wrap:wrap}
+#score{flex:1 1 100%;text-align:center;font-size:13px;line-height:1.5;white-space:normal}
+#phase{display:none}
+.points-live{display:none!important}
+.contract-icon.diamond{font-size:34px;min-width:34px;height:34px}
+@media(max-width:560px){#score{font-size:12px}.contract-icon.diamond{font-size:30px;min-width:30px;height:30px}}
+
+.seat-contract .contract-diamond{display:inline-block;font-size:1.55em;line-height:.8;vertical-align:-2px}
+@media(max-width:560px){.seat-contract .contract-diamond{font-size:1.4em}}
+
+
+/* Premium player identity plaque and status strip. */
+.board .seat-identity{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:max-content;max-width:100%;min-width:76px;margin:2px auto 0;
+  padding:5px 10px 4px;border:1px solid #c6a15d99;border-radius:10px;
+  background:linear-gradient(145deg,#092f24eF,#164b38eF 58%,#0b3025f2);
+  box-shadow:inset 0 1px 0 #fff2,inset 0 -2px 5px #001b12aa,0 3px 9px #0018;
+}
+.board .seat-name{
+  display:block;width:100%;font-size:13px;font-weight:900;line-height:1.35;
+  color:#fff4d2;text-shadow:0 1px 2px #0019;overflow-wrap:anywhere;
+}
+.board .seat.active-turn .seat-identity{
+  border-color:#f5d47c;background:linear-gradient(145deg,#315b3b,#214b34);
+  box-shadow:inset 0 1px 0 #fff4,0 0 12px #f4d47755,0 3px 9px #0018;
+}
+.board .seat-badges{
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;
+  width:100%;margin-top:6px;padding-top:4px;border-top:1px solid #d4b66a55;
+}
+.board .seat-contract,.board .seat-role{
+  display:inline-flex;align-items:center;justify-content:center;gap:3px;
+  min-height:19px;margin:0;padding:2px 7px;border:1px solid #d8bb705c;
+  border-radius:6px;background:linear-gradient(180deg,#f1d78d2b,#b88a3420);
+  color:#ffe6a4;font-size:12px;font-weight:900;line-height:1.2;
+}
+.board .seat-contract b{display:inline!important;font-size:1.7em!important;line-height:.75}
+.board .seat-contract .contract-diamond{font-size:1.8em!important;vertical-align:-2px}
+.board .seat-project{margin-top:5px}
+.board .seat-bottom .seat-identity{margin-top:3px}
+@media(max-width:560px){
+ .board .seat-identity{min-width:66px;padding:4px 6px 3px;border-radius:8px;margin-top:3px}
+ .board .seat-name{font-size:12px}
+ .board .seat-badges{margin-top:5px;padding-top:3px;gap:3px}
+ .board .seat-contract,.board .seat-role{font-size:10px;min-height:17px;padding:2px 5px}
+ .board .seat-contract b{font-size:1.6em!important}
+}
+
+/* A discreet return control sits below the player's status plaque. */
+.controls .bot-return{
+  flex:0 0 auto;width:auto;min-width:132px;max-width:190px;margin:7px auto 0;
+  padding:7px 18px;border:1px solid #d4b56e;border-radius:8px;
+  background:linear-gradient(180deg,#f3d98f,#c89b43);color:#34270b;
+  font-size:13px;box-shadow:0 3px 9px #0018;
+}
+.controls:has(.bot-return){padding-top:2px;padding-bottom:2px}
+
+/* Round result: our team's points first, then the opponents, with an explicit replay action. */
+.round-summary-points{direction:rtl;flex-direction:row}
+.round-next{
+  align-self:center;min-width:150px;padding:8px 20px;margin-top:3px;
+  border:1px solid #fff0bd;border-radius:9px;
+  background:linear-gradient(180deg,#246a4b,#12442f);color:#fff4d2;
+  box-shadow:inset 0 1px 0 #ffffff35,0 3px 8px #0004;
+  font-size:13px;font-weight:900;
+}
+.round-next:disabled{opacity:.6;cursor:wait}
+
+/* Slightly lower the fan and trim card width on narrow phones. */
+.board .hand{transform:translateY(8px)}
+@media(max-width:560px){
+ .hand .playing-card{flex-basis:60px!important;width:60px!important}
+ .board .hand{transform:translateY(8px);padding-left:1px!important;padding-right:1px!important}
+}
+
+/* Refined poker-style card backs: deep felt, fine crosshatch and double gold edging. */
+.back-card{
+  border:1px solid #d9bd78!important;border-radius:5px!important;
+  background:
+    linear-gradient(135deg,transparent 46%,#ffffff24 47%,#ffffff24 50%,transparent 51%) 0 0/8px 8px,
+    linear-gradient(45deg,transparent 46%,#ffffff20 47%,#ffffff20 50%,transparent 51%) 0 0/8px 8px,
+    radial-gradient(ellipse at center,#286b53 0%,#164a39 58%,#0b3026 100%)!important;
+  box-shadow:inset 0 0 0 2px #d9bd784d,inset 0 0 0 4px #092e25,0 2px 5px #001b!important;
+}
+.back-card::after{
+  content:"";position:absolute;inset:4px;border:1px solid #e4ca8b99;border-radius:2px;
+  background:repeating-linear-gradient(45deg,#e2c88718 0 2px,transparent 2px 4px);
+}
+.opponent-hand .back-card{position:relative;overflow:hidden}
+@media(max-width:560px){.back-card{border-radius:4px!important}}
+
+/* A more refined poker-table rail with layered wood and gold pinstripe. */
+.board{
+  border:10px solid #50351f!important;border-radius:34px!important;
+  outline:2px solid #c69b58;outline-offset:-5px;
+  box-shadow:inset 0 0 0 2px #e2c27c,inset 0 0 0 6px #102f25,
+    inset 0 0 34px #031b13,0 10px 26px #0007!important;
+  background:
+    radial-gradient(ellipse at 50% 42%,#287451 0%,#19553e 52%,#103d2e 100%)!important;
+}
+@media(max-width:560px){.board{border-width:7px!important;border-radius:25px!important}}
+
+
+/* Mobile fan: just a touch of overlap to keep the full hand compact. */
+@media(max-width:560px){
+  .board .hand .playing-card{margin-left:-4px!important}
+  .board .hand .playing-card:first-child{margin-left:0!important}
+}
+
+/* Keep every player's name on one line; clip only when the plaque is too narrow. */
+.board .seat-identity{width:100%;max-width:100%;min-width:0}
+.board .seat-name{
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  overflow-wrap:normal!important;word-break:normal!important;
+}
+
+/* Opponent hand arc opens downward; the outer card edges sit lower. */
+.opponent-hand{position:relative;z-index:2;align-items:flex-start!important;margin-top:0!important}
+.opponent-hand .back-card{transform-origin:50% 0}
+.won-pile{
+  position:relative;z-index:1;display:flex;justify-content:center;align-items:center;
+  height:24px;width:78px;margin:-2px auto -12px;pointer-events:none;
+}
+.won-pile .won-card{
+  position:absolute;left:calc(50% - 9px);top:0;width:18px;height:25px;
+  margin:0!important;transform:translate(calc((var(--pile-i) - 11.5)*1.05px),calc(var(--pile-i)*.22px))
+    rotate(calc((var(--pile-i) - 11.5)*1.5deg));
+  box-shadow:0 1px 3px #001b!important;
+}
+@media(max-width:560px){
+  .won-pile{height:20px;width:64px;margin:-2px auto -10px}
+  .won-pile .won-card{width:15px;height:21px;left:calc(50% - 7.5px)}
+}
+
+/* Score plaque matches player identity plaques; trick points get a compact right-side chip. */
+#score{padding:0!important}
+.score-panel{
+  direction:rtl;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;max-width:430px;margin:0 auto;padding:5px 7px;
+  border:1px solid #c6a15d99;border-radius:10px;
+  background:linear-gradient(145deg,#092f24ef,#164b38ef 58%,#0b3025f2);
+  box-shadow:inset 0 1px 0 #fff2,0 3px 9px #0018;
+}
+.score-teams{display:flex;align-items:center;justify-content:center;gap:7px;flex:1;min-width:0}
+.score-team{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:1;
+  min-width:0;padding:4px 8px;border:1px solid #d8bb705c;border-radius:7px;
+  background:linear-gradient(180deg,#f1d78d2b,#b88a3420);color:#fff4d2;
+  font-size:13px;font-weight:900;white-space:nowrap;
+}
+.score-team b{font-size:18px;color:#ffe6a4}
+.score-points{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:0 0 auto;min-width:57px;padding:3px 7px;border:1px solid #d8bb7080;
+  border-radius:7px;background:#061f19aa;color:#f7df9e;line-height:1.1;
+}
+.score-points small{font-size:9px;color:#f4dfaa}
+.score-points b{font-size:12px;margin-top:3px;white-space:nowrap}
+.turn-dot{display:none!important}
+.board .seat.active-turn .seat-identity{
+  border-color:#fff0b3!important;
+  background:linear-gradient(145deg,#426b4d,#315c40)!important;
+  box-shadow:inset 0 1px 0 #fff7,0 0 15px #f8e6ae88,0 3px 9px #0018!important;
+}
+@media(max-width:560px){
+  .score-panel{padding:4px 5px;gap:5px}
+  .score-team{font-size:11px;padding:4px 5px;gap:3px}
+  .score-team b{font-size:16px}
+  .score-points{min-width:52px;padding:3px 5px}
+}
+
+
+/* Clean table layout without passive status/instruction bars. */
+#gameNotice,.game-notice,.points-live{display:none!important}
+#controls:empty{display:none!important}
+.controls{padding:5px 0 0;min-height:0}
+.table-hint{display:none!important}
+.played-card{margin-left:-5px!important;margin-right:-5px!important;z-index:2}
+.trick{position:relative;isolation:isolate;gap:2px;overflow:visible}
+.won-backdrop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none;opacity:.36;filter:saturate(.72)}
+.won-backdrop .back-card{position:absolute;width:34px;height:48px;flex:0 0 34px;margin:0!important;border-radius:4px;box-shadow:0 1px 3px #0019}
+.center-announcement,.round-summary{position:relative;z-index:3}
+.table-head .room-label{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid #d9bb77;border-radius:10px;background:linear-gradient(145deg,#0a3025,#174b39);box-shadow:inset 0 1px 0 #fff2,0 2px 8px #0017}
+#code{display:inline-flex;align-items:center;justify-content:center;min-width:54px;padding:3px 8px;border-radius:6px;background:#f3dfaa;color:#263629;font-weight:900;letter-spacing:1.5px}
+.room-actions{display:flex;align-items:center;gap:7px}
+.share-room{width:39px;height:39px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid #e7cf91;border-radius:10px;background:#f2d47f;color:#263629}
+.share-room svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.share-word{display:inline-flex;align-items:center;justify-content:center;min-width:48px;height:39px;padding:3px 9px;border:1px solid #d9bb77;border-radius:6px;background:#f3dfaa;color:#263629;font-weight:900;letter-spacing:.3px}
+@media(max-width:560px){
+ .shell{padding-left:8px;padding-right:8px}.table{padding:10px}
+ .board .seat-identity{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:3px 2px 4px!important;border-radius:7px}
+ .board .seat-name{width:100%!important;max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;overflow-wrap:normal!important;word-break:normal!important;text-align:center;font-size:10px!important;line-height:1.2}
+ .board .seat-badges{gap:2px;margin-top:3px;padding-top:3px}
+ .board .seat-contract,.board .seat-role,.board .seat-project{background:#123e30!important;opacity:1!important;border:1px solid #c6a15d!important;color:#fff0c2!important;padding:2px 4px!important;border-radius:4px!important;font-size:9px!important;white-space:nowrap}
+ .board .seat{padding:3px 0!important}
+ .hand{gap:0!important;padding-left:2px!important;padding-right:2px!important;overflow-x:hidden!important}
+ .hand .playing-card{margin-left:-12px!important;flex:0 0 54px!important;width:54px!important}
+ .hand .playing-card:first-child{margin-left:0!important}
+ .playing-card img{width:27px!important;height:27px!important;object-fit:contain}
+ .played-card{margin-left:-7px!important;margin-right:-7px!important}
+ .won-backdrop .back-card{width:28px;height:40px;flex-basis:28px}
+ .table-head .room-label{font-size:13px;padding:5px 8px}.share-room{width:35px;height:35px}
+}
+
+
+/* Navigation header and compact drop-down menu */
+.site-header{position:relative;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px;padding:8px 12px;border:1px solid #dce7df;border-radius:16px;background:linear-gradient(120deg,#fff,#f2f7f2);box-shadow:0 6px 22px #163b2510}
+.site-header .brand{text-decoration:none;white-space:nowrap}
+.site-header .tag{margin-inline-start:auto;font-size:13px}
+.menu-toggle{width:42px;height:40px;padding:0;border:1px solid #c7d8cc;border-radius:11px;background:#174d3c;color:#fff;font-size:21px}
+.site-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:8px;display:none;min-width:190px;padding:7px;border:1px solid #d6e2d9;border-radius:14px;background:#fff;box-shadow:0 14px 34px #102d1c30}
+.site-menu.open{display:grid}
+.site-menu a{padding:12px 13px;border-radius:9px;color:#174d3c;text-decoration:none;font-weight:800}
+.site-menu a:hover{background:#edf4ee}
+.lobby-panel{margin-top:18px}
+
+/* The table is a dedicated app-like screen on phones: no document scrolling. */
+html:has(body.table-page),body.table-page{width:100%;height:100%;min-height:100%;margin:0;overflow:hidden;overscroll-behavior:none;touch-action:none}
+body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;background:#082d22}
+.table-page .shell{width:100%;max-width:none;height:100%;min-height:0;margin:0;padding:calc(6px + env(safe-area-inset-top)) calc(6px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(6px + env(safe-area-inset-left));display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.table-page .site-header{flex:0 0 42px;min-height:42px;height:42px;padding:3px 9px;border:1px solid #8e7548;border-radius:10px;background:linear-gradient(120deg,#103e30,#08291f);box-shadow:0 2px 9px #0005}
+.table-page .site-header .brand{font-size:19px;color:#fff}
+.table-page .site-header .brand b{font-size:11px;padding:3px 5px}
+.table-page .site-header .tag{color:#e5d4a7;font-size:10px}
+.table-page .menu-toggle{width:34px;height:32px;border-color:#bfa66f;background:#e8c66f;color:#26351e;font-size:18px}
+.table-page .site-menu{background:#123d2f;border-color:#b99b5b}
+.table-page .site-menu a{color:#fff0c7}
+.table-page .site-menu a:hover{background:#ffffff18}
+.table-page .intro,.table-page .account-panel,.table-page .lobby-panel,.table-page footer{display:none!important}
+.table-page #table{display:flex!important;flex:1 1 auto;flex-direction:column;min-height:0;width:100%;margin:0;padding:7px;background:#164b39;border:1px solid #805b35;border-radius:12px;overflow:hidden;box-shadow:inset 0 0 0 2px #c49a61,0 5px 15px #0005}
+.table-page .table-head{flex:0 0 36px;min-height:36px;flex-wrap:nowrap}
+.table-page .game-info{flex:0 0 auto;min-height:34px;padding:4px 0}
+.table-page .board{flex:1 1 auto;min-height:0;height:auto;grid-template-rows:minmax(48px,.65fr) minmax(95px,1.25fr) minmax(48px,.65fr) auto;gap:1px;padding:4px 0;border-width:4px;border-radius:14px;overflow:hidden}
+.table-page .board .seat{min-height:0}
+.table-page .center-play{align-self:center}
+.table-page .board .hand{min-height:0;max-height:96px;padding:7px 3px 8px;align-items:center;overflow:hidden}
+.table-page #controls{flex:0 0 auto;max-height:72px;overflow-y:auto}
+.table-page #turnTimeout{position:absolute;z-index:40;inset-inline:12px;bottom:12px}
+.table-page .my-projects{flex:0 0 auto;min-height:0;margin:0}
+.table-page .hand{position:relative;border-top:1px solid #c6a15d55;background:linear-gradient(180deg,#0b3025,#061f19);border-radius:9px;box-shadow:inset 0 3px 12px #0005}
+.table-page .hand .playing-card{flex:0 0 54px;width:54px;height:76px;min-height:76px;margin-left:-27px!important;padding:5px 4px;border-radius:7px;transform:none!important;transform-origin:center;box-shadow:0 3px 7px #0006}
+.table-page .hand .playing-card:first-child{margin-left:0!important}
+.table-page .hand .playing-card.selected{transform:translateY(-12px)!important;z-index:20}
+.table-page .hand .playing-card:active{transform:translateY(-8px)!important}
+.table-page .hand .playing-card .full-card-art{max-width:100%;max-height:100%;object-fit:contain}
+.table-page .board .seat-bottom .seat-identity{background:linear-gradient(145deg,#08291f,#0c382a)!important;border:1px solid #c6a15d!important;border-radius:8px!important;padding:4px 7px!important;box-shadow:inset 0 1px 0 #ffffff20,0 2px 7px #0005!important}
+.table-page .board .seat-bottom .seat-name{color:#fff4d2!important}
+.table-page .board .seat-bottom .seat-badges span{background:#08291f!important}
+@media(max-width:560px){
+ .table-page .shell{padding:3px;gap:3px}
+ .table-page .site-header{flex-basis:36px;height:36px;min-height:36px;padding:2px 7px}
+ .table-page .site-header .brand{font-size:17px}
+ .table-page .site-header .tag{font-size:9px}
+ .table-page #table{padding:5px;border-radius:9px}
+ .table-page .table-head{flex-basis:32px;min-height:32px}
+ .table-page .game-info{min-height:31px;font-size:12px}
+ .table-page .board{grid-template-columns:58px minmax(0,1fr) 58px;grid-template-rows:minmax(42px,.55fr) minmax(86px,1.15fr) minmax(42px,.55fr) auto;padding:3px;border-width:3px;border-radius:12px}
+ .table-page .board .seat{padding:2px 0!important}
+ .table-page .center-play{width:142px;height:122px;min-width:142px;min-height:122px}
+ .table-page .played-card{width:48px;height:68px}
+ .table-page .played-card.at-0{left:47px;top:58px}
+ .table-page .played-card.at-1{left:2px;top:27px}
+ .table-page .played-card.at-2{left:47px;top:-3px}
+ .table-page .played-card.at-3{left:91px;top:27px}
+ .table-page .board .hand{max-height:83px;padding:5px 2px 6px}
+ .table-page .hand .playing-card{flex-basis:52px;width:52px;height:73px;min-height:73px;margin-left:-26px!important}
+ .table-page .hand .playing-card:first-child{margin-left:0!important}
+ .table-page .card-corner b,.table-page .card-corner i{font-size:12px}
+ .table-page .card-pips{font-size:11px}
+ .table-page .court-art{width:65%;height:70%}
+ .table-page #controls{gap:5px;padding:3px 0;max-height:62px}
+ .table-page #controls button{min-width:0;padding:8px 10px;font-size:12px}
+}
+@media(max-height:650px) and (max-width:560px){
+ .table-page .board{grid-template-rows:38px minmax(72px,1fr) 38px auto}
+ .table-page .board .hand{max-height:70px}
+ .table-page .hand .playing-card{height:64px;min-height:64px}
+}
+
+
+/* Baloot Net SEO homepage */
+.home-shell{max-width:1080px}
+.home-hero{padding:56px 0 42px;text-align:center}
+.home-hero h1{max-width:900px;margin:12px auto;font-size:clamp(32px,6vw,56px);line-height:1.35;color:#123f32}
+.home-hero .hero-lead{max-width:780px;margin:14px auto;color:#52675b;font-size:17px;line-height:2}
+.hero-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:24px 0 18px}
+.hero-actions a{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:12px;padding:14px 22px;font-weight:800}
+.primary-link{background:#174d3c;color:#fff}.secondary-link{background:#e8efe9;color:#174d3c}
+.hero-points{display:flex;justify-content:center;gap:10px 20px;flex-wrap:wrap;color:#426653;font-size:13px;font-weight:700}
+.section-heading{text-align:center;margin-bottom:22px}.section-heading h2{font-size:clamp(23px,4vw,32px);margin:6px 0;color:#173f31}.section-heading p{color:#64766b;line-height:1.8}
+.home-features,.how-section,.faq-section{padding:34px 0}
+.feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.feature-card{background:#fff;border:1px solid #e0e7e1;border-radius:16px;padding:20px;box-shadow:0 8px 24px #1a382008}
+.feature-card>span{font-size:26px}.feature-card h3{margin:10px 0 6px;color:#174d3c}.feature-card p{margin:0;color:#65766b;line-height:1.8;font-size:14px}
+.home-lobby{margin:16px 0 28px}.home-lobby .section-heading{margin-bottom:24px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;list-style:none;padding:0;counter-reset:step}
+.steps li{counter-increment:step;background:#eaf0eb;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.steps li:before{content:counter(step);display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#174d3c;color:white;font-weight:bold}
+.steps li b{color:#174d3c}.steps li span{font-size:14px;line-height:1.8;color:#5e7165}
+.faq-section details{background:#fff;border:1px solid #e0e7e1;border-radius:12px;padding:15px 18px;margin:9px 0}
+.faq-section summary{cursor:pointer;font-weight:800;color:#174d3c}.faq-section details p{color:#65766b;line-height:1.8;margin-bottom:0}
+.home-footer{text-align:center;border-top:1px solid #dfe7e0;margin-top:24px;padding:28px 10px;color:#718078}
+.home-footer .brand{display:inline-block;text-decoration:none}.home-footer p{font-size:13px;line-height:1.8}
+@media(max-width:760px){.feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.steps{grid-template-columns:1fr}.home-hero{padding:38px 0 28px}.home-hero .hero-lead{font-size:15px}}
+@media(max-width:480px){.feature-grid{grid-template-columns:1fr}.hero-actions{flex-direction:column}.hero-actions a{width:100%}.hero-points{gap:8px 12px}.home-shell{padding:14px 12px}}
+
+
+/* Optional qaid room setting and in-game evidence chooser. */
+.qaid-setting{display:flex;align-items:center;gap:8px;margin:12px 0;color:#174d3c;font-weight:800}
+.qaid-setting input{width:18px;height:18px;accent-color:#174d3c}
+.qaid-open{min-height:34px;padding:7px 16px;border:1px solid #d9bd78!important;background:#f5e5b8!important;color:#4a3510!important;font-weight:900}
+.qaid-panel{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px;border:1px solid #d9bd78;border-radius:10px;background:#092f24;color:#fff2c9}
+.qaid-panel strong,.qaid-panel p{width:100%;margin:2px 0;text-align:center;font-size:12px;line-height:1.7}
+.qaid-panel button{min-height:32px;padding:6px 10px;font-size:11px}
+.qaid-panel .qaid-confirm{background:#f3d98f;color:#34270b;border:1px solid #fff0bd;border-radius:7px;font-weight:900}
+@media(max-width:560px){.qaid-setting{font-size:12px}.table-page .qaid-panel{gap:5px;padding:7px}.table-page .qaid-panel button{font-size:10px;padding:6px 8px}}
+/* Slightly larger cards while retaining the overlapping hand layout. */
+.table-page .hand .playing-card{width:56px;height:78px;min-height:78px;flex-basis:56px}
+.table-page .played-card{width:50px;height:70px}
+@media(max-width:560px){.table-page .hand .playing-card{width:54px;height:76px;min-height:76px;flex-basis:54px;margin-left:-27px!important}.table-page .hand .playing-card:first-child{margin-left:0!important}.table-page .played-card{width:50px;height:70px}}
+/* Active mobile seat lights up in place; no movement or layout shift. */
+.table-page .board .seat-bottom.active-turn .seat-identity{border-color:#fff0b3!important;background:linear-gradient(145deg,#426b4d,#315c40)!important;box-shadow:inset 0 1px 0 #fff7,0 0 15px #f8e6ae99,0 3px 9px #0018!important;transform:none!important}
+
+#qaidTopControl{display:flex;justify-content:center;align-items:center;width:100%;margin:4px auto 0}
+#qaidTopControl:empty{display:none}
+#qaidTopControl .qaid-panel{max-width:100%}
+.table-page #qaidTopControl .qaid-open{min-height:28px;padding:4px 14px;font-size:11px}
+
+/* Qaid evidence: each completed trick is shown separately as four card images. */
+.table-page .qaid-visual-panel{display:flex;flex-direction:column;align-items:center;gap:9px}
+.table-page .qaid-countdown{font-size:12px;font-weight:900;color:#ffe39a}
+.table-page .qaid-trick-list{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;width:100%}
+.table-page .qaid-trick-choice{min-width:105px}
+.table-page .qaid-card-grid{display:grid;grid-template-columns:repeat(4,minmax(54px,1fr));gap:7px;width:100%;max-width:420px}
+.table-page .qaid-card-choice{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;padding:5px!important;background:#fff!important;color:#18372b!important;border:2px solid #d6d0c2!important;border-radius:8px}
+.table-page .qaid-card-choice:disabled{opacity:.35;filter:grayscale(1)}
+.table-page .qaid-card-choice.selected,.table-page .qaid-trick-choice.selected{outline:3px solid #f3d98f!important;border-color:#f3d98f!important}
+.table-page .qaid-card-art{display:block;width:100%;max-width:68px;aspect-ratio:5/7}
+.table-page .qaid-card-art .full-card-art{display:block;width:100%;height:100%;object-fit:contain}
+.table-page .qaid-card-choice small{font-size:10px;color:#294638}
+.table-page .qaid-selection-summary{padding:6px 9px;background:#174333;border-radius:7px}
+@media(max-width:560px){.table-page .qaid-card-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.table-page .qaid-card-choice{padding:3px!important}.table-page .qaid-card-choice small{font-size:9px}}
+
+/* One-page qaid evidence board: all completed tricks stay visible and selectable. */
+.table-page #qaidTopControl .qaid-visual-panel{display:flex;flex-direction:column;align-items:stretch;gap:8px;max-height:62vh;overflow:hidden}
+.table-page .qaid-board-head{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
+.table-page .qaid-instruction{font-size:12px;line-height:1.65}
+.table-page .qaid-legend{display:flex;justify-content:center;gap:9px;font-size:11px;font-weight:900}
+.table-page .qaid-legend span{padding:4px 9px;border-radius:6px}
+.table-page .qaid-legend-cheat{background:#a51e26;color:#fff}
+.table-page .qaid-legend-proof{background:#168348;color:#fff}
+.table-page .qaid-history-board{width:100%;overflow-y:auto;overscroll-behavior:contain;padding:4px 2px 10px;max-height:42vh}
+.table-page .qaid-trick-row{position:relative;padding:5px 4px 9px;border-bottom:1px solid #ffffff26}
+.table-page .qaid-trick-row+.qaid-trick-row{margin-top:-13px;padding-top:16px}
+.table-page .qaid-trick-label{font-size:10px;font-weight:900;text-align:right;color:#f3d98f;margin:0 3px 5px}
+.table-page .qaid-card-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;width:100%;max-width:none}
+.table-page .qaid-card-choice{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:4px!important;background:#fff!important;color:#18372b!important;border:2px solid #d6d0c2!important;border-radius:7px;cursor:pointer}
+.table-page .qaid-card-choice:disabled{opacity:.35;filter:grayscale(1);cursor:not-allowed}
+.table-page .qaid-card-art{display:block;width:100%;max-width:65px;aspect-ratio:5/7}
+.table-page .qaid-card-art .full-card-art{display:block;width:100%;height:100%;object-fit:contain}
+.table-page .qaid-card-choice small{font-size:9px;color:#294638}
+.table-page .qaid-card-choice.qaid-cheat-selected{border:3px solid #d51f2a!important;background:#fff0f0!important;box-shadow:0 0 0 2px #d51f2a55}
+.table-page .qaid-card-choice.qaid-proof-selected{border:3px solid #15934f!important;background:#eafff1!important;box-shadow:0 0 0 2px #15934f55}
+.table-page .qaid-card-tag{display:block;width:100%;padding:3px 1px;border-radius:4px;color:#fff;font-size:9px;line-height:1.2}
+.table-page .qaid-cheat-selected .qaid-card-tag{background:#bd202b}
+.table-page .qaid-proof-selected .qaid-card-tag{background:#168348}
+.table-page .qaid-actions{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:7px;width:100%}
+.table-page .qaid-selection-summary{width:100%;font-size:11px;padding:5px 8px;background:#174333;border-radius:7px}
+.table-page .qaid-actions .qaid-confirm{background:#f3d98f;color:#34270b;border:1px solid #fff0bd;border-radius:7px;font-weight:900}
+@media(max-width:560px){
+ .table-page #qaidTopControl .qaid-visual-panel{max-height:66vh;padding:6px}
+ .table-page .qaid-history-board{max-height:47vh}
+ .table-page .qaid-card-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+ .table-page .qaid-card-choice{padding:3px!important}
+ .table-page .qaid-card-choice small{font-size:8px}
+ .table-page .qaid-card-art{max-width:58px}
+ .table-page .qaid-card-tag{font-size:8px}
+}
+
+
+/* Qaid evidence opens as a full-screen pause overlay on desktop and mobile. */
+.table-page #qaidTopControl:has(.qaid-visual-panel){
+ position:fixed;inset:0;z-index:10000;width:100vw;height:100vh;height:100dvh;
+ margin:0;padding:0;background:rgba(0,0,0,.78);display:flex;align-items:stretch;justify-content:stretch;
+}
+.table-page #qaidTopControl .qaid-visual-panel{
+ width:100%;height:100%;height:100dvh;max-width:none;max-height:none;min-height:0;
+ border:0;border-radius:0;padding:10px max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+ overflow:hidden;display:flex;flex-direction:column;gap:7px;
+}
+.table-page .qaid-board-head{position:sticky;top:0;z-index:4;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0 9px;border-bottom:1px solid #ffffff35;background:#092f24}
+.table-page .qaid-board-head>strong{width:auto;text-align:right;font-size:16px}
+.table-page .qaid-head-actions{display:flex;align-items:center;gap:7px}
+.table-page .qaid-head-actions button{white-space:nowrap;min-height:34px;padding:5px 10px;font-size:12px}
+.table-page .qaid-head-confirm{background:#f3d98f!important;color:#34270b!important;border:1px solid #fff0bd!important;border-radius:7px;font-weight:900}
+.table-page .qaid-head-close{background:#ffffff18!important;color:#fff!important;border-color:#ffffff45!important}
+.table-page .qaid-instruction{font-size:11px!important;line-height:1.35!important;margin:0!important;flex:0 0 auto}
+.table-page .qaid-legend{flex:0 0 auto;font-size:10px}
+.table-page .qaid-history-board{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding:2px 2px 14px}
+.table-page .qaid-trick-row{padding:3px 3px 6px}
+.table-page .qaid-trick-row+.qaid-trick-row{margin-top:0;padding-top:5px}
+.table-page .qaid-trick-label{font-size:9px;margin:0 2px 3px}
+.table-page .qaid-card-grid{gap:5px}
+.table-page .qaid-card-choice{gap:2px;padding:3px!important}
+.table-page .qaid-card-name{display:block;width:100%;font-size:10px;font-weight:900;line-height:1.2;color:#193b2c;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.table-page .qaid-card-art{display:block;position:relative;width:100%;max-width:64px;aspect-ratio:5/7;overflow:hidden}
+.table-page .qaid-card-art .full-card-art{position:static!important;display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important}
+.table-page .qaid-card-art .card-fallback{display:flex;align-items:center;justify-content:center;width:100%;height:100%;gap:4px;font-weight:900;font-size:clamp(16px,5vw,24px);color:#173d30;background:#fff}
+.table-page .qaid-card-choice small{font-size:8px;line-height:1.1}
+.table-page .qaid-card-tag{font-size:8px;padding:2px 1px}
+.table-page .qaid-actions{flex:0 0 auto}
+.table-page .qaid-selection-summary{margin:0!important}
+@media(max-width:560px){
+ .table-page #qaidTopControl .qaid-visual-panel{padding:calc(7px + env(safe-area-inset-top)) 7px calc(7px + env(safe-area-inset-bottom));gap:5px}
+ .table-page .qaid-board-head>strong{font-size:14px}
+ .table-page .qaid-head-actions{gap:4px}
+ .table-page .qaid-head-actions button{min-height:31px;padding:4px 7px;font-size:10px}
+ .table-page .qaid-instruction{font-size:10px!important}
+ .table-page .qaid-legend{font-size:9px}
+ .table-page .qaid-card-grid{gap:3px}
+ .table-page .qaid-card-choice{padding:2px!important}
+ .table-page .qaid-card-name{font-size:9px}
+ .table-page .qaid-card-art{max-width:60px}
+ .table-page .qaid-card-choice small{font-size:7px}
+ .table-page .qaid-card-tag{font-size:7px}
+}
+
+
+/* Refined table spacing and card proportions. */
+.table-page .shell{padding:2px max(2px,env(safe-area-inset-right)) calc(2px + env(safe-area-inset-bottom)) max(2px,env(safe-area-inset-left));gap:2px}
+.table-page .site-header{flex-basis:34px;height:34px;min-height:34px;padding:2px 8px}
+.table-page #table{padding:5px}
+.table-page .table-head{flex-basis:31px;min-height:31px}
+.table-page .game-info{padding:2px 0;min-height:29px}
+.table-page .hand .playing-card{flex-basis:80px!important;width:80px!important;height:114px!important;min-height:114px!important}
+.table-page .played-card{width:58px!important;height:81px!important}
+.table-page .played-card.at-0{left:calc(50% - 29px)!important;top:calc(100% - 84px)!important}
+.table-page .played-card.at-1{left:2px!important;top:calc(50% - 40px)!important}
+.table-page .played-card.at-2{left:calc(50% - 29px)!important;top:2px!important}
+.table-page .played-card.at-3{left:calc(100% - 60px)!important;top:calc(50% - 40px)!important}
+.table-page .hand .playing-card{transition:transform .18s cubic-bezier(.2,.8,.25,1),box-shadow .16s ease!important;will-change:transform}
+.table-page .hand .playing-card.selected{transform:translateY(-11px) rotate(0deg) scale(1.025)!important;box-shadow:0 7px 13px #0004!important}
+.table-page .hand .playing-card.is-playing{animation:card-throw .18s cubic-bezier(.22,.8,.25,1) forwards!important;pointer-events:none}
+@keyframes card-throw{0%{opacity:1;transform:translateY(-10px) scale(1.015)}65%{opacity:.82;transform:translateY(-20px) rotate(-2deg) scale(.99)}100%{opacity:0;transform:translateY(-25px) rotate(-3deg) scale(.97)}}
+.table-page .played-card.card-arriving{animation:card-arrive .2s cubic-bezier(.2,.8,.25,1) both}
+@keyframes card-arrive{0%{opacity:0;transform:translateY(-12px) scale(.94) rotate(-2deg)}75%{opacity:1;transform:translateY(1px) scale(1.01)}100%{opacity:1;transform:none}}
+.table-page .played-card.clearing{animation:trick-gather .32s cubic-bezier(.25,.75,.3,1) forwards!important}
+@keyframes trick-gather{0%{opacity:1;filter:brightness(1);transform:translateY(0) scale(1)}65%{opacity:.75;filter:brightness(1.06);transform:translateY(5px) scale(.97)}100%{opacity:0;filter:brightness(1.08);transform:translateY(9px) scale(.94)}}
+@media(max-width:560px){
+ .table-page .shell{padding:2px 2px calc(2px + env(safe-area-inset-bottom));gap:2px}
+ .table-page .site-header{flex-basis:30px;height:30px;min-height:30px;padding:1px 6px}
+ .table-page .site-header .brand{font-size:16px}
+ .table-page .site-header .tag{font-size:8px}
+ .table-page #table{padding:4px}
+ .table-page .table-head{flex-basis:29px;min-height:29px}
+ .table-page .game-info{min-height:27px}
+ .table-page .board .hand{max-height:92px;padding:5px 2px 7px}
+ .table-page .hand .playing-card{flex-basis:65px!important;width:65px!important;height:94px!important;min-height:94px!important;margin-left:-29px!important}
+ .table-page .hand .playing-card:first-child{margin-left:0!important}
+ .table-page .played-card{width:56px!important;height:78px!important}
+ .table-page .played-card.at-0{left:calc(50% - 28px)!important;top:calc(100% - 81px)!important}
+ .table-page .played-card.at-1{left:1px!important;top:calc(50% - 39px)!important}
+ .table-page .played-card.at-2{left:calc(50% - 28px)!important;top:1px!important}
+ .table-page .played-card.at-3{left:calc(100% - 57px)!important;top:calc(50% - 39px)!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .table-page .hand .playing-card,.table-page .played-card{transition:none!important;animation:none!important}
+}
+
+/* Selectable empty seats before the first deal. */
+.table-page .seat.seat-selectable{cursor:pointer;border:1px dashed #d7c28a!important;border-radius:12px;background:#ffffff0a!important;transition:background .16s ease,border-color .16s ease}
+.table-page .seat.seat-selectable:after{content:'اضغط للانتقال';display:block;margin:3px auto;color:#f4dfa5;font-size:10px;font-weight:800}
+.table-page .seat.seat-selectable:focus-visible{outline:2px solid #f4dfa5;outline-offset:2px}
+.table-page .round-summary{width:min(94%,390px);max-height:90%;overflow:auto;padding:12px;background:linear-gradient(160deg,#172b27,#0a1715);border:1px solid #c8ad70;border-radius:16px;color:#f8f1dd;box-shadow:0 12px 36px #000b;gap:9px}
+.table-page .round-summary-title{font-size:17px;color:#f2d58d}
+.table-page .round-summary-section,.table-page .round-summary-total{width:100%;padding:7px 9px;border:1px solid #ffffff20;border-radius:9px;background:#ffffff08}
+.table-page .round-summary-section small,.table-page .round-summary-total small{display:block;color:#cdbd93;font-size:11px;margin-bottom:5px}
+.table-page .round-summary-points{display:flex;justify-content:space-around;gap:12px;font-size:13px}
+.table-page .round-summary-points b{font-size:21px;color:#fff}
+.table-page .round-summary-project-names{font-size:10px;color:#d8d0bd;margin-top:4px}
+.table-page .round-summary-total{background:#d8bd79;color:#18231d;border-color:#f2dda7}
+.table-page .round-summary-total small,.table-page .round-summary-total .round-summary-points b{color:#18231d}
+.table-page .round-summary-replay{width:100%;min-height:40px;border:1px solid #f3dda3;border-radius:9px;background:#e4c77f;color:#1c281f;font-weight:900;font-size:14px;cursor:pointer}
+.table-page #startGame[hidden]{display:none!important}
+@media(max-width:560px){.table-page .round-summary{width:min(96%,360px);padding:9px;gap:6px}.table-page .round-summary-title{font-size:15px}.table-page .round-summary-section,.table-page .round-summary-total{padding:5px 7px}.table-page .round-summary-points b{font-size:19px}}
+
+/* Final result sheet: compact two-team score grid matching the table cells. */
+.table-page .room-actions{display:flex;align-items:center;gap:8px}
+.table-page #startGame{min-width:74px;padding:7px 13px;border:2px solid #d8bd79;border-radius:8px;background:#e4c77f;color:#1b2c22;box-shadow:inset 0 0 0 2px #fff4cf,0 2px 5px #0004;font-size:13px;line-height:1.2}
+.table-page #startGame[hidden]{display:none!important}
+.table-page .round-summary{width:min(96%,390px);max-height:95%;overflow:auto;padding:8px;background:linear-gradient(160deg,#142b24,#071713);border:2px solid #9e8249;border-radius:12px;color:#f7f0df;box-shadow:0 8px 28px #000b;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.table-page .round-summary>header{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:2px 3px 6px;border-bottom:1px solid #b99b5b66}
+.table-page .round-summary-title{font-size:13px;color:#f0d58e}
+.table-page .round-summary>header small{font-size:9px;color:#c9c0a9;font-weight:500}
+.table-page .round-summary-result{font-size:11px;padding:3px;border:0;color:#f5dfa5}
+.table-page .round-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;direction:rtl}
+.table-page .result-team{min-width:0;padding:5px;border:1px solid #b99b5b88;border-radius:8px;background:#ffffff08;display:flex;flex-direction:column;gap:4px;text-align:center}
+.table-page .result-team>strong{font-size:11px;padding:3px;border-radius:5px;background:#244b3b;color:#f3d990}
+.table-page .result-cell{display:grid;grid-template-columns:1fr auto;align-items:center;gap:3px;padding:3px 4px;border:1px solid #ffffff20;border-radius:5px;text-align:right}
+.table-page .result-cell small{font-size:9px;color:#cbbf9d}
+.table-page .result-cell b{font-size:13px;color:#fff}
+.table-page .result-cell em{grid-column:1/-1;font-size:8px;font-style:normal;color:#d9d0ba;line-height:1.3;overflow-wrap:anywhere}
+.table-page .result-cell.result-total{background:#d9c17f;border-color:#f0dca7}
+.table-page .result-cell.result-total small,.table-page .result-cell.result-total b{color:#1c2b22}
+.table-page .round-summary-qaid,.table-page .round-summary-replay{width:100%;min-height:30px;padding:5px;border:1px solid #f0d99e;border-radius:6px;background:#e2c77f;color:#1b2b21;font-size:11px;font-weight:900}
+.table-page .round-summary:focus-visible{outline:2px solid #f0d99e;outline-offset:2px}
+@media(max-width:560px){.table-page .round-summary{width:min(98%,340px);padding:6px;gap:4px}.table-page .round-summary-title{font-size:12px}.table-page .round-summary>header small{font-size:8px}.table-page .result-team{padding:4px;gap:3px}.table-page .result-cell{padding:2px 3px}.table-page .result-cell small{font-size:8px}.table-page .result-cell b{font-size:12px}.table-page .result-cell em{font-size:7px}.table-page .round-summary-result{font-size:10px}}
+
+/* Full-page result and qaid views: no popup inside the card table. */
+.table-page .result-page,.table-page .qaid-page{flex:1 1 auto;min-height:0;width:100%;overflow-y:auto;overscroll-behavior:contain;padding:12px;background:#0b3327;border:1px solid #c5a365;border-radius:12px;box-shadow:inset 0 0 0 1px #ffffff18}
+.table-page .result-page:not(.hidden),.table-page .qaid-page:not(.hidden){display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:12px}
+.table-page .result-page .round-summary{width:100%;max-width:760px;margin:auto;box-sizing:border-box;box-shadow:none}
+.table-page .round-summary-dismiss{min-height:40px;margin-top:5px;background:#123f32!important;color:#fff0c7!important;border:1px solid #c9a75f!important;border-radius:9px;font-weight:900}
+.table-page .result-page .round-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.table-page .qaid-page .qaid-panel{width:100%;max-width:760px;margin:auto;box-sizing:border-box}
+.table-page .site-header{z-index:500;overflow:visible}
+.table-page .menu-toggle{position:relative;z-index:502;cursor:pointer;pointer-events:auto}
+.table-page .site-menu{z-index:501;pointer-events:auto}
+.table-page .site-menu a{display:block;cursor:pointer;pointer-events:auto}
+.table-page #qaidHeaderButton{min-height:34px;padding:5px 13px;border-radius:9px;cursor:pointer}
+.table-page #qaidHeaderButton:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:560px){.table-page .result-page,.table-page .qaid-page{padding:8px}.table-page .result-page .round-summary-grid{gap:6px}}
+
+/* Keep the main navigation above hero/table layers and fully clickable. */
+.site-header{position:relative;z-index:500;overflow:visible}
+.menu-toggle{position:relative;z-index:502;cursor:pointer;pointer-events:auto}
+.site-menu{z-index:501;pointer-events:auto}
+.site-menu a{display:block;cursor:pointer;pointer-events:auto}
+
+
+/* Result newsletter is a compact centered modal over the table, never a page below it. */
+.table-page .result-page:not(.hidden){
+ position:fixed;inset:0;z-index:9000;width:100vw;height:100vh;height:100dvh;
+ display:flex;align-items:center;justify-content:center;overflow:hidden;
+ margin:0;padding:14px;background:rgba(0,0,0,.78);border:0;border-radius:0;box-shadow:none;
+}
+.table-page .result-page .round-summary{
+ width:min(94vw,520px);max-width:520px;max-height:calc(100dvh - 28px);overflow:hidden;
+ margin:auto;padding:15px;border:1px solid #d8b96e;border-radius:16px;
+ background:linear-gradient(155deg,#174b39,#0c3025);color:#fff4d3;
+ box-shadow:0 18px 55px #0009,inset 0 0 0 2px #ffffff12;
+}
+.table-page .result-page .round-summary>header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.table-page .result-page .round-summary-title{font-size:17px;color:#ffe39a}
+.table-page .result-page .round-summary>header small{font-size:10px;color:#e3d5ae;text-align:left}
+.table-page .result-page .round-summary-result{font-size:14px;color:#fff0bd;border-color:#ffffff35;padding:6px 0}
+.table-page .result-page .round-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.table-page .result-page .result-team{padding:7px;background:#ffffff0b;border-color:#d4b76b88;gap:5px}
+.table-page .result-page .result-team>strong{font-size:12px}
+.table-page .result-page .result-cell{padding:4px 5px}
+.table-page .result-page .result-cell small{font-size:9px}
+.table-page .result-page .result-cell b{font-size:13px}
+.table-page .result-page .result-cell em{font-size:8px}
+.table-page .round-summary-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:5px}
+.table-page .round-summary-actions button{width:100%;min-height:40px;padding:8px 12px;border-radius:9px;font-size:13px;font-weight:900}
+.table-page .round-summary-continue{background:#e7ca7f;color:#26351f;border:1px solid #fff0bd}
+.table-page .round-summary-qaid{background:#f7e9c5;color:#4a1d18;border:1px solid #e8b3a2}
+.table-page .round-summary-qaid:disabled{opacity:.6}
+.table-page .round-summary-replay{background:#e7ca7f;color:#26351f}
+.table-page #qaidPage:not(.hidden){
+ position:fixed;inset:0;z-index:10000;width:100vw;height:100vh;height:100dvh;
+ display:flex;align-items:stretch;justify-content:stretch;overflow:hidden;
+ margin:0;padding:0;background:rgba(0,0,0,.82);border:0;border-radius:0;
+}
+.table-page #qaidPage .qaid-visual-panel{
+ width:100%;height:100%;max-width:none;max-height:none;min-height:0;
+ padding:calc(10px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+ overflow:hidden;border:0;border-radius:0;display:flex;flex-direction:column;gap:7px;
+}
+.table-page #qaidPage .qaid-history-board{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto}
+@media(max-width:560px){
+ .table-page .result-page:not(.hidden){padding:8px}
+ .table-page .result-page .round-summary{width:96vw;max-height:calc(100dvh - 16px);padding:9px;gap:6px}
+ .table-page .result-page .round-summary-title{font-size:14px}
+ .table-page .result-page .round-summary-result{font-size:12px}
+ .table-page .result-page .result-team{padding:5px;gap:3px}
+ .table-page .result-page .result-cell{padding:3px}
+ .table-page .result-page .result-cell small{font-size:8px}
+ .table-page .result-page .result-cell b{font-size:12px}
+ .table-page .result-page .result-cell em{font-size:7px}
+ .table-page .round-summary-actions button{min-height:36px;padding:6px;font-size:12px}
+}
+
+/* Keep the exposed purchase card visible while post-purchase responses are pending. */
+.table-page .upcard-visible{display:block;width:40px;height:56px;flex:0 0 40px;overflow:hidden;border-radius:5px;box-shadow:0 3px 9px #0008}
+.table-page .upcard-visible .full-card-art{display:block;width:100%;height:100%;object-fit:fill}
+
+/* Keep the exposed purchase card physically inside the playing table. */
+.table-page .board{position:relative}
+.table-page .board #upcard{position:absolute;top:2px;left:50%;transform:translateX(-50%);z-index:8;width:auto;min-height:0;margin:0;padding:0;pointer-events:none}
+.table-page .board #upcard .upcard-visible{width:42px;height:59px;flex:0 0 42px}
+/* Disabled evidence cards remain clearly visible; only violation cards are selectable. */
+.table-page .qaid-card-choice:disabled{opacity:1!important;filter:none!important;cursor:default}
+
+
+/* Qaid/result dialogs live at body level and must remain fully interactive on touch screens. */
+.table-page #resultPage:not(.hidden){
+ z-index:19000;pointer-events:auto;isolation:isolate;
+}
+.table-page #qaidPage:not(.hidden){
+ z-index:20000;pointer-events:auto;isolation:isolate;touch-action:pan-y;
+}
+.table-page #resultPage .round-summary,
+.table-page #resultPage .round-summary-actions,
+.table-page #resultPage .round-summary-actions button,
+.table-page #qaidPage .qaid-visual-panel,
+.table-page #qaidPage .qaid-history-board,
+.table-page #qaidPage .qaid-card-choice,
+.table-page #qaidPage .qaid-head-actions button{
+ pointer-events:auto;
+}
+.table-page #resultPage button,
+.table-page #qaidPage button{
+ position:relative;z-index:2;touch-action:manipulation;cursor:pointer;
+}
+.table-page #qaidPage .qaid-card-choice:not(:disabled){cursor:pointer}
+.table-page #qaidPage .qaid-card-tag-available{background:#a56a18;color:#fff}
