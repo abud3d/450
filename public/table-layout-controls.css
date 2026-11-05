@@ -21,11 +21,11 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   --bottom-info-x: 0px; --bottom-info-y: 34px; --bottom-info-z: 20; --bottom-info-s: 1;
 
   /* اللاعب الأيسر */
-  --left-seat-x: 0px; --left-seat-y: 0px; --left-seat-z: 5;
+  --left-seat-x: 0px; --left-seat-y: 20px; --left-seat-z: 5;
   --left-avatar-s: 1; --left-info-s: 1;
 
   /* اللاعب الأيمن */
-  --right-seat-x: 0px; --right-seat-y: 0px; --right-seat-z: 5;
+  --right-seat-x: 0px; --right-seat-y: 20px; --right-seat-z: 5;
   --right-avatar-s: 1; --right-info-s: 1;
 
   /* أوراق الخصوم */
@@ -37,7 +37,7 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   --my-cards-z: 3; --my-cards-s: 1;
 
   /* الأوراق الملعوبة في الوسط */
-  --trick-x: 0px; --trick-y: 0px; --trick-z: 12; --trick-s: 1;
+  --trick-x: 0px; --trick-y: 20px; --trick-z: 12; --trick-s: 1;
 
   /* ورقة العرض */
   --upcard-x: 0px; --upcard-y: 0px; --upcard-z: 9; --upcard-s: 1;
@@ -57,10 +57,10 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
     --bottom-avatar-x: 0px; --bottom-avatar-y: 38px; --bottom-avatar-z: 5; --bottom-avatar-s: 1;
     --bottom-info-x: 0px; --bottom-info-y: 26px; --bottom-info-z: 20; --bottom-info-s: 1;
 
-    --left-seat-x: 0px; --left-seat-y: 0px; --left-seat-z: 5;
+    --left-seat-x: 0px; --left-seat-y: 20px; --left-seat-z: 5;
     --left-avatar-s: 1; --left-info-s: 1;
 
-    --right-seat-x: 0px; --right-seat-y: 0px; --right-seat-z: 5;
+    --right-seat-x: 0px; --right-seat-y: 20px; --right-seat-z: 5;
     --right-avatar-s: 1; --right-info-s: 1;
 
     --opponent-cards-x: 0px; --opponent-cards-y: 0px;
@@ -69,7 +69,7 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
     --my-cards-x: 78px; --my-cards-y: 68px;
     --my-cards-z: 8; --my-cards-s: 1;
 
-    --trick-x: 0px; --trick-y: 0px; --trick-z: 12; --trick-s: 1;
+    --trick-x: 0px; --trick-y: 20px; --trick-z: 12; --trick-s: 1;
     --upcard-x: 0px; --upcard-y: 0px; --upcard-z: 9; --upcard-s: 1;
     --projects-x: 0px; --projects-y: 0px; --projects-z: 12; --projects-s: 1;
   }
