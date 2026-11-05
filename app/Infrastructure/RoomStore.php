@@ -441,8 +441,12 @@ final class RoomStore
                             $didChange = true;
                         } elseif ($seat >= 0 && (int) ($state['timeoutSeat'] ?? -1) !== $seat) {
                             $state['timeoutSeat'] = $seat;
-                            $state['timeoutGraceUntil'] = $now + 2;
-                            \Baloot\Game\TurnClock::arm($state, 2, $now);
+                            $state['timeoutGraceUntil'] = $now + 5;
+                            $turnClockStartedAt = (int) ($state['turnClockStartedAt'] ?? max(0, (int) ($state['turnDeadlineAt'] ?? $now) - 5));
+                            \Baloot\Game\TurnClock::arm($state, 5, $now);
+                            $state['turnClockStartedAt'] = $turnClockStartedAt;
+                            $state['timeoutNoticeSeat'] = $seat;
+                            $state['timeoutNoticeUntil'] = $now + 10;
                             $state['lastAction'] = 'تأخر اللاعب؛ سيُعرض خيار تولي البوت للمقعد.';
                             $didChange = true;
                         }
