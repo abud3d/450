@@ -185,14 +185,8 @@ footer #buildVersion{display:inline-block;color:#53685d;font-weight:700;directio
 .seat-role,.seat-contract{font-size:11px;line-height:1.4;font-weight:900;color:#ffe08a;margin-top:2px}
 .seat-contract{color:#f8df91}
 .seat-project{position:relative;z-index:4;margin-top:1px;color:#fff0b5;text-shadow:0 1px 3px #002}
-.turn-timeout{position:relative;z-index:20;margin:12px auto;padding:16px;border:2px solid #e7c76b;border-radius:14px;background:#fff7dc;color:#382b0c;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;max-width:440px;box-shadow:0 8px 24px #0003}
-.turn-timeout span{font-size:13px;line-height:1.6}
-.turn-timeout div{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
-.turn-timeout button{min-width:125px}
-@media(max-width:560px){.board{grid-template-rows:70px 142px 70px auto}.board .hand{min-height:110px;padding:9px 4px 14px}.hand .playing-card{margin-left:-23px}.hand .playing-card:first-child{margin-left:0}.seat-role,.seat-contract{font-size:9px}.turn-timeout{padding:12px}.turn-timeout button{min-width:110px}}
 
 /* Final layout corrections */
-.turn-timeout.hidden{display:none!important}
 .seat-badges{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;gap:5px;min-height:16px;white-space:nowrap}
 .seat-badges .seat-role,.seat-badges .seat-contract,.seat-badges .seat-project{display:inline-flex;align-items:center;margin:0;font-size:10px;line-height:1.2;white-space:nowrap}
 .seat-badges .seat-project{color:#fff0b5}
@@ -742,7 +736,6 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
 .table-page .center-play{align-self:center}
 .table-page .board .hand{min-height:0;max-height:96px;padding:7px 3px 8px;align-items:center;overflow:hidden}
 .table-page #controls{flex:0 0 auto;max-height:72px;overflow-y:auto}
-.table-page #turnTimeout{position:absolute;z-index:40;inset-inline:12px;bottom:12px}
 .table-page .my-projects{flex:0 0 auto;min-height:0;margin:0}
 .table-page .hand{position:relative;border-top:1px solid #c6a15d55;background:linear-gradient(180deg,#0b3025,#061f19);border-radius:9px;box-shadow:inset 0 3px 12px #0005}
 .table-page .hand .playing-card{flex:0 0 54px;width:54px;height:76px;min-height:76px;margin-left:-27px!important;padding:5px 4px;border-radius:7px;transform:none!important;transform-origin:center;box-shadow:0 3px 7px #0006}
@@ -1358,35 +1351,39 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
 .table-page .board .seat-badges .seat-call.pulse-b{animation:auction-call-float-b .65s ease-in-out 2}
 @keyframes auction-call-float-a{50%{transform:translate(-50%,-7px);box-shadow:0 0 0 4px #f4d46b66,0 7px 18px #0009}}
 @keyframes auction-call-float-b{50%{transform:translate(-50%,7px);box-shadow:0 0 0 4px #8ebeff66,0 7px 18px #0009}}
-/* Full-width timeout notice: direct child of #board, pinned to the viewport. */
+/* BLT-PHP-19.12: full-screen return-to-game overlay; no countdown or bot opt-out. */
 .table-page #table #board > #turnTimeout{
-  position:fixed;left:0;right:0;top:auto;bottom:0;
-  inset-inline-start:0;inset-inline-end:0;
-  transform:none;z-index:10000;
-  display:flex!important;flex-direction:column;align-items:center;justify-content:center;
-  box-sizing:border-box;width:100vw;max-width:none;min-height:0;height:auto;
-  margin:0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));
+  position:fixed;inset:0;z-index:10000;
+  display:grid!important;place-items:center;
+  box-sizing:border-box;width:100vw;height:100dvh;max-width:none;
+  margin:0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));
   border:0!important;border-radius:0!important;
-  background:#f3d16e!important;color:#174d3c!important;text-align:center;
-  box-shadow:none!important;gap:3px;
+  background:rgba(0,0,0,.76)!important;
+  -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+  color:#fff;text-align:center;
 }
-.table-page #table #board > #turnTimeout:not(.hidden){animation:timeout-rise .25s ease-out both}
-@keyframes timeout-rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.table-page #table #board > #turnTimeout strong{margin:0;color:#174d3c!important;font:800 13px/1.3 Tahoma,Arial,sans-serif}
-.table-page #table #board > #turnTimeout span{margin:0;color:#174d3c!important;font:400 11px/1.4 Tahoma,Arial,sans-serif}
-.table-page #table #board > #turnTimeout>div{display:flex;justify-content:center;gap:7px;margin-top:3px}
+.table-page #table #board > #turnTimeout .timeout-modal{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;width:min(340px,90vw);padding:30px 22px;
+  border:2px solid #e7c76b;border-radius:18px;
+  background:linear-gradient(145deg,#082f24,#18533c);
+  color:#fff4d2;box-shadow:0 18px 55px #000b;
+  animation:timeout-modal-enter .22s ease-out both;
+}
+.table-page #table #board > #turnTimeout strong{
+  margin:0;color:#ffe49a;font:900 21px/1.4 Tahoma,Arial,sans-serif;
+}
 .table-page #table #board > #turnTimeout button{
-  min-height:29px;min-width:0;padding:5px 12px;border:0!important;border-radius:7px;
-  background:#174d3c!important;color:#fff!important;font:700 11px/1.2 Tahoma,Arial,sans-serif;
-  box-shadow:none!important
+  min-width:190px;min-height:48px;padding:12px 24px;
+  border:1px solid #f4d47b;border-radius:12px;
+  background:#f0d078;color:#173d30;
+  font:900 16px/1.2 Tahoma,Arial,sans-serif;
+  box-shadow:0 5px 14px #0005;cursor:pointer;
 }
-.table-page #table #board > #turnTimeout button.secondary{
-  background:#e8efe9!important;color:#174d3c!important;border:0!important
-}
-.table-page #table #board > #turnTimeout button[hidden]{display:none!important}
+.table-page #table #board > #turnTimeout button:disabled{opacity:.65;cursor:wait}
 .table-page #table #board > #turnTimeout.hidden{display:none!important}
-@media(prefers-reduced-motion:reduce){.table-page #table #board > #turnTimeout:not(.hidden){animation:none}}
-
+@keyframes timeout-modal-enter{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.table-page #table #board > #turnTimeout .timeout-modal{animation:none}}
 /* The lower strip reports the current player's real record or the active call. */
 .table-page #table #gameNotice{
   display:flex!important;align-items:center;justify-content:center;gap:9px;
@@ -1468,12 +1465,6 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
 .table-page .board #trick{transform:scale(1.045)}
 .table-page .board .played-card{width:69px;height:96px}
 .table-page .board #upcard .upcard-visible{width:46px;height:64px;flex-basis:46px}
-.table-page .turn-timeout{position:absolute;left:50%;bottom:calc(100% + 5px);transform:translateX(-50%);z-index:30;width:min(300px,88vw);max-width:300px;margin:0;padding:10px 12px;border:2px solid #d8bd72;border-radius:13px;background:linear-gradient(145deg,#082f24f5,#18533cf5);color:#fff4d2;box-shadow:0 8px 22px #001b}
-.table-page .turn-timeout strong{font-size:14px;color:#ffe49a}
-.table-page .turn-timeout span{font-size:11px;line-height:1.4;color:#f4ead0}
-.table-page .turn-timeout .timeout-countdown-text{display:grid;place-items:center;width:30px;height:30px;border:2px solid #f5d477;border-radius:50%;color:#ffe49a;font-size:16px;font-weight:900}
-.table-page .turn-timeout div{gap:6px}
-.table-page .turn-timeout button{min-width:0;padding:7px 10px;font-size:11px}
 #controls:empty:not(.hidden){display:flex!important;visibility:hidden;min-height:50px}
 #controls:not(:empty){min-height:50px}
 .controls button.is-pending,.hand .playing-card.is-pending{opacity:.82;cursor:progress;filter:saturate(.75)}
@@ -1490,8 +1481,6 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
  .table-page .board .hand{transform:translateY(8px)!important}
  .table-page .board #trick{transform:scale(1.02)}
  .table-page .board .played-card{width:58px;height:82px}
- .table-page .turn-timeout{width:min(270px,86vw);padding:8px 10px}
- .table-page .turn-timeout button{padding:6px 8px;font-size:10px}
 }
 @media(prefers-reduced-motion:reduce){.controls button.is-pending::after{animation:none}}
 
