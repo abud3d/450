@@ -220,3 +220,25 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
 .table-page #table #board .seat-bottom .seat-avatar-wrap {
   z-index: 22 !important;
 }
+
+
+/* BLT-PHP-19.34: cards stay behind avatar and info; transparent seat area must not block taps. */
+.table-page #table #board > #hand {
+  z-index: 3 !important;
+  pointer-events: auto !important;
+}
+.table-page #table #board .seat-bottom {
+  position: relative !important;
+  z-index: 5 !important;
+  pointer-events: none !important;
+}
+.table-page #table #board .seat-bottom .seat-avatar-wrap,
+.table-page #table #board .seat-bottom .seat-identity {
+  pointer-events: auto !important;
+}
+.table-page #table #board .seat-bottom .seat-avatar-wrap {
+  z-index: 5 !important;
+}
+.table-page #table #board .seat-bottom .seat-identity {
+  z-index: 20 !important;
+}
