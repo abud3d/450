@@ -13,8 +13,8 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   --board-x: 0px; --board-y: 0px;
 
   /* اللاعب العلوي */
-  --top-avatar-x: 0px; --top-avatar-y: 0px; --top-avatar-z: 10; --top-avatar-s: 1;
-  --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
+  --top-avatar-x: 0px; --top-avatar-y: 10px; --top-avatar-z: 10; --top-avatar-s: 1;
+  --top-info-x: 0px; --top-info-y: 10px; --top-info-z: 11; --top-info-s: 1;
 
   /* اللاعب السفلي */
   --bottom-avatar-x: 0px; --bottom-avatar-y: 48px; --bottom-avatar-z: 5; --bottom-avatar-s: 1;
