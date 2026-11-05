@@ -360,6 +360,7 @@ final class RoomStore
                 $room = $this->lockedRoom($pdo, (string) $code);
                 $state = $this->decode((string) $room['state_json']);
                 $now = time();
+                if ((int) ($state['timeoutNoticeUntil'] ?? 0) <= $now) unset($state['timeoutNoticeUntil'], $state['timeoutNoticeSeat']);
                 $beforePhase = (string) ($state['game']['phase'] ?? 'lobby');
                 $beforeQaidResult = $state['game']['qaidResult'] ?? null;
                 $game =& $state['game'];
@@ -442,7 +443,11 @@ final class RoomStore
                         } elseif ($seat >= 0 && (int) ($state['timeoutSeat'] ?? -1) !== $seat) {
                             $state['timeoutSeat'] = $seat;
                             $state['timeoutGraceUntil'] = $now + 5;
+                            $turnClockStartedAt = (int) ($state['turnClockStartedAt'] ?? max(0, (int) ($state['turnDeadlineAt'] ?? $now) - 5));
                             \Baloot\Game\TurnClock::arm($state, 5, $now);
+                            $state['turnClockStartedAt'] = $turnClockStartedAt;
+                            $state['timeoutNoticeSeat'] = $seat;
+                            $state['timeoutNoticeUntil'] = $now + 10;
                             $state['lastAction'] = 'تأخر اللاعب؛ سيُعرض خيار تولي البوت للمقعد.';
                             $didChange = true;
                         }
