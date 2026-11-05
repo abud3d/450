@@ -1,0 +1,385 @@
+/*
+============================================================
+BLT TABLE LAYOUT CONTROLS — 19.26
+ملف مستقل للتحكم في مواقع عناصر الطاولة وطبقاتها وأحجامها.
+X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
+لا نغيّر transform الخاص بأوراق اللعب الفردية أو حركة الاختيار.
+============================================================
+*/
+
+/* 1) إعدادات سطح المكتب */
+:root {
+  /* الطاولة */
+  --board-x: 0px; --board-y: 0px;
+
+  /* اللاعب العلوي */
+  --top-avatar-x: 0px; --top-avatar-y: 0px; --top-avatar-z: 10; --top-avatar-s: 1;
+  --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
+
+  /* اللاعب السفلي */
+  --bottom-avatar-x: 0px; --bottom-avatar-y: 48px; --bottom-avatar-z: 5; --bottom-avatar-s: 1;
+  --bottom-info-x: 0px; --bottom-info-y: 34px; --bottom-info-z: 20; --bottom-info-s: 1;
+
+  /* اللاعب الأيسر */
+  --left-seat-x: 0px; --left-seat-y: 35px; --left-seat-z: 5;
+  --left-avatar-s: 1; --left-info-s: 1;
+
+  /* اللاعب الأيمن */
+  --right-seat-x: 0px; --right-seat-y: 35px; --right-seat-z: 5;
+  --right-avatar-s: 1; --right-info-s: 1;
+
+  /* أوراق الخصوم */
+  --opponent-cards-x: 0px; --opponent-cards-y: 0px;
+  --opponent-cards-z: 4; --opponent-cards-s: 1;
+
+  /* أوراق اللاعب الحالي */
+  --my-cards-x: 0px; --my-cards-y: 53px;
+  --my-cards-z: 3; --my-cards-s: 1;
+
+  /* الأوراق الملعوبة في الوسط */
+  --trick-x: 0px; --trick-y: 45px; --trick-z: 12; --trick-s: 1;
+
+  /* ورقة العرض */
+  --upcard-x: 0px; --upcard-y: 0px; --upcard-z: 9; --upcard-s: 1;
+
+  /* المشاريع/الإعلانات */
+  --projects-x: 0px; --projects-y: 0px; --projects-z: 12; --projects-s: 1;
+}
+
+/* 2) إعدادات الهاتف — غيّرها هنا دون التأثير على الكمبيوتر */
+@media (max-width:560px) {
+  :root {
+    --board-x: 0px; --board-y: 0px;
+
+    --top-avatar-x: 0px; --top-avatar-y: 0px; --top-avatar-z: 10; --top-avatar-s: 1;
+    --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
+
+    --bottom-avatar-x: 0px; --bottom-avatar-y: 38px; --bottom-avatar-z: 5; --bottom-avatar-s: 1;
+    --bottom-info-x: 0px; --bottom-info-y: 26px; --bottom-info-z: 20; --bottom-info-s: 1;
+
+    --left-seat-x: 0px; --left-seat-y: 35px; --left-seat-z: 5;
+    --left-avatar-s: 1; --left-info-s: 1;
+
+    --right-seat-x: 0px; --right-seat-y: 35px; --right-seat-z: 5;
+    --right-avatar-s: 1; --right-info-s: 1;
+
+    --opponent-cards-x: 0px; --opponent-cards-y: 0px;
+    --opponent-cards-z: 4; --opponent-cards-s: 1;
+
+    --my-cards-x: 78px; --my-cards-y: 68px;
+    --my-cards-z: 8; --my-cards-s: 1;
+
+    --trick-x: 0px; --trick-y: 45px; --trick-z: 12; --trick-s: 1;
+    --upcard-x: 0px; --upcard-y: 0px; --upcard-z: 9; --upcard-s: 1;
+    --projects-x: 0px; --projects-y: 0px; --projects-z: 12; --projects-s: 1;
+  }
+}
+
+/* 3) الطاولة */
+.table-page #table .board {
+  translate: var(--board-x) var(--board-y);
+}
+
+/* 4) صورة ومعلومات اللاعب العلوي */
+.table-page .board .seat-top .seat-avatar-wrap {
+  top: 0 !important;
+  translate: var(--top-avatar-x) var(--top-avatar-y) !important;
+  scale: var(--top-avatar-s);
+  z-index: var(--top-avatar-z) !important;
+}
+.table-page .board .seat-top .seat-identity {
+  translate: var(--top-info-x) var(--top-info-y) !important;
+  scale: var(--top-info-s);
+  z-index: var(--top-info-z) !important;
+}
+
+/* 5) صورة ومعلومات اللاعب السفلي */
+.table-page .board .seat-bottom .seat-avatar-wrap {
+  top: 0 !important;
+  translate: var(--bottom-avatar-x) var(--bottom-avatar-y) !important;
+  scale: var(--bottom-avatar-s);
+  z-index: var(--bottom-avatar-z) !important;
+}
+.table-page .board .seat-bottom .seat-identity {
+  transform: none !important;
+  translate: var(--bottom-info-x) var(--bottom-info-y) !important;
+  scale: var(--bottom-info-s);
+  z-index: var(--bottom-info-z) !important;
+}
+
+/* 6) اللاعبان الأيسر والأيمن */
+.table-page .board .seat-left {
+  translate: var(--left-seat-x) var(--left-seat-y);
+  z-index: var(--left-seat-z);
+}
+.table-page .board .seat-left .seat-avatar-wrap { scale: var(--left-avatar-s); }
+.table-page .board .seat-left .seat-identity { scale: var(--left-info-s); }
+
+.table-page .board .seat-right {
+  translate: var(--right-seat-x) var(--right-seat-y);
+  z-index: var(--right-seat-z);
+}
+.table-page .board .seat-right .seat-avatar-wrap { scale: var(--right-avatar-s); }
+.table-page .board .seat-right .seat-identity { scale: var(--right-info-s); }
+
+/* 7) أوراق الخصوم */
+.table-page .board .opponent-hand {
+  translate: var(--opponent-cards-x) var(--opponent-cards-y);
+  scale: var(--opponent-cards-s);
+  z-index: var(--opponent-cards-z);
+  position: relative;
+}
+
+/* 8) أوراق اللاعب الحالي — إلغاء إزاحات transform القديمة للحاوية فقط.
+   لا تتغير transforms الخاصة بكل ورقة أو التحديد/الرفع عند الضغط. */
+.table-page #table .board > #hand {
+  transform: none !important;
+  translate: var(--my-cards-x) var(--my-cards-y) !important;
+  scale: var(--my-cards-s);
+  z-index: var(--my-cards-z) !important;
+  position: relative;
+}
+
+/* 9) أوراق الوسط وورقة العرض */
+.table-page .board #trick {
+  translate: var(--trick-x) var(--trick-y);
+  scale: var(--trick-s);
+  z-index: var(--trick-z);
+}
+.table-page .board #upcard {
+  translate: var(--upcard-x) var(--upcard-y);
+  scale: var(--upcard-s);
+  z-index: var(--upcard-z);
+}
+
+/* 10) بطاقات المشاريع */
+.table-page .board .project-cards {
+  translate: var(--projects-x) var(--projects-y);
+  scale: var(--projects-s);
+  z-index: var(--projects-z);
+  position: relative;
+}
+
+
+/* BLT-PHP-19.26: explicit front-seat overlap and lower hand position. */
+.table-page .board .seat-bottom .seat-avatar-wrap {
+  position: relative !important;
+  z-index: 5 !important;
+}
+.table-page .board .seat-bottom .seat-identity {
+  position: relative !important;
+  z-index: 20 !important;
+}
+.table-page #table .board > #hand {
+  transform: none !important;
+  translate: 0 0 !important;
+  margin-top: 0 !important;
+}
+.table-page #table .board > #hand > .playing-card {
+  transform: translateY(calc(var(--fan-y, 0px) + var(--my-cards-y))) rotate(var(--fan-r, 0deg)) !important;
+}
+.table-page #table .board > #hand > .playing-card.selected {
+  transform: translateY(calc(var(--fan-y, 0px) + var(--my-cards-y) - 12px)) rotate(0deg) scale(1.025) !important;
+}
+
+/* BLT-PHP-19.29: keep the hand backdrop fixed; move the real card buttons only.
+   The independent CSS translate preserves each card's fan rotation/selection transform. */
+.table-page #table #board > #hand {
+  transform: none !important;
+  translate: 0 0 !important;
+  top: auto !important;
+}
+.table-page #table #board > #hand > .playing-card {
+  translate: 0 var(--my-cards-y) !important;
+}
+@media (max-width:560px) {
+  .table-page #table #board > #hand > .playing-card {
+    translate: 0 var(--my-cards-y) !important;
+  }
+}
+
+
+/* BLT-PHP-19.30: cards lower, and behind the player's avatar. */
+.table-page #table #board > #hand {
+  z-index: 3 !important;
+}
+.table-page #table #board .seat-bottom .seat-avatar-wrap {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+
+/* BLT-PHP-19.33: keep the front avatar above the cards, but make the cards tappable. */
+.table-page #table #board > #hand {
+  z-index: 21 !important;
+  pointer-events: auto !important;
+}
+.table-page #table #board > #hand > .playing-card {
+  pointer-events: auto !important;
+}
+.table-page #table #board .seat-bottom .seat-avatar-wrap {
+  z-index: 22 !important;
+}
+
+
+/* BLT-PHP-19.34: cards stay behind avatar and info; transparent seat area must not block taps. */
+.table-page #table #board > #hand {
+  z-index: 3 !important;
+  pointer-events: auto !important;
+}
+.table-page #table #board .seat-bottom {
+  position: relative !important;
+  z-index: 5 !important;
+  pointer-events: none !important;
+}
+.table-page #table #board .seat-bottom .seat-avatar-wrap,
+.table-page #table #board .seat-bottom .seat-identity {
+  pointer-events: auto !important;
+}
+.table-page #table #board .seat-bottom .seat-avatar-wrap {
+  z-index: 5 !important;
+}
+.table-page #table #board .seat-bottom .seat-identity {
+  z-index: 20 !important;
+}
+
+
+/* BLT-PHP-19.37: move the entire top player's seat, hidden cards, avatar and name plaque 10px down together. */
+.table-page #table #board .seat-top {
+  transform: translateY(10px) !important;
+}
+.table-page #table #board .seat-top .opponent-hand {
+  transform: none !important;
+}
+
+
+/* BLT-PHP-19.38: remove the dark tray behind the bottom hand; bring side avatars and name plaques above their card backs. */
+.table-page #table #board > #hand {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+.table-page #table #board .seat-left .opponent-hand,
+.table-page #table #board .seat-right .opponent-hand {
+  position: relative !important;
+  z-index: 1 !important;
+}
+.table-page #table #board .seat-left .seat-avatar-wrap,
+.table-page #table #board .seat-right .seat-avatar-wrap,
+.table-page #table #board .seat-left .seat-identity,
+.table-page #table #board .seat-right .seat-identity {
+  z-index: 8 !important;
+}
+
+
+/* BLT-PHP-19.41: enlarge declared project cards and give the bottom player's played card a clear lower display position. */
+.table-page #table .board .project-card {
+  flex-basis: 40px !important;
+  width: 40px !important;
+  height: 58px !important;
+}
+.table-page #table .board .project-card .card-corner b,
+.table-page #table .board .project-card .card-corner i {
+  font-size: 9px !important;
+}
+.table-page #table .board .project-card .card-pips {
+  font-size: 9px !important;
+  padding-top: 6px !important;
+}
+.table-page #table .board .project-card .ace-art {
+  font-size: 23px !important;
+}
+
+/* The user's own played card (at-0) sits below the three central cards,
+   visibly in front of the hand, without changing the play logic. */
+.table-page #table .board #trick .played-card.at-0 {
+  top: 118px !important;
+  z-index: 5 !important;
+}
+@media (max-width:560px) {
+  .table-page #table .board .project-card {
+    flex-basis: 33px !important;
+    width: 33px !important;
+    height: 48px !important;
+  }
+  .table-page #table .board .project-card .card-corner b,
+  .table-page #table .board .project-card .card-corner i {
+    font-size: 7px !important;
+  }
+  .table-page #table .board .project-card .card-pips {
+    font-size: 7px !important;
+    padding-top: 5px !important;
+  }
+  .table-page #table .board .project-card .ace-art {
+    font-size: 18px !important;
+  }
+  .table-page #table .board #trick .played-card.at-0 {
+    top: 96px !important;
+  }
+}
+
+
+/* BLT-PHP-19.47: move all played cards in the center trick 20px down. */
+.table-page .board #trick{
+  translate:var(--trick-x) calc(var(--trick-y) + 20px) !important;
+}
+
+
+/* BLT-PHP-19.48: enlarge side project cards downward; lift side avatars 10px and hidden hands 20px. */
+.table-page #table #board .seat-left .project-card,
+.table-page #table #board .seat-right .project-card{
+  flex-basis:60px !important;
+  height:60px !important;
+}
+.table-page #table #board .seat-left .seat-avatar-wrap,
+.table-page #table #board .seat-right .seat-avatar-wrap{
+  translate:0 -10px !important;
+}
+.table-page #table #board .seat-left .opponent-hand,
+.table-page #table #board .seat-right .opponent-hand{
+  translate:var(--opponent-cards-x) calc(var(--opponent-cards-y) - 20px) !important;
+}
+@media(max-width:560px){
+  .table-page #table #board .seat-left .project-card,
+  .table-page #table #board .seat-right .project-card{
+    flex-basis:58px !important;
+    height:58px !important;
+  }
+}
+
+
+/* BLT-PHP-19.52: lift the bottom player's hand 20px on landscape phones only. */
+@media (max-width:560px) and (orientation:landscape){
+  :root{
+    --my-cards-y:38px;
+  }
+}
+
+/* BLT-PHP-19.63: center only the top player's avatar; preserve the seat and info-plaque dimensions. */
+.table-page #table #board .seat-top .seat-avatar-wrap{
+  position:absolute!important;
+  left:50%!important;
+  right:auto!important;
+  top:0!important;
+  margin:0!important;
+  transform:translateX(-50%)!important;
+  translate:0 0!important;
+}
+
+
+/* BLT-PHP-19.66: bottom project cards must not change the hand, avatar or info layout. */
+.table-page #table #board .seat-bottom.has-project-cards{
+  position:relative!important;
+}
+.table-page #table #board .seat-bottom.has-project-cards .project-cards{
+  position:absolute!important;
+  left:50%!important;
+  top:calc(100% - 2px)!important;
+  right:auto!important;
+  width:max-content!important;
+  max-width:100%!important;
+  margin:0!important;
+  transform:translateX(-50%)!important;
+  z-index:12!important;
+}

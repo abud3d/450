@@ -9,15 +9,17 @@ namespace Baloot\Game;
  */
 final class TurnClock
 {
-    public static function arm(array &$roomState, int $seconds = 10, ?int $now = null): void
+    public static function arm(array &$roomState, int $seconds = 5, ?int $now = null): void
     {
         $seconds = max(1, min(300, $seconds));
+        $roomState['turnClockStartedAt'] = $now ?? time();
         $roomState['turnDeadlineAt'] = ($now ?? time()) + $seconds;
+        $roomState['turnDeadlineDuration'] = $seconds;
     }
 
     public static function clear(array &$roomState): void
     {
-        unset($roomState['turnDeadlineAt']);
+        unset($roomState['turnDeadlineAt'], $roomState['turnDeadlineDuration'], $roomState['turnClockStartedAt']);
     }
 
     public static function expired(array $roomState, ?int $now = null): bool
@@ -39,7 +41,7 @@ final class TurnClock
         }
         if (!$seatIsBot) return 'human_timeout';
         if (!Bot::act($roomState, $seat)) return 'no_bot_action';
-        self::arm($roomState, 10, $now);
+        self::arm($roomState, 5, $now);
         return 'bot_acted';
     }
 

@@ -185,14 +185,8 @@ footer #buildVersion{display:inline-block;color:#53685d;font-weight:700;directio
 .seat-role,.seat-contract{font-size:11px;line-height:1.4;font-weight:900;color:#ffe08a;margin-top:2px}
 .seat-contract{color:#f8df91}
 .seat-project{position:relative;z-index:4;margin-top:1px;color:#fff0b5;text-shadow:0 1px 3px #002}
-.turn-timeout{position:relative;z-index:20;margin:12px auto;padding:16px;border:2px solid #e7c76b;border-radius:14px;background:#fff7dc;color:#382b0c;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;max-width:440px;box-shadow:0 8px 24px #0003}
-.turn-timeout span{font-size:13px;line-height:1.6}
-.turn-timeout div{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
-.turn-timeout button{min-width:125px}
-@media(max-width:560px){.board{grid-template-rows:70px 142px 70px auto}.board .hand{min-height:110px;padding:9px 4px 14px}.hand .playing-card{margin-left:-23px}.hand .playing-card:first-child{margin-left:0}.seat-role,.seat-contract{font-size:9px}.turn-timeout{padding:12px}.turn-timeout button{min-width:110px}}
 
 /* Final layout corrections */
-.turn-timeout.hidden{display:none!important}
 .seat-badges{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;gap:5px;min-height:16px;white-space:nowrap}
 .seat-badges .seat-role,.seat-badges .seat-contract,.seat-badges .seat-project{display:inline-flex;align-items:center;margin:0;font-size:10px;line-height:1.2;white-space:nowrap}
 .seat-badges .seat-project{color:#fff0b5}
@@ -211,14 +205,14 @@ footer #buildVersion{display:inline-block;color:#53685d;font-weight:700;directio
 /* Turn marker leads the dealer/contract/project badges; winning team projects are shown beside their owners during trick two. */
 .turn-dot{display:inline-block;flex:0 0 9px;width:9px;height:9px;margin:0 2px 0 0;vertical-align:middle}
 .project-cards{direction:ltr;display:flex;justify-content:center;align-items:center;gap:2px;margin:4px auto 2px;max-width:100%;}
-.project-card{display:block;flex:0 0 29px;width:29px;height:42px;background:#fff;border:1px solid #d9d2c4;border-radius:4px;overflow:hidden;box-shadow:0 2px 5px #0018;color:#17231e}
+.project-card{display:block;flex:0 0 34px;width:34px;height:50px;background:#fff;border:1px solid #d9d2c4;border-radius:4px;overflow:hidden;box-shadow:0 2px 5px #0018;color:#17231e}
 .project-card .card-corner-top,.project-card .card-corner-bottom{left:2px;right:2px}
 .project-card .card-corner b,.project-card .card-corner i{font-size:7px!important}
 .project-card .card-pips{font-size:7px!important;padding:5px 0 2px;height:78%;width:76%}
 .project-card .court-art{width:68%;height:70%;margin-top:5px}
 .project-card .ace-art{font-size:19px}
 .project-card.red{color:#c62828}
-@media(max-width:560px){.project-card{flex-basis:23px;width:23px;height:34px}.project-card .card-corner b,.project-card .card-corner i{font-size:6px!important}.project-card .card-pips{font-size:6px!important;padding-top:4px}.project-card .ace-art{font-size:15px}}
+@media(max-width:560px){.project-card{flex-basis:28px;width:28px;height:42px}.project-card .card-corner b,.project-card .card-corner i{font-size:6px!important}.project-card .card-pips{font-size:6px!important;padding-top:4px}.project-card .ace-art{font-size:15px}}
 
 
 /* Final card-size overrides: table cards grow clearly; hand cards grow subtly. */
@@ -556,9 +550,9 @@ footer #buildVersion{display:inline-block;color:#53685d;font-weight:700;directio
 /* A discreet return control sits below the player's status plaque. */
 .controls .bot-return{
   flex:0 0 auto;width:auto;min-width:132px;max-width:190px;margin:7px auto 0;
-  padding:7px 18px;border:1px solid #d4b56e;border-radius:8px;
-  background:linear-gradient(180deg,#f3d98f,#c89b43);color:#34270b;
-  font-size:13px;box-shadow:0 3px 9px #0018;
+  padding:7px 18px;border:0;border-radius:8px;
+  background:linear-gradient(180deg,#23664b,#12442f);color:#fff4d2;
+  font:700 13px Tahoma,Arial,sans-serif;box-shadow:0 3px 9px #0018;
 }
 .controls:has(.bot-return){padding-top:2px;padding-bottom:2px}
 
@@ -742,7 +736,6 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
 .table-page .center-play{align-self:center}
 .table-page .board .hand{min-height:0;max-height:96px;padding:7px 3px 8px;align-items:center;overflow:hidden}
 .table-page #controls{flex:0 0 auto;max-height:72px;overflow-y:auto}
-.table-page #turnTimeout{position:absolute;z-index:40;inset-inline:12px;bottom:12px}
 .table-page .my-projects{flex:0 0 auto;min-height:0;margin:0}
 .table-page .hand{position:relative;border-top:1px solid #c6a15d55;background:linear-gradient(180deg,#0b3025,#061f19);border-radius:9px;box-shadow:inset 0 3px 12px #0005}
 .table-page .hand .playing-card{flex:0 0 54px;width:54px;height:76px;min-height:76px;margin-left:-27px!important;padding:5px 4px;border-radius:7px;transform:none!important;transform-origin:center;box-shadow:0 3px 7px #0006}
@@ -975,8 +968,9 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
 }
 
 /* Selectable empty seats before the first deal. */
-.table-page .seat.seat-selectable{cursor:pointer;border:1px dashed #d7c28a!important;border-radius:12px;background:#ffffff0a!important;transition:background .16s ease,border-color .16s ease}
-.table-page .seat.seat-selectable:after{content:'اضغط للانتقال';display:block;margin:3px auto;color:#f4dfa5;font-size:10px;font-weight:800}
+.table-page .seat.seat-selectable{position:relative!important;cursor:pointer;border:1px dashed #d7c28a!important;border-radius:12px;background:#ffffff0a!important;padding-bottom:18px!important;transition:background .16s ease,border-color .16s ease}
+.table-page .seat.seat-selectable:after{content:'اضغط للانتقال';position:absolute;left:50%;bottom:1px;transform:translateX(-50%);display:block;margin:0;white-space:nowrap;color:#f4dfa5;font-size:10px;font-weight:800;line-height:14px;z-index:1}
+.table-page .seat.seat-selectable>*{position:relative;z-index:2}
 .table-page .seat.seat-selectable:focus-visible{outline:2px solid #f4dfa5;outline-offset:2px}
 .table-page .round-summary{width:min(94%,390px);max-height:90%;overflow:auto;padding:12px;background:linear-gradient(160deg,#172b27,#0a1715);border:1px solid #c8ad70;border-radius:16px;color:#f8f1dd;box-shadow:0 12px 36px #000b;gap:9px}
 .table-page .round-summary-title{font-size:17px;color:#f2d58d}
@@ -1064,6 +1058,8 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
 .table-page .round-summary-qaid{background:#f7e9c5;color:#4a1d18;border:1px solid #e8b3a2}
 .table-page .round-summary-qaid:disabled{opacity:.6}
 .table-page .round-summary-replay{background:#e7ca7f;color:#26351f}
+.table-page .round-summary-actions a{display:flex;align-items:center;justify-content:center;width:100%;min-height:40px;padding:8px 12px;border:1px solid #fff0bd;border-radius:9px;background:#164b39;color:#fff0c7;text-decoration:none;font-size:13px;font-weight:900}
+.table-page .round-summary-actions a:hover{background:#23664c}
 .table-page #qaidPage:not(.hidden){
  position:fixed;inset:0;z-index:10000;width:100vw;height:100vh;height:100dvh;
  display:flex;align-items:stretch;justify-content:stretch;overflow:hidden;
@@ -1074,7 +1070,9 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
  padding:calc(10px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
  overflow:hidden;border:0;border-radius:0;display:flex;flex-direction:column;gap:7px;
 }
-.table-page #qaidPage .qaid-history-board{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto}
+.table-page #qaidPage .qaid-history-board{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-behavior:auto}
+html:has(body.table-page.qaid-review-open),body.table-page.qaid-review-open{touch-action:pan-y}
+.table-page .qaid-violation-reason{display:block;color:#8b1d24;font-size:10px;font-weight:800;line-height:1.35;text-align:center}
 @media(max-width:560px){
  .table-page .result-page:not(.hidden){padding:8px}
  .table-page .result-page .round-summary{width:96vw;max-height:calc(100dvh - 16px);padding:9px;gap:6px}
@@ -1187,4 +1185,638 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
   .table-page #qaidPage .qaid-card-choice{padding:2px!important}
   .table-page #qaidPage .qaid-card-name{font-size:9px}
   .table-page #qaidPage .qaid-card-art{max-width:60px}
+}
+
+
+/* Internal game-page scrolling: keep the document fixed but let the table
+   itself scroll vertically on touch devices instead of clipping lower content. */
+.table-page .table-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  width:100%;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  scrollbar-width:thin;
+  scrollbar-color:#c6a15d #082d22;
+}
+.table-page .table-scroll::-webkit-scrollbar{width:6px}
+.table-page .table-scroll::-webkit-scrollbar-thumb{background:#c6a15d;border-radius:8px}
+.table-page #table{
+  flex:0 0 auto;
+  min-height:calc(100dvh - 58px);
+  height:auto;
+  overflow:visible;
+}
+.table-page #table .board{
+  flex:1 0 390px;
+  min-height:390px;
+  overflow:visible;
+}
+.table-page #table #controls{flex:0 0 auto;max-height:none;overflow:visible}
+
+/* The qaid history has its own touch-scroll region; every trick row stays
+   in the document flow and cannot be clipped after the first few rows. */
+.table-page #qaidPage:not(.hidden){
+  display:flex;
+  min-height:0;
+  overflow:hidden;
+  touch-action:pan-y;
+}
+.table-page #qaidPage .qaid-visual-panel{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  height:100dvh;
+  max-height:100dvh;
+  overflow:hidden;
+}
+.table-page #qaidPage .qaid-history-board{
+  display:flex;
+  flex:1 1 0;
+  flex-direction:column;
+  min-height:0;
+  height:0;
+  max-height:none;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+}
+.table-page #qaidPage .qaid-trick-row{flex:0 0 auto;min-height:max-content}
+.table-page #qaidPage .qaid-actions{flex:0 0 auto}
+
+/* Side-seat project cards form a compact horizontal fan beneath the name. */
+.table-page .board .seat-left,
+.table-page .board .seat-right{overflow:visible;position:relative;z-index:3}
+.table-page .board .seat-left .project-cards,
+.table-page .board .seat-right .project-cards{
+  display:flex;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  justify-content:center;
+  align-items:center;
+  gap:0;
+  width:max-content;
+  max-width:none;
+  margin:3px auto 0;
+  overflow:visible;
+  direction:ltr;
+}
+.table-page .board .seat-left .project-card,
+.table-page .board .seat-right .project-card{
+  flex:0 0 23px;
+  width:23px;
+  height:34px;
+  margin-left:-12px;
+  position:relative;
+}
+.table-page .board .seat-left .project-card:first-child,
+.table-page .board .seat-right .project-card:first-child{margin-left:0}
+.table-page .board .seat-left .project-card:nth-child(2),
+.table-page .board .seat-right .project-card:nth-child(2){z-index:2}
+.table-page .board .seat-left .project-card:nth-child(3),
+.table-page .board .seat-right .project-card:nth-child(3){z-index:3}
+.table-page .board .seat-left .project-card:nth-child(4),
+.table-page .board .seat-right .project-card:nth-child(4){z-index:4}
+.table-page .board .seat-left .project-card:nth-child(5),
+.table-page .board .seat-right .project-card:nth-child(5){z-index:5}
+@media(max-width:560px){
+  .table-page #table{min-height:calc(100dvh - 48px)}
+  .table-page #table .board{flex-basis:410px;min-height:410px}
+  .table-page .board .seat-left .project-card,
+  .table-page .board .seat-right .project-card{
+    flex-basis:25px;width:25px;height:37px;margin-left:-12px;
+  }
+}
+
+/* Clear auction decisions in the empty badge area under each player name. */
+.seat-badges .seat-call{display:inline-flex;align-items:center;justify-content:center;min-width:42px;min-height:23px;padding:2px 9px;border:1px solid #e0c16d;border-radius:6px;background:#123e30;color:#fff0b5;font-size:14px;font-weight:1000;line-height:1.1;text-shadow:0 1px 2px #001;}
+.seat-badges .seat-call.pulse-a{animation:auction-call-a .65s ease-in-out 2}.seat-badges .seat-call.pulse-b{animation:auction-call-b .65s ease-in-out 2}@keyframes auction-call-a{50%{border-color:#fff;background:#9a7423;box-shadow:0 0 0 3px #f4d46b66}}@keyframes auction-call-b{50%{border-color:#fff;background:#315f9c;box-shadow:0 0 0 3px #8ebeff66}}
+@media(max-width:560px){.seat-badges .seat-call{min-width:38px;min-height:21px;font-size:12px;padding:2px 7px}.table-page .board .seat-left .project-card,.table-page .board .seat-right .project-card{flex-basis:23px;width:23px;height:34px;margin-left:-10px}}
+
+/* The fullscreen qaid selector has higher specificity than .hidden. */
+.table-page #qaidPage.hidden{display:none!important}
+
+
+/* Player avatar overlaps the seat plaque and the enlarged hidden-card fan. */
+.table-page .board .seat{position:relative;overflow:visible}
+.table-page .board .opponent-hand{
+  position:relative;z-index:1;height:46px;max-width:164px;margin:2px auto 0;
+  overflow:visible;
+}
+.table-page .board .back-card{
+  flex-basis:22px;width:27px;height:37px;margin-left:-10px;border-radius:5px;
+  border:1px solid #e8d7b4;box-shadow:0 3px 6px #001b;
+}
+.table-page .board .seat-identity{
+  position:relative;z-index:3;margin-top:22px;padding-top:12px;
+}
+.table-page .board .seat-avatar{
+  position:absolute;top:-25px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;justify-content:center;width:48px;height:48px;
+  padding:0;border:3px solid #e3c477;border-radius:50%;
+  background:radial-gradient(circle at 30% 25%,#fff8e7,#d9c28d 52%,#82633a);
+  color:#173d30;font-size:25px;line-height:1;box-shadow:0 3px 10px #001b,inset 0 1px 2px #fff9;
+  z-index:5;cursor:pointer;
+}
+@property --turn-ring-progress{syntax:"<percentage>";inherits:false;initial-value:100%}
+.table-page .board .seat.active-turn .seat-avatar::after{
+   content:"";position:absolute;inset:-8px;border:3px solid transparent;border-radius:50%;
+   background:conic-gradient(from 0deg,#ffe08a var(--turn-ring-progress),#ffffff22 0) border-box;
+   -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);
+   -webkit-mask-composite:xor;mask-composite:exclude;
+   transition:--turn-ring-progress .2s linear;pointer-events:none;
+}
+
+.table-page .board .seat-name.seat-profile-trigger{
+  display:block;width:100%;padding:0;border:0;border-radius:0;background:transparent;
+  color:#fff4d2;font:inherit;font-size:13px;font-weight:900;line-height:1.35;
+  text-shadow:0 1px 2px #0019;cursor:pointer;
+}
+.table-page .board .seat-name.seat-profile-trigger:hover{color:#ffe08a}
+.table-page .board .seat-profile-trigger:focus-visible{outline:2px solid #ffe08a;outline-offset:3px}
+.table-page .board .seat-identity:has(.seat-call) .seat-avatar{opacity:.35}
+.table-page .board .seat-badges{position:relative}
+.table-page .board .seat-badges .seat-call{
+  position:absolute;left:50%;top:-22px;transform:translateX(-50%);
+  z-index:8;min-width:58px;min-height:30px;padding:4px 12px;
+  border:2px solid #f3d27a;border-radius:9px;
+  background:linear-gradient(145deg,#0a3025,#1d5b42);color:#fff3c8;
+  box-shadow:0 5px 16px #0009;font-size:16px;
+}
+.table-page .board .seat-badges .seat-call.pulse-a{animation:auction-call-float-a .65s ease-in-out 2}
+.table-page .board .seat-badges .seat-call.pulse-b{animation:auction-call-float-b .65s ease-in-out 2}
+@keyframes auction-call-float-a{50%{transform:translate(-50%,-7px);box-shadow:0 0 0 4px #f4d46b66,0 7px 18px #0009}}
+@keyframes auction-call-float-b{50%{transform:translate(-50%,7px);box-shadow:0 0 0 4px #8ebeff66,0 7px 18px #0009}}
+/* BLT-PHP-19.12: full-screen return-to-game overlay; no countdown or bot opt-out. */
+.table-page #table #board > #turnTimeout{
+  position:fixed;inset:0;z-index:10000;
+  display:grid!important;place-items:center;
+  box-sizing:border-box;width:100vw;height:100dvh;max-width:none;
+  margin:0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));
+  border:0!important;border-radius:0!important;
+  background:rgba(0,0,0,.76)!important;
+  -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+  color:#fff;text-align:center;
+}
+.table-page #table #board > #turnTimeout .timeout-modal{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;width:min(340px,90vw);padding:30px 22px;
+  border:2px solid #e7c76b;border-radius:18px;
+  background:linear-gradient(145deg,#082f24,#18533c);
+  color:#fff4d2;box-shadow:0 18px 55px #000b;
+  animation:timeout-modal-enter .22s ease-out both;
+}
+.table-page #table #board > #turnTimeout strong{
+  margin:0;color:#ffe49a;font:900 21px/1.4 Tahoma,Arial,sans-serif;
+}
+.table-page #table #board > #turnTimeout button{
+  min-width:190px;min-height:48px;padding:12px 24px;
+  border:1px solid #f4d47b;border-radius:12px;
+  background:#f0d078;color:#173d30;
+  font:900 16px/1.2 Tahoma,Arial,sans-serif;
+  box-shadow:0 5px 14px #0005;cursor:pointer;
+}
+.table-page #table #board > #turnTimeout button:disabled{opacity:.65;cursor:wait}
+.table-page #table #board > #turnTimeout.hidden{display:none!important}
+@keyframes timeout-modal-enter{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.table-page #table #board > #turnTimeout .timeout-modal{animation:none}}
+/* The lower strip reports the current player's real record or the active call. */
+.table-page #table #gameNotice{
+  display:flex!important;align-items:center;justify-content:center;gap:9px;
+  min-height:38px;margin:7px auto 2px;padding:7px 12px;
+  border:1px solid #c6a15d77;border-radius:10px;
+  background:linear-gradient(90deg,#0a3025,#174b39,#0a3025);
+  color:#fff0c6;font-size:12px;line-height:1.4;
+  box-shadow:inset 0 1px 0 #fff2,0 3px 9px #0017;
+}
+.table-page #table #gameNotice .status-strip-label{
+  color:#e8ca83;font-size:10px;font-weight:800;white-space:nowrap;
+}
+.table-page #table #gameNotice.is-announcement{
+  border-color:#f0cd71;background:linear-gradient(90deg,#443312,#8a6824,#443312);
+  color:#fff7d8;font-size:14px;
+}
+.player-profile-modal{
+  position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;
+  padding:18px;background:#000b;backdrop-filter:blur(4px);
+}
+.player-profile-modal.hidden{display:none!important}
+.player-profile-card{
+  position:relative;width:min(100%,360px);padding:24px 20px 20px;text-align:center;
+  border:1px solid #c6a15d;border-radius:18px;
+  background:linear-gradient(155deg,#103d2e,#08291f);color:#fff4d2;
+  box-shadow:0 18px 50px #0009;
+}
+.player-profile-close{
+  position:absolute;top:8px;left:10px;width:34px;height:34px;padding:0;
+  border:1px solid #ffffff40;border-radius:50%;background:#ffffff16;color:#fff;font-size:24px;
+}
+.player-profile-avatar{
+  display:flex;align-items:center;justify-content:center;width:76px;height:76px;margin:0 auto 10px;
+  border:3px solid #e3c477;border-radius:50%;background:#ead9ad;color:#173d30;font-size:40px;
+  box-shadow:0 4px 12px #0007;
+}
+.player-profile-card h2{margin:8px 0;color:#fff4d2;font-size:20px}
+.player-profile-level{
+  display:inline-block;margin:2px auto 14px;padding:5px 14px;border-radius:20px;
+  background:#d7b766;color:#34270b;font-size:12px;
+}
+.player-profile-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.player-profile-stat{display:grid;gap:4px;padding:12px 8px;border:1px solid #ffffff25;border-radius:10px;background:#ffffff0c}
+.player-profile-stat b{font-size:21px;color:#f4d47a}
+.player-profile-stat span,.player-profile-empty{font-size:12px;color:#e5e1cf}
+@media(max-width:560px){
+  .table-page .board .opponent-hand{height:39px;max-width:146px}
+  .table-page .board .back-card{flex-basis:19px;width:23px;height:31px;margin-left:-8px}
+  .table-page .board .seat-identity{margin-top:20px;padding:10px 7px 4px}
+  .table-page .board .seat-avatar{top:-22px;width:42px;height:42px;font-size:22px}
+  .table-page .board .seat-name.seat-profile-trigger{font-size:11px}
+  .table-page .board .seat-badges .seat-call{top:-19px;min-width:50px;min-height:26px;font-size:13px}
+  .table-page #table #gameNotice{min-height:34px;margin-top:5px;padding:6px 8px;font-size:11px}
+  .table-page #table #seat0 #turnTimeout{width:min(92vw,360px);padding:10px}
+  .table-page #table #seat0 #turnTimeout strong{font-size:15px}
+}
+
+
+/* Compact release identifier inside the fixed game table. */
+.table-page #table .game-release-version{flex:0 0 auto;display:block;width:100%;padding:2px 0 0;margin:0;text-align:center;color:#d8c99d;font:700 9px/1.2 Tahoma,Arial,sans-serif;direction:rtl;opacity:.82;letter-spacing:.02em;pointer-events:none}
+
+
+/* PR16: Facebook-like green player portraits, countdown ring and table layering. */
+.table-page .board .opponent-hand{position:relative;z-index:1;height:48px;margin:0 auto -18px;max-width:172px;overflow:visible}
+.table-page .board .back-card{flex-basis:27px;width:31px;height:42px;margin-left:-13px;border-radius:6px;border:1px solid #e7d8b7;box-shadow:0 3px 7px #001b}
+.table-page .board .seat-identity{position:relative;z-index:5;margin-top:8px;padding-top:17px}
+.table-page .board .seat-avatar{top:-34px;z-index:3;width:54px;height:54px;border:3px solid #d9f2e0;background:linear-gradient(145deg,#effff3 0%,#a2d7b2 42%,#367b54 100%);color:#123d2b;font-size:26px;box-shadow:0 4px 12px #001b,inset 0 1px 3px #fff}
+.table-page .board .seat-identity::after{content:"";position:absolute;left:0;right:0;bottom:0;height:9px;z-index:4;border-radius:0 0 10px 10px;background:inherit;pointer-events:none}
+.table-page .board .seat-name,.table-page .board .seat-badges{position:relative;z-index:5}
+.table-page .board .seat-level{display:inline-flex;align-items:center;justify-content:center;padding:2px 6px;border:1px solid #cce6d1;border-radius:6px;background:#d9f1df;color:#185637;font-size:9px;font-weight:900;white-space:nowrap}
+.avatar-countdown{position:absolute;inset:-6px;z-index:8;pointer-events:none}
+.avatar-countdown::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(#ffd66b var(--progress,100%),#ffffff35 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px))}
+.avatar-countdown b{position:absolute;inset:6px;display:grid;place-items:center;border-radius:50%;background:#0b3d2dcc;color:#fff;font-size:13px;font-weight:900;text-shadow:0 1px 3px #000;line-height:1}
+.avatar-countdown.is-expired b{background:#7c2d25dd}
+.table-page .board .seat-bottom .seat-identity{margin-top:7px}
+.table-page .board .hand{position:relative;z-index:2;transform:translateY(10px)!important;padding-top:4px!important;padding-bottom:4px!important}
+.table-page .board .seat-bottom{position:relative;z-index:6}
+.table-page .board{padding-top:15px;padding-bottom:13px;border-width:9px}
+.table-page .board #trick{transform:scale(1.045)}
+.table-page .board .played-card{width:69px;height:96px}
+.table-page .board #upcard .upcard-visible{width:46px;height:64px;flex-basis:46px}
+#controls:empty:not(.hidden){display:flex!important;visibility:hidden;min-height:50px}
+#controls:not(:empty){min-height:50px}
+.controls button.is-pending,.hand .playing-card.is-pending{opacity:.82;cursor:progress;filter:saturate(.75)}
+.controls button.is-pending::after{content:"";display:inline-block;width:9px;height:9px;margin-inline-start:6px;border:2px solid currentColor;border-left-color:transparent;border-radius:50%;vertical-align:middle;animation:baloot-pending-spin .65s linear infinite}
+@keyframes baloot-pending-spin{to{transform:rotate(360deg)}}
+.purchase-flight-card{position:fixed;z-index:30000;overflow:hidden;border:1px solid #d8cfbb;border-radius:7px;background:#fff;box-shadow:0 8px 20px #0008;pointer-events:none;will-change:transform,opacity}
+.purchase-flight-card .full-card-art{display:block;width:100%;height:100%;object-fit:fill}
+@media(max-width:560px){
+ .table-page .board .opponent-hand{height:40px;margin-bottom:-15px}
+ .table-page .board .back-card{flex-basis:21px;width:24px;height:34px;margin-left:-11px}
+ .table-page .board .seat-identity{margin-top:6px;padding-top:15px}
+ .table-page .board .seat-avatar{top:-30px;width:48px;height:48px;font-size:23px}
+ .table-page .board .seat-bottom .seat-identity{margin-top:5px}
+ .table-page .board .hand{transform:translateY(8px)!important}
+ .table-page .board #trick{transform:scale(1.02)}
+ .table-page .board .played-card{width:58px;height:82px}
+}
+@media(prefers-reduced-motion:reduce){.controls button.is-pending::after{animation:none}}
+
+
+/* Keep the player's portrait visible; the seconds sit in a small lower badge. */
+.avatar-countdown b{
+ inset:auto 0 5px;width:22px;height:17px;margin:0 auto;
+ border-radius:9px;font-size:11px;background:#0b3d2deF;
+}
+
+/* BLT-PHP-19.7: keep the active avatar between the card fan and player plaque. */
+.table-page .board .seat-avatar-wrap{
+ position:absolute;left:50%;top:8px;transform:translateX(-50%);
+ z-index:3;width:54px;height:54px;pointer-events:none;
+}
+.table-page .board .seat-avatar-wrap .seat-avatar{
+ position:absolute;top:0;left:0;transform:none;z-index:1;
+ pointer-events:auto;
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown{
+ position:absolute;inset:-7px;z-index:2;pointer-events:none;
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown::before{
+ content:"";position:absolute;inset:0;border-radius:50%;
+ background:conic-gradient(#ffe08a var(--progress,100%),#ffffff35 0);
+ -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));
+ mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown b{
+ position:absolute;inset:auto 0 0;width:22px;height:17px;margin:0 auto;
+ display:grid;place-items:center;border-radius:9px;
+ background:#0b3d2deF;color:#fff;font-size:11px;font-weight:900;
+ box-shadow:0 1px 4px #0008;
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown.is-expired b{background:#7c2d25dd}
+@media(max-width:560px){
+ .table-page .board .seat-avatar-wrap{top:1px;width:48px;height:48px}
+ .table-page .board .seat-avatar-wrap .seat-avatar{width:48px;height:48px;font-size:23px}
+ .table-page .board .seat-avatar-wrap .avatar-countdown{inset:-6px}
+}
+
+
+/* BLT-PHP-19.9: stable card fan, clearer portraits and a larger playable board. */
+.table-page #table .board{
+  min-height:calc(100dvh - 178px);
+  grid-template-rows:minmax(56px,.72fr) minmax(120px,1.45fr) minmax(76px,.92fr) auto;
+  overflow:visible;
+}
+.table-page .board .seat-top,
+.table-page .board .seat-left,
+.table-page .board .seat-right{
+  transform:translateY(-6px);
+}
+.table-page .board .opponent-hand{
+  transform:translateY(-5px);
+  margin-bottom:-12px;
+}
+.table-page .board .seat-bottom{
+  position:relative;
+  z-index:8;
+  transform:translateY(5px);
+}
+.table-page .board .seat-bottom .seat-avatar-wrap{
+  top:-49px;
+  z-index:10;
+}
+.table-page .board .seat-bottom .seat-identity{
+  position:relative;
+  z-index:9;
+  margin-top:0!important;
+}
+.table-page .board .hand{
+  position:relative;
+  z-index:6;
+  transform:translateY(10px)!important;
+  overflow:visible!important;
+  max-height:none;
+}
+.table-page .board .hand .playing-card{
+  transform:translateY(var(--fan-y,0)) rotate(var(--fan-r,0deg))!important;
+  transform-origin:50% 100%;
+  transition:transform .16s ease,box-shadow .16s ease!important;
+  will-change:transform;
+  touch-action:manipulation;
+}
+.table-page .board .hand .playing-card.selected{
+  transform:translateY(-12px) rotate(0deg) scale(1.025)!important;
+  z-index:20;
+}
+@media(hover:hover) and (pointer:fine){
+  .table-page .board .hand .playing-card:hover{
+    transform:translateY(-12px) rotate(0deg)!important;
+    z-index:15;
+  }
+}
+@media(hover:none){
+  .table-page .board .hand .playing-card:not(.selected):active{
+    transform:translateY(-5px) rotate(0deg)!important;
+  }
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown{
+  inset:0!important;
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown::before{
+  inset:0;
+  background:conic-gradient(from -90deg,#ffe08a 0 var(--progress,100%),#ffffff30 var(--progress,100%) 100%);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));
+}
+.table-page .board .seat.active-turn .seat-avatar::after{display:none!important;content:none!important}
+.controls button.is-pending::after{display:none!important;content:none!important}
+@media(max-width:560px){
+  .table-page #table .board{
+    min-height:calc(100dvh - 168px);
+    grid-template-rows:minmax(54px,.7fr) minmax(112px,1.4fr) minmax(72px,.9fr) auto;
+    overflow:visible;
+  }
+  .table-page .board .seat-top,
+  .table-page .board .seat-left,
+  .table-page .board .seat-right{transform:translateY(-5px)}
+  .table-page .board .opponent-hand{height:40px;margin-bottom:-11px}
+  .table-page .board .seat-bottom .seat-avatar-wrap{top:-45px;width:48px;height:48px}
+  .table-page .board .seat-bottom .seat-avatar-wrap .seat-avatar{width:48px;height:48px}
+  .table-page .board .hand{max-height:none;padding:5px 2px 8px!important;transform:translateY(8px)!important}
+  .table-page .board .hand .playing-card{transform:translateY(var(--fan-y,0)) rotate(var(--fan-r,0deg))!important}
+  .table-page .board .hand .playing-card.selected{transform:translateY(-11px) rotate(0deg) scale(1.02)!important}
+}
+@media(max-height:650px) and (max-width:560px){
+  .table-page #table .board{min-height:calc(100dvh - 150px);grid-template-rows:42px minmax(82px,1fr) 66px auto}
+  .table-page .board .hand{max-height:none}
+}
+
+/* BLT-PHP-19.24: board height retained; element positioning moved to table-layout-controls.css. */
+.table-page #table .board{min-height:calc(100dvh - 158px)}
+@media(max-width:560px){
+  .table-page #table .board{min-height:calc(100dvh - 148px)}
+}
+
+
+/* BLT-PHP-19.44: display side players' project cards as a vertical overlapping fan. */
+.table-page .board .seat-left .project-cards,
+.table-page .board .seat-right .project-cards{
+  flex-direction:column !important;
+  flex-wrap:nowrap !important;
+  justify-content:flex-start !important;
+  align-items:center !important;
+  gap:0 !important;
+  width:max-content !important;
+  height:max-content !important;
+  margin:4px auto 0 !important;
+}
+.table-page .board .seat-left .project-card,
+.table-page .board .seat-right .project-card{
+  flex:0 0 34px !important;
+  width:23px !important;
+  height:34px !important;
+  margin:0 0 -22px !important;
+  position:relative !important;
+}
+.table-page .board .seat-left .project-card:first-child,
+.table-page .board .seat-right .project-card:first-child{
+  margin-top:0 !important;
+}
+.table-page .board .seat-left .project-card:last-child,
+.table-page .board .seat-right .project-card:last-child{
+  margin-bottom:0 !important;
+}
+.table-page .board .seat-left .project-card:nth-child(1),
+.table-page .board .seat-right .project-card:nth-child(1){z-index:1}
+.table-page .board .seat-left .project-card:nth-child(2),
+.table-page .board .seat-right .project-card:nth-child(2){z-index:2}
+.table-page .board .seat-left .project-card:nth-child(3),
+.table-page .board .seat-right .project-card:nth-child(3){z-index:3}
+.table-page .board .seat-left .project-card:nth-child(4),
+.table-page .board .seat-right .project-card:nth-child(4){z-index:4}
+.table-page .board .seat-left .project-card:nth-child(5),
+.table-page .board .seat-right .project-card:nth-child(5){z-index:5}
+@media(max-width:560px){
+  .table-page .board .seat-left .project-card,
+  .table-page .board .seat-right .project-card{
+    flex-basis:37px !important;
+    width:25px !important;
+    height:37px !important;
+    margin-bottom:-24px !important;
+  }
+}
+
+
+/* BLT-PHP-19.45: enlarge side project cards and increase the visible gap between them. */
+.table-page .board .seat-left .project-card,
+.table-page .board .seat-right .project-card{
+  flex-basis:40px !important;
+  width:28px !important;
+  height:40px !important;
+  margin:0 0 -14px !important;
+}
+.table-page .board .seat-left .project-card .card-corner b,
+.table-page .board .seat-left .project-card .card-corner i,
+.table-page .board .seat-right .project-card .card-corner b,
+.table-page .board .seat-right .project-card .card-corner i{
+  font-size:8px !important;
+}
+@media(max-width:560px){
+  .table-page .board .seat-left .project-card,
+  .table-page .board .seat-right .project-card{
+    flex-basis:39px !important;
+    width:27px !important;
+    height:39px !important;
+    margin-bottom:-13px !important;
+  }
+  .table-page .board .seat-left .project-card .card-corner b,
+  .table-page .board .seat-left .project-card .card-corner i,
+  .table-page .board .seat-right .project-card .card-corner b,
+  .table-page .board .seat-right .project-card .card-corner i{
+    font-size:7px !important;
+  }
+}
+
+
+/* BLT-PHP-19.46: show 20px of each vertically stacked side project card. */
+.table-page .board .seat-left .project-card,
+.table-page .board .seat-right .project-card{
+  margin-bottom:-20px !important;
+}
+@media(max-width:560px){
+  .table-page .board .seat-left .project-card,
+  .table-page .board .seat-right .project-card{
+    margin-bottom:-19px !important;
+  }
+}
+
+
+/* BLT-PHP-19.51: keep the circular countdown ring visible and enlarge the number inside. */
+.table-page .board .seat-avatar-wrap .avatar-countdown{
+  inset:-5px !important;
+  z-index:2 !important;
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown b{
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  margin:0 !important;
+  border-radius:50% !important;
+  display:grid !important;
+  place-items:center !important;
+  font-size:23px !important;
+  line-height:1 !important;
+  color:#fff !important;
+  background:#0b3d2d88 !important;
+  text-shadow:0 1px 3px #000 !important;
+  box-shadow:none !important;
+}
+@media(max-width:560px){
+  .table-page .board .seat-avatar-wrap .avatar-countdown b{
+    font-size:21px !important;
+  }
+}
+
+
+/* BLT-PHP-19.55: side projects float over the table felt instead of enlarging the seat/grid row. */
+.table-page .board .seat-left,
+.table-page .board .seat-right{position:relative!important;overflow:visible!important;}
+.table-page .board .seat-left .project-cards,
+.table-page .board .seat-right .project-cards{
+  position:absolute!important;left:50%!important;top:58%!important;
+  transform:translate(-50%,-50%)!important;
+  display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+  align-items:center!important;justify-content:center!important;
+  width:max-content!important;height:auto!important;max-width:none!important;
+  margin:0!important;padding:3px 5px!important;gap:0!important;
+  border-radius:8px;background:#092d22a8;
+  z-index:2!important;pointer-events:none!important;
+}
+.table-page .board .seat-left .project-card,
+.table-page .board .seat-right .project-card{
+  flex:0 0 30px!important;width:30px!important;height:44px!important;
+  margin:0 0 0 -13px!important;position:relative!important;
+}
+.table-page .board .seat-left .project-card:first-child,
+.table-page .board .seat-right .project-card:first-child{margin-left:0!important;}
+.table-page .board .seat-left .project-cards .project-card:nth-child(1),
+.table-page .board .seat-right .project-cards .project-card:nth-child(1){z-index:1}
+.table-page .board .seat-left .project-cards .project-card:nth-child(2),
+.table-page .board .seat-right .project-cards .project-card:nth-child(2){z-index:2}
+.table-page .board .seat-left .project-cards .project-card:nth-child(3),
+.table-page .board .seat-right .project-cards .project-card:nth-child(3){z-index:3}
+.table-page .board .seat-left .project-cards .project-card:nth-child(4),
+.table-page .board .seat-right .project-cards .project-card:nth-child(4){z-index:4}
+.table-page .board .seat-left .project-cards .project-card:nth-child(5),
+.table-page .board .seat-right .project-cards .project-card:nth-child(5){z-index:5}
+@media(max-width:560px){
+ .table-page .board .seat-left .project-cards,
+ .table-page .board .seat-right .project-cards{top:58%!important;padding:2px 4px!important;}
+ .table-page .board .seat-left .project-card,
+ .table-page .board .seat-right .project-card{flex-basis:25px!important;width:25px!important;height:37px!important;margin-left:-11px!important;}
+}
+
+
+/* BLT-PHP-19.57: lift bottom player's laid project cards and lower side players' horizontal project row. */
+.table-page .board .seat-bottom .project-cards{
+  position:relative!important;
+  transform:translateY(-30px)!important;
+  translate:0 -30px!important;
+}
+.table-page .board .seat-left .project-cards,
+.table-page .board .seat-right .project-cards{
+  top:calc(58% - 55px)!important;
+}
+.table-page .board .seat-right .project-cards{
+  transform:translate(calc(-50% - 20px),-50%)!important;
+}
+.table-page .board .seat-left .project-cards{
+  transform:translate(calc(-50% + 20px),-50%)!important;
+}
+@media(max-width:560px){
+  .table-page .board .seat-left .project-cards,
+  .table-page .board .seat-right .project-cards{
+    top:calc(58% - 55px)!important;
+  }
+}
+
+
+/* BLT-PHP-19.61: project cards use the original card artwork without a second white frame. */
+.table-page .board .project-card{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+  padding:0!important;
+}
+.table-page .board .project-card .full-card-art{
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:fill!important;
+  border:0!important;
+  border-radius:0!important;
 }

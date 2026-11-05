@@ -17,7 +17,10 @@ final class Projects {
   if(!in_array($game['phase']??'', ['projectDeclaration','playing'],true)||count($game['history']??[])>0)throw new \DomainException('مرحلة إعلان المشاريع غير متاحة');
   if($seat<0||$seat>3)throw new \DomainException('المقعد غير صحيح');
   if(!empty($game['projectDeclared'][$seat]))throw new \DomainException('تم تسجيل إعلان مشروعك مسبقاً');
-  if($projectType!=='pass'){
+  if($projectType==='pass'){
+   // Passing means the project was not announced; it must never enter scoring or display.
+   $game['projectClaims'][$seat]=[];
+  }else{
    $project=null;
    foreach($game['projectOptions'][$seat]??[] as $option)if(($option['type']??'')===$projectType){$project=$option;break;}
    if(!is_array($project))throw new \DomainException('المشروع غير موجود في أوراقك');

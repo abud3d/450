@@ -20,12 +20,25 @@ final class Engine
             || !is_string($owner) || !hash_equals($owner, (string) ($players[$requestingSeat]['guestId'] ?? ''))) {
             throw new DomainException('صاحب الغرفة فقط يبدأ اللعبة');
         }
+        $botStyles = ['professional', 'aggressive', 'cautious', 'analyst'];
+        $usedBotNumbers = [];
         for ($seat = 0; $seat < 4; $seat++) {
-            if (empty($players[$seat])) {
-                $players[$seat] = ['name' => 'كمبيوتر ' . ($seat + 10), 'seat' => $seat, 'bot' => true, 'botNumber' => $seat + 10, 'guestId' => null];
-            }
+            if (empty($players[$seat])) $players[$seat] = ['name' => 'كمبيوتر', 'seat' => $seat, 'bot' => true, 'guestId' => null];
             $players[$seat]['seat'] = $seat;
             $players[$seat]['bot'] = !empty($players[$seat]['bot']);
+            if ($players[$seat]['bot']) {
+                $number = (int) ($players[$seat]['botNumber'] ?? 0);
+                if ($number < 1 || $number > 99 || in_array($number, $usedBotNumbers, true)) {
+                    $number = random_int(1, 99);
+                    for ($attempt = 0; in_array($number, $usedBotNumbers, true) && $attempt < 99; $attempt++) $number = ($number % 99) + 1;
+                }
+                $usedBotNumbers[] = $number;
+                $players[$seat]['botNumber'] = $number;
+                $style = (string) ($players[$seat]['botStyle'] ?? '');
+                if (!in_array($style, $botStyles, true)) $style = $botStyles[random_int(0, 3)];
+                $players[$seat]['botStyle'] = $style;
+                $players[$seat]['name'] = 'كمبيوتر ' . $number;
+            }
         }
         $game = Rules::create(array_map(fn($p) => (string) ($p['name'] ?? 'ضيف'), $players));
         $game['players'] = array_values($players);
@@ -33,7 +46,7 @@ final class Engine
         Rules::deal($game);
         $room['players'] = array_values($players);
         $room['game'] = $game;
-        TurnClock::arm($room, 10);
+        TurnClock::arm($room, 5);
         $room['lastAction'] = 'وُزعت خمس أوراق لكل لاعب وبدأ الشراء.';
         self::queueBotTurn($room);
     }
@@ -44,7 +57,10 @@ final class Engine
         if (!isset($room['players'][$seat]) || !is_array($room['players'][$seat])) throw new DomainException('المقعد غير معروف');
         if (!empty($room['players'][$seat]['botControl']) && $action !== 'timeout_return') throw new DomainException('البوت يدير هذا المقعد حالياً');
         $g =& $room['game'];
-        if (!in_array($action, ['timeout_return','timeout_bot'], true)) unset($room['timeoutSeat'], $room['timeoutGraceUntil']);
+        if (isset($room['qaidWindow']) && !in_array($action, ['qaid_claim','qaid_cancel'], true)) {
+            throw new DomainException('اللعب متوقف حتى يختار فاتح القيد؛ لا يمكن تنفيذ حركات أخرى.');
+        }
+        if ($action !== 'timeout_return') unset($room['timeoutSeat'], $room['timeoutGraceUntil']);
 
         switch ($action) {
             case 'bid':
@@ -71,10 +87,10 @@ final class Engine
                 $room['lastAction'] = 'تم لعب الورقة.';
                 break;
             case 'qaid_claim':
-                if (($room['qaidWindow']['seat'] ?? -1) !== $seat || (int) ($room['qaidWindow']['expiresAt'] ?? 0) < time()) {
+                if (($room['qaidWindow']['seat'] ?? -1) !== $seat || (int) ($room['qaidWindow']['expiresAt'] ?? 0) <= time()) {
                     throw new DomainException('انتهت مهلة كشف أوراق القيد؛ افتح الطلب من جديد');
                 }
-                $result = Qaid::claim($g, $seat, (int) ($input['violationIndex'] ?? -1), (int) ($input['proofIndex'] ?? -1));
+                $result = Qaid::decide($g, $seat);
                 unset($room['qaidWindow']);
                 $room['roundResultReadyAt'] = time();
                 $room['lastAction'] = 'تم حسم طلب القيد.';
@@ -88,11 +104,14 @@ final class Engine
                 $room['lastAction'] = 'بدأ كشف أوراق القيد.';
                 break;
             case 'qaid_cancel':
-                if (($room['qaidWindow']['seat'] ?? -1) !== $seat) throw new DomainException('لا يوجد طلب قيد لهذا المقعد');
+                if (($room['qaidWindow']['seat'] ?? -1) !== $seat || (int) ($room['qaidWindow']['expiresAt'] ?? 0) <= time()) {
+                    throw new DomainException('انتهت مهلة كشف أوراق القيد.');
+                }
+                $result = Qaid::decide($g, $seat);
                 unset($room['qaidWindow']);
-                if (($g['phase'] ?? '') === 'roundEnd') $room['roundResultReadyAt'] = time();
-                $room['lastAction'] = 'أُغلق كشف القيد.';
-                break;
+                $room['roundResultReadyAt'] = time();
+                $room['lastAction'] = 'أُغلق كشف القيد وتم احتساب النتيجة.';
+                return ['ok' => true, 'result' => $result];
             case 'next':
                 if (!hash_equals((string) ($room['ownerGuestId'] ?? ''), (string) ($room['players'][$seat]['guestId'] ?? ''))) throw new DomainException('صاحب الغرفة فقط يبدأ التوزيعة التالية');
                 Rules::nextRound($g);
@@ -107,14 +126,8 @@ final class Engine
             case 'timeout_return':
                 if (($room['timeoutSeat'] ?? $seat) !== $seat && empty($room['players'][$seat]['botControl'])) throw new DomainException('لا يوجد طلب عودة لهذا المقعد');
                 $room['players'][$seat]['botControl'] = false;
-                unset($room['timeoutSeat']);
+                unset($room['timeoutSeat'], $room['timeoutGraceUntil']);
                 $room['lastAction'] = 'عاد اللاعب لمقعده.';
-                break;
-            case 'timeout_bot':
-                if (($room['timeoutSeat'] ?? -1) !== $seat) throw new DomainException('انتهت مهلة الاختيار أو لم يحن وقتها');
-                $room['players'][$seat]['botControl'] = true;
-                unset($room['timeoutSeat']);
-                $room['lastAction'] = 'البوت يكمل اللعب بدلاً من اللاعب.';
                 break;
             case 'replay':
                 if (($g['phase'] ?? '') !== 'gameEnd') throw new DomainException('إعادة اللعب متاحة بعد انتهاء الصكة فقط');
@@ -130,9 +143,13 @@ final class Engine
                 throw new DomainException('نوع العملية غير مدعوم');
         }
 
-        if (!isset($room['qaidWindow'])) self::queueBotTurn($room);
-        if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 10);
-        else TurnClock::clear($room);
+        if (isset($room['qaidWindow'])) {
+            TurnClock::clear($room);
+        } else {
+            self::queueBotTurn($room);
+            if (in_array($g['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 5);
+            else TurnClock::clear($room);
+        }
         return ['ok' => true];
     }
 
@@ -166,13 +183,49 @@ final class Engine
             } else break;
 
             $beforeTricks = count($g['tricks'] ?? []);
-            if (!Bot::act($g, $seat)) break;
-            if (count($g['tricks'] ?? []) > $beforeTricks) $room['trickVisibleUntil'] = time() + (in_array($g['phase'], ['roundEnd','gameEnd'], true) ? 6 : 2);
+            $acted = false;
+            try {
+                $acted = Bot::act($g, $seat);
+            } catch (\Throwable $error) {
+                error_log('Baloot primary bot failed: ' . $error->getMessage());
+            }
+
+            if (!$acted) {
+                $retrySeat = (int) ($room['botRetrySeat'] ?? -1);
+                $retryCount = (int) ($room['botRetryCount'] ?? 0);
+                if ($retrySeat !== $seat || $retryCount < 1) {
+                    $room['botRetrySeat'] = $seat;
+                    $room['botRetryCount'] = 1;
+                    $room['botActionAt'] = time() + 5;
+                    $room['lastAction'] = 'تأخر البوت؛ سيتولى بوت احتياطي الحركة بعد 5 ثوانٍ.';
+                    TurnClock::arm($room, 35);
+                    return 1;
+                }
+                try {
+                    $acted = Bot::fallbackAct($g, $seat);
+                } catch (\Throwable $error) {
+                    error_log('Baloot backup bot failed: ' . $error->getMessage());
+                }
+                if (!$acted) {
+                    // Keep a bounded retry cadence instead of clearing the only timer.
+                    $room['botRetrySeat'] = $seat;
+                    $room['botRetryCount'] = $retryCount + 1;
+                    $room['botActionAt'] = time() + 5;
+                    $room['lastAction'] = 'البوت الاحتياطي يعيد المحاولة بعد 5 ثوانٍ.';
+                    TurnClock::arm($room, 35);
+                    return 1;
+                }
+            }
+
+            unset($room['botRetrySeat'], $room['botRetryCount']);
+            if (count($g['tricks'] ?? []) > $beforeTricks) {
+                $room['trickVisibleUntil'] = time() + (in_array($g['phase'], ['roundEnd','gameEnd'], true) ? 6 : 2);
+            }
             if (in_array($g['phase'], ['roundEnd','gameEnd'], true)) $room['roundResultReadyAt'] = time() + 6;
             $count++;
         }
         if ($count > 0) $room['lastAction'] = 'اتخذ البوت قراراً تلقائياً.';
-        if (in_array($room['game']['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 30);
+        if (in_array($room['game']['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 5);
         else TurnClock::clear($room);
         self::queueBotTurn($room);
         return $count;
@@ -203,6 +256,9 @@ final class Engine
             $seat = (int) ($g['turn'] ?? -1);
         }
         if ($seat !== null && $seat >= 0 && (!empty($room['players'][$seat]['bot']) || !empty($room['players'][$seat]['botControl']))) {
+            if (isset($room['botRetrySeat']) && (int) $room['botRetrySeat'] !== $seat) {
+                unset($room['botRetrySeat'], $room['botRetryCount']);
+            }
             $pause = max(1, min(6, (int) ($room['trickVisibleUntil'] ?? 0) - time()));
             $room['botActionAt'] = time() + $pause;
         }
@@ -228,7 +284,7 @@ final class Engine
         }
         if (in_array($g['phase'], ['roundEnd','gameEnd'], true)) $room['roundResultReadyAt'] = time() + 6;
         $room['lastAction'] = 'لُعبت الورقة الأخيرة تلقائياً.';
-        if (in_array($g['phase'], ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 10);
+        if (in_array($g['phase'], ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 5);
         else TurnClock::clear($room);
         self::queueBotTurn($room);
         return true;
@@ -242,8 +298,19 @@ final class Engine
             $players[] = [
                 'seat' => $i,
                 'name' => $p['name'] ?? 'بانتظار لاعب',
+                'avatar' => (string) (($p['publicProfile']['avatar'] ?? '') ?: (!empty($p['bot']) ? '🤖' : '👤')),
+                'profile' => is_array($p['publicProfile'] ?? null) ? [
+                    'points' => (int) ($p['publicProfile']['points'] ?? 0),
+                    'matches' => (int) ($p['publicProfile']['matches'] ?? 0),
+                    'wins' => (int) ($p['publicProfile']['wins'] ?? 0),
+                    'losses' => (int) ($p['publicProfile']['losses'] ?? 0),
+                    'draws' => (int) ($p['publicProfile']['draws'] ?? 0),
+                ] : null,
                 'bot' => !empty($p['bot']) || !empty($p['botControl']),
                 'botControl' => !empty($p['botControl']),
+                'botNumber' => !empty($p['bot']) ? (int) ($p['botNumber'] ?? ($i + 10)) : null,
+                'botStyle' => !empty($p['bot']) ? (string) ($p['botStyle'] ?? 'professional') : null,
+                'botStyleLabel' => !empty($p['bot']) ? Bot::styleLabel((string) ($p['botStyle'] ?? 'professional')) : null,
                 'connected' => !empty($p['connected']),
                 'empty' => empty($p),
                 'isOwner' => !empty($p['guestId']) && hash_equals((string) ($room['ownerGuestId'] ?? ''), (string) $p['guestId']),
@@ -282,6 +349,20 @@ final class Engine
         $resultReadyAt = (int) ($room['roundResultReadyAt'] ?? 0);
         $trickVisible = (int) ($room['trickVisibleUntil'] ?? 0) > time();
         $projectDisplayBySeat = [[],[],[],[]];
+        $announcedProjectsBySeat = [[],[],[],[]];
+        // During trick one, reveal a project's name only after its owner has
+        // actually played a card. The card faces are shown during trick two.
+        if (($g['phase'] ?? '') === 'playing' && count($g['tricks'] ?? []) === 0
+            && !empty($g['projectClaims'])) {
+            foreach ($g['projectClaims'] as $projectSeat => $claims) {
+                foreach ($g['trick'] ?? [] as $play) {
+                    if ((int) ($play['seat'] ?? -1) === (int) $projectSeat) {
+                        $announcedProjectsBySeat[$projectSeat] = $claims;
+                        break;
+                    }
+                }
+            }
+        }
         if (($g['phase'] ?? '') === 'playing' && count($g['tricks'] ?? []) === 1
             && !empty($g['projectClaims'])) {
             $resolvedProjects = Projects::resolve(
@@ -304,10 +385,13 @@ final class Engine
                 }
             }
         }
+        // Never expose the proof card from a hidden hand before the claimant opens the qaid review.
+        $canReviewQaid = (int) ($room['qaidWindow']['seat'] ?? -1) === $seat;
         foreach ($g['history'] ?? [] as $index => $play) {
             $history[] = [
                 'historyIndex' => $index, 'seat' => $play['seat'],
-                'card' => $play['card'], 'violation' => !empty($play['violation']),
+                'playerName' => (string) ($players[(int) $play['seat']]['name'] ?? ('لاعب ' . ((int) $play['seat'] + 1))),
+                'card' => $play['card'], 'proofCard' => $canReviewQaid ? ($play['proofCard'] ?? null) : null, 'violationReason' => $canReviewQaid ? ($play['violationReason'] ?? null) : null, 'violation' => !empty($play['violation']),
                 'leadSuit' => $play['leadSuit'] ?? null, 'trickIndex' => $play['trickIndex'] ?? 0,
             ];
         }
@@ -315,15 +399,28 @@ final class Engine
         foreach ($history as $play) $qaidGroups[$play['trickIndex']][] = $play;
         $qaidHistory = [];
         foreach ($qaidGroups as $trickIndex => $cards) $qaidHistory[] = ['trickIndex' => (int) $trickIndex, 'cards' => $cards];
+        $legalCardIds = [];
+        if (($g['phase'] ?? '') === 'playing' && (int) ($g['turn'] ?? -1) === $seat) {
+            $hand = $g['hands'][$seat] ?? [];
+            $legalCardIds = array_column(Rules::legal($hand, $g['trick'] ?? [], $g['contract'] ?? ['type' => 'sun'], $seat), 'id');
+            if (!empty($room['qaidEnabled']) && !empty($g['trick'])) {
+                // Qaid rooms allow a player to expose an illegal choice; the server records it and the claimant can review proof.
+                $legalCardIds = array_column($hand, 'id');
+            }
+            $legalCardIds = array_values(array_unique($legalCardIds));
+        }
         return [
             'code' => $room['code'] ?? '',
             'players' => $players,
             'phase' => $g['phase'],
             'turn' => $g['turn'] ?? 0,
+            'turnClockStartedAt' => $room['turnClockStartedAt'] ?? null,
+            'auctionCalls' => $g['auctionCalls'] ?? [null,null,null,null],
+            'legalCardIds' => $legalCardIds,
             'contract' => $g['contract'] ?? null,
             'upCard' => $g['upCard'] ?? null,
             'qaidEnabled' => !empty($room['qaidEnabled']),
-            'qaidHistory' => !empty($room['qaidEnabled']) && empty($g['qaidResult']) && in_array($g['phase'], ['playing','roundEnd','gameEnd'], true) ? $qaidHistory : [],
+            'qaidHistory' => !empty($room['qaidEnabled']) && $canReviewQaid && empty($g['qaidResult']) && in_array($g['phase'], ['playing','roundEnd','gameEnd'], true) ? $qaidHistory : [],
             'qaidReady' => !empty($room['qaidEnabled']) && in_array($g['phase'], ['playing','roundEnd','gameEnd'], true) && empty($g['qaidResult']),
             'qaidDeadline' => ($room['qaidWindow']['seat'] ?? -1) === $seat ? ($room['qaidWindow']['expiresAt'] ?? null) : null,
             'qaidResult' => $g['qaidResult'] ?? null,
@@ -350,7 +447,7 @@ final class Engine
             'tricksWon' => $g['tricksWon'] ?? [0,0],
             'mySeat' => $seat,
             'myProjects' => ($g['tricks'] ?? []) === [] ? ($g['projectClaims'][$seat] ?? []) : [],
-            'projectsBySeat' => ($g['tricks'] ?? []) === [] ? ($g['projectClaims'] ?? [[],[],[],[]]) : [[],[],[],[]],
+            'projectsBySeat' => $announcedProjectsBySeat,
             'projectDisplayBySeat' => $projectDisplayBySeat,
             'projectOptions' => $g['projectOptions'][$seat] ?? [],
             'projectDeclared' => $g['projectDeclared'] ?? [false,false,false,false],
@@ -359,6 +456,9 @@ final class Engine
             'postPurchaseBuyer' => $g['postPurchase']['buyer'] ?? $g['contract']['buyer'] ?? null,
             'postPurchaseTurn' => $g['turn'] ?? null,
             'timeoutPrompt' => ($room['timeoutSeat'] ?? -1) === $seat,
+            'timeoutSeat' => isset($room['timeoutSeat']) ? (int) $room['timeoutSeat'] : null,
+            'turnDeadlineAt' => isset($room['turnDeadlineAt']) ? (int) $room['turnDeadlineAt'] : null,
+            'turnDeadlineDuration' => (int) ($room['turnDeadlineDuration'] ?? 10),
             'qaidWindowActive' => isset($room['qaidWindow']),
             'lastAction' => $room['lastAction'] ?? '',
         ];
