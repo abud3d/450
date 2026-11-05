@@ -1777,3 +1777,20 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
  .table-page .board .seat-left .project-card,
  .table-page .board .seat-right .project-card{flex-basis:25px!important;width:25px!important;height:37px!important;margin-left:-11px!important;}
 }
+
+
+/* BLT-PHP-19.57: lift bottom player's laid project cards and lower side players' horizontal project row. */
+.table-page .board .seat-bottom .project-cards{
+  position:relative!important;
+  transform:translateY(-30px)!important;
+}
+.table-page .board .seat-left .project-cards,
+.table-page .board .seat-right .project-cards{
+  top:calc(58% + 20px)!important;
+}
+@media(max-width:560px){
+  .table-page .board .seat-left .project-cards,
+  .table-page .board .seat-right .project-cards{
+    top:calc(58% + 20px)!important;
+  }
+}
