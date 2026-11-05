@@ -16,6 +16,14 @@ function trackAuctionCalls(s){
    auctionCallTimers[actor]=setTimeout(()=>{if(Date.now()>=auctionCallUntil[actor]){auctionCallUntil[actor]=0;const rel=(actor-mySeat+4)%4;document.querySelector('#seat'+rel+' .seat-call')?.remove();}},5000);
   }
  }
+ if(latest?.phase==='postPurchase'&&s.phase==='postPurchase'&&s.turn!==latest.turn){
+  const actor=Number(latest.turn);
+  if(Number.isInteger(actor)&&actor>=0&&actor<4){
+   auctionCallText[actor]='بس';auctionCallUntil[actor]=Date.now()+5000;auctionCallPulse[actor]++;
+   clearTimeout(auctionCallTimers[actor]);
+   auctionCallTimers[actor]=setTimeout(()=>{if(Date.now()>=auctionCallUntil[actor]){auctionCallUntil[actor]=0;const rel=(actor-mySeat+4)%4;document.querySelector('#seat'+rel+' .seat-call')?.remove();}},5000);
+  }
+ }
 }
 let guestId=localStorage.getItem('baloot400Guest')||crypto.randomUUID();localStorage.setItem('baloot400Guest',guestId);
 const ROOM_TTL=60*60*1000;
