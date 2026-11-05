@@ -1667,3 +1667,34 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
     margin-bottom:-24px !important;
   }
 }
+
+
+/* BLT-PHP-19.45: enlarge side project cards and increase the visible gap between them. */
+.table-page .board .seat-left .project-card,
+.table-page .board .seat-right .project-card{
+  flex-basis:40px !important;
+  width:28px !important;
+  height:40px !important;
+  margin:0 0 -14px !important;
+}
+.table-page .board .seat-left .project-card .card-corner b,
+.table-page .board .seat-left .project-card .card-corner i,
+.table-page .board .seat-right .project-card .card-corner b,
+.table-page .board .seat-right .project-card .card-corner i{
+  font-size:8px !important;
+}
+@media(max-width:560px){
+  .table-page .board .seat-left .project-card,
+  .table-page .board .seat-right .project-card{
+    flex-basis:39px !important;
+    width:27px !important;
+    height:39px !important;
+    margin-bottom:-13px !important;
+  }
+  .table-page .board .seat-left .project-card .card-corner b,
+  .table-page .board .seat-left .project-card .card-corner i,
+  .table-page .board .seat-right .project-card .card-corner b,
+  .table-page .board .seat-right .project-card .card-corner i{
+    font-size:7px !important;
+  }
+}
