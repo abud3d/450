@@ -13,8 +13,8 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   --board-x: 0px; --board-y: 0px;
 
   /* اللاعب العلوي */
-  --top-avatar-x: 0px; --top-avatar-y: 10px; --top-avatar-z: 10; --top-avatar-s: 1;
-  --top-info-x: 0px; --top-info-y: 10px; --top-info-z: 11; --top-info-s: 1;
+  --top-avatar-x: 0px; --top-avatar-y: 0px; --top-avatar-z: 10; --top-avatar-s: 1;
+  --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
 
   /* اللاعب السفلي */
   --bottom-avatar-x: 0px; --bottom-avatar-y: 48px; --bottom-avatar-z: 5; --bottom-avatar-s: 1;
@@ -51,8 +51,8 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   :root {
     --board-x: 0px; --board-y: 0px;
 
-    --top-avatar-x: 0px; --top-avatar-y: 10px; --top-avatar-z: 10; --top-avatar-s: 1;
-    --top-info-x: 0px; --top-info-y: 10px; --top-info-z: 11; --top-info-s: 1;
+    --top-avatar-x: 0px; --top-avatar-y: 0px; --top-avatar-z: 10; --top-avatar-s: 1;
+    --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
 
     --bottom-avatar-x: 0px; --bottom-avatar-y: 38px; --bottom-avatar-z: 5; --bottom-avatar-s: 1;
     --bottom-info-x: 0px; --bottom-info-y: 26px; --bottom-info-z: 20; --bottom-info-s: 1;
@@ -241,4 +241,13 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
 }
 .table-page #table #board .seat-bottom .seat-identity {
   z-index: 20 !important;
+}
+
+
+/* BLT-PHP-19.37: move the entire top player's seat, hidden cards, avatar and name plaque 10px down together. */
+.table-page #table #board .seat-top {
+  transform: translateY(10px) !important;
+}
+.table-page #table #board .seat-top .opponent-hand {
+  transform: none !important;
 }
