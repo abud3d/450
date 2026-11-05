@@ -1,7 +1,7 @@
 const transport=new BalootHttpClient(),$=id=>document.getElementById(id);
 let roomCode=null,mySeat=null,latest=null,account=null,csrfToken=null,selectedCardId=null,queuedCardId=null,playRequestInFlight=false,qaidState=null,qaidTimer=null,lastSeenPlayCount=null,dismissedResultRound=null;
 let retainedProjectCardsBySeat={};
-let lastRenderedHandIds=[],dealAnimationToken=0,lastPurchaseAnimationKey='',countdownTicker=null;
+let lastRenderedHandIds=[],dealAnimationToken=0,lastPurchaseAnimationKey='',purchaseLandedCard=null,countdownTicker=null;
 let auctionCallUntil=[0,0,0,0],auctionCallPulse=[0,0,0,0],auctionCallText=['','','',''],auctionCallTimers=[null,null,null,null];
 function trackAuctionCalls(s){
  if(s.phase==='playing'||['roundEnd','gameEnd','lobby'].includes(s.phase)){
@@ -77,31 +77,35 @@ transport.on('disconnect',()=>status('انقطع الاتصال؛ نحاول إ�
 function playCardNow(id){document.getElementById('turnTimeout')?.classList.add('hidden');if(playRequestInFlight)return;playRequestInFlight=true;selectedCardId=null;queuedCardId=null;const button=document.querySelector('[data-card="'+CSS.escape(id)+'"]');if(button){button.disabled=true;button.classList.add('is-playing','is-pending');button.setAttribute('aria-busy','true');}status('جارٍ إرسال الورقة...');transport.emit('room:play',{code:roomCode,cardId:id},result=>{playRequestInFlight=false;if(!result?.ok){if(button){button.disabled=false;button.classList.remove('is-playing','is-pending');button.removeAttribute('aria-busy');}status(result?.error||'تعذر لعب الورقة');if(latest)renderControls(latest);}else status('تم استلام الورقة.');});}
 
 function animatePurchasedUpcard(s,previous){
- if(!previous||!s.contract||!Number.isInteger(s.contract.buyer))return;
- const receiver=Number.isInteger(s.contract.cardReceiver)?s.contract.cardReceiver:s.contract.buyer;
- if(!Number.isInteger(receiver)||receiver<0||receiver>3)return;
- const enteredPurchase=['auction1','auction2'].includes(previous.phase)&&['postPurchase','buyerConfirm','buyerSelectHukm'].includes(s.phase);
- const completed=['postPurchase','buyerConfirm','buyerSelectHukm'].includes(previous.phase)&&['projectDeclaration','playing'].includes(s.phase);
- const oldReceiver=previous.contract?(Number.isInteger(previous.contract.cardReceiver)?previous.contract.cardReceiver:previous.contract.buyer):null;
- const handedOff=Number.isInteger(oldReceiver)&&oldReceiver!==receiver;
- if(!enteredPurchase&&!completed&&!handedOff)return;
- const cardId=s.upCard?.id||previous.upCard?.id||'card';
- const key=[s.code,cardId,receiver].join(':');
- if(lastPurchaseAnimationKey===key)return;
- const relative=(receiver-Number(s.mySeat)+4)%4;
- const target=document.getElementById('seat'+relative)?.querySelector('.seat-avatar');
- const sourceCard=document.getElementById('upcard')?.querySelector('.upcard-visible');
- if(!target||!sourceCard)return;
- lastPurchaseAnimationKey=key;
- const sr=sourceCard.getBoundingClientRect(),tr=target.getBoundingClientRect();
- const width=sr.width,height=sr.height,left=sr.left,top=sr.top;
- const dx=tr.left+tr.width/2-(left+width/2),dy=tr.top+tr.height/2-(top+height/2);
- const flight=document.createElement('div');flight.className='purchase-flight-card';
- flight.style.left=left+'px';flight.style.top=top+'px';flight.style.width=width+'px';flight.style.height=height+'px';
- flight.innerHTML=sourceCard.innerHTML;document.body.appendChild(flight);sourceCard.style.visibility='hidden';
- const animation=flight.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px) scale(.58)',opacity:.96}],{duration:720,easing:'cubic-bezier(.22,.75,.25,1)'});
- animation.onfinish=()=>flight.remove();animation.oncancel=()=>flight.remove();
-}
+  const purchasePhases=['postPurchase','buyerConfirm','buyerSelectHukm'];
+  const completed=!!previous&&purchasePhases.includes(previous.phase)&&['projectDeclaration','playing'].includes(s.phase);
+  if(completed){purchaseLandedCard?.remove();purchaseLandedCard=null;return;}
+  if(!previous||!s.contract||!Number.isInteger(s.contract.buyer))return;
+  const receiver=Number.isInteger(s.contract.cardReceiver)?s.contract.cardReceiver:s.contract.buyer;
+  if(!Number.isInteger(receiver)||receiver<0||receiver>3)return;
+  const enteredPurchase=['auction1','auction2'].includes(previous.phase)&&purchasePhases.includes(s.phase);
+  const oldReceiver=previous.contract?(Number.isInteger(previous.contract.cardReceiver)?previous.contract.cardReceiver:previous.contract.buyer):null;
+  const handedOff=Number.isInteger(oldReceiver)&&oldReceiver!==receiver;
+  if(!enteredPurchase&&!handedOff)return;
+  const cardId=s.upCard?.id||previous.upCard?.id||'card';
+  const key=[s.code,cardId,receiver].join(':');
+  if(lastPurchaseAnimationKey===key)return;
+  const relative=(receiver-Number(s.mySeat)+4)%4;
+  const target=document.getElementById('seat'+relative)?.querySelector('.seat-avatar');
+  const sourceCard=document.getElementById('upcard')?.querySelector('.upcard-visible');
+  if(!target||!sourceCard)return;
+  lastPurchaseAnimationKey=key;
+  const sr=sourceCard.getBoundingClientRect(),tr=target.getBoundingClientRect();
+  const width=sr.width,height=sr.height,left=sr.left,top=sr.top;
+  const dx=tr.left+tr.width/2-(left+width/2),dy=tr.top+tr.height/2-(top+height/2);
+  const landedTransform='translate('+dx+'px,'+dy+'px) scale(.58)';
+  const flight=document.createElement('div');flight.className='purchase-flight-card';
+  flight.style.left=left+'px';flight.style.top=top+'px';flight.style.width=width+'px';flight.style.height=height+'px';
+  flight.innerHTML=sourceCard.innerHTML;document.body.appendChild(flight);sourceCard.style.visibility='hidden';
+  const animation=flight.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:landedTransform,opacity:.96}],{duration:720,easing:'cubic-bezier(.22,.75,.25,1)'});
+  animation.onfinish=()=>{flight.style.transform=landedTransform;flight.style.opacity='.96';purchaseLandedCard=flight;};
+  animation.oncancel=()=>{if(purchaseLandedCard!==flight)flight.remove();};
+ }
 function updateAvatarCountdowns(){
  document.querySelectorAll('.avatar-countdown').forEach(node=>{
   const deadline=Number(node.dataset.deadline)*1000,duration=Math.max(1,Number(node.dataset.duration)||10),remaining=deadline-Date.now();
