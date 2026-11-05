@@ -240,7 +240,6 @@ try {
         'next' => 'next',
         'result-continue' => 'continue',
         'timeout-return' => 'timeout_return',
-        'timeout-bot' => 'timeout_bot',
         'replay' => 'replay',
         default => '',
     };
