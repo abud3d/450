@@ -356,47 +356,13 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   }
 }
 
-
-/* BLT-PHP-19.62: before the game starts, center top/bottom avatars above their info plaques. */
-.table-page #table #board.lobby-seat-layout .seat-top,
-.table-page #table #board.lobby-seat-layout .seat-bottom{
-  display:flex!important;
-  flex-direction:column!important;
-  flex-wrap:nowrap!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:4px!important;
-}
-.table-page #table #board.lobby-seat-layout .seat-top .opponent-hand,
-.table-page #table #board.lobby-seat-layout .seat-bottom .opponent-hand{
-  order:0!important;
-  align-self:center!important;
-  width:100%!important;
-}
-.table-page #table #board.lobby-seat-layout .seat-top .seat-avatar-wrap,
-.table-page #table #board.lobby-seat-layout .seat-bottom .seat-avatar-wrap{
-  order:1!important;
-  align-self:center!important;
-  margin:0 auto!important;
-  left:auto!important;
+/* BLT-PHP-19.63: center only the top player's avatar; preserve the seat and info-plaque dimensions. */
+.table-page #table #board .seat-top .seat-avatar-wrap{
+  position:absolute!important;
+  left:50%!important;
   right:auto!important;
+  top:0!important;
+  margin:0!important;
+  transform:translateX(-50%)!important;
   translate:0 0!important;
-}
-.table-page #table #board.lobby-seat-layout .seat-top .seat-identity,
-.table-page #table #board.lobby-seat-layout .seat-bottom .seat-identity{
-  order:2!important;
-  align-self:center!important;
-  width:min(190px,90%)!important;
-  max-width:190px!important;
-  min-width:0!important;
-  margin:0 auto!important;
-  text-align:center!important;
-  translate:0 0!important;
-}
-.table-page #table #board.lobby-seat-layout .seat-top .seat-name,
-.table-page #table #board.lobby-seat-layout .seat-bottom .seat-name,
-.table-page #table #board.lobby-seat-layout .seat-top .seat-badges,
-.table-page #table #board.lobby-seat-layout .seat-bottom .seat-badges{
-  text-align:center!important;
-  justify-content:center!important;
 }
