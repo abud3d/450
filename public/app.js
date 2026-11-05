@@ -88,17 +88,17 @@ function animatePurchasedUpcard(s,previous){
  const cardId=s.upCard?.id||previous.upCard?.id||'card';
  const key=[s.code,cardId,receiver].join(':');
  if(lastPurchaseAnimationKey===key)return;
- lastPurchaseAnimationKey=key;
  const relative=(receiver-Number(s.mySeat)+4)%4;
  const target=document.getElementById('seat'+relative)?.querySelector('.seat-avatar');
  const sourceCard=document.getElementById('upcard')?.querySelector('.upcard-visible');
  if(!target||!sourceCard)return;
+ lastPurchaseAnimationKey=key;
  const sr=sourceCard.getBoundingClientRect(),tr=target.getBoundingClientRect();
  const width=sr.width,height=sr.height,left=sr.left,top=sr.top;
  const dx=tr.left+tr.width/2-(left+width/2),dy=tr.top+tr.height/2-(top+height/2);
  const flight=document.createElement('div');flight.className='purchase-flight-card';
  flight.style.left=left+'px';flight.style.top=top+'px';flight.style.width=width+'px';flight.style.height=height+'px';
- flight.innerHTML=sourceCard.innerHTML;document.body.appendChild(flight);
+ flight.innerHTML=sourceCard.innerHTML;document.body.appendChild(flight);sourceCard.style.visibility='hidden';
  const animation=flight.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+dx+'px,'+dy+'px) scale(.58)',opacity:.96}],{duration:720,easing:'cubic-bezier(.22,.75,.25,1)'});
  animation.onfinish=()=>flight.remove();animation.oncancel=()=>flight.remove();
 }
