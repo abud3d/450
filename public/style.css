@@ -1713,20 +1713,16 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
 }
 
 
-/* BLT-PHP-19.49: expand the turn countdown number to fill the avatar circle. */
+/* BLT-PHP-19.50: restore the circular progress ring and keep the countdown in its badge. */
 .table-page .board .seat-avatar-wrap .avatar-countdown b{
-  inset:0 !important;
-  width:100% !important;
-  height:100% !important;
-  margin:0 !important;
-  border-radius:50% !important;
+  inset:auto 0 0 !important;
+  width:22px !important;
+  height:17px !important;
+  margin:0 auto !important;
+  border-radius:9px !important;
   display:grid !important;
   place-items:center !important;
-  font-size:24px !important;
-  background:#0b3d2d99 !important;
-}
-@media(max-width:560px){
-  .table-page .board .seat-avatar-wrap .avatar-countdown b{
-    font-size:22px !important;
-  }
+  font-size:11px !important;
+  background:#0b3d2def !important;
+  box-shadow:0 1px 4px #0008 !important;
 }
