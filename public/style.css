@@ -968,8 +968,9 @@ body.table-page{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;ba
 }
 
 /* Selectable empty seats before the first deal. */
-.table-page .seat.seat-selectable{cursor:pointer;border:1px dashed #d7c28a!important;border-radius:12px;background:#ffffff0a!important;transition:background .16s ease,border-color .16s ease}
-.table-page .seat.seat-selectable:after{content:'اضغط للانتقال';display:block;margin:3px auto;color:#f4dfa5;font-size:10px;font-weight:800}
+.table-page .seat.seat-selectable{position:relative!important;cursor:pointer;border:1px dashed #d7c28a!important;border-radius:12px;background:#ffffff0a!important;padding-bottom:18px!important;transition:background .16s ease,border-color .16s ease}
+.table-page .seat.seat-selectable:after{content:'اضغط للانتقال';position:absolute;left:50%;bottom:1px;transform:translateX(-50%);display:block;margin:0;white-space:nowrap;color:#f4dfa5;font-size:10px;font-weight:800;line-height:14px;z-index:1}
+.table-page .seat.seat-selectable>*{position:relative;z-index:2}
 .table-page .seat.seat-selectable:focus-visible{outline:2px solid #f4dfa5;outline-offset:2px}
 .table-page .round-summary{width:min(94%,390px);max-height:90%;overflow:auto;padding:12px;background:linear-gradient(160deg,#172b27,#0a1715);border:1px solid #c8ad70;border-radius:16px;color:#f8f1dd;box-shadow:0 12px 36px #000b;gap:9px}
 .table-page .round-summary-title{font-size:17px;color:#f2d58d}
