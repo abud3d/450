@@ -10,7 +10,7 @@
       this.timer = null;
       this.busy = false;
       this.stopped = false;
-      this.delay = 1800;
+      this.delay = 2500;
       this.identityPromise = null;
       queueMicrotask(() => this.dispatch('connect'));
     }
@@ -129,7 +129,7 @@
       try {
         const result = await this.request('/api/room.php?action=state&code=' + encodeURIComponent(this.code));
         if (result.snapshot) this.acceptSnapshot(result.snapshot);
-        this.delay = document.hidden ? 5000 : (result.snapshot?.phase === 'lobby' ? 2500 : 1800);
+        this.delay = document.hidden ? 5000 : 2500;
       } catch (error) {
         this.delay = Math.min(12000, Math.max(2500, this.delay * 1.7));
         if (/الغرفة غير موجودة|لا يوجد مقعد محفوظ/.test(error.message)) this.dispatch('disconnect');
