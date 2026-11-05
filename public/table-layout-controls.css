@@ -366,3 +366,20 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   transform:translateX(-50%)!important;
   translate:0 0!important;
 }
+
+
+/* BLT-PHP-19.66: bottom project cards must not change the hand, avatar or info layout. */
+.table-page #table #board .seat-bottom.has-project-cards{
+  position:relative!important;
+}
+.table-page #table #board .seat-bottom.has-project-cards .project-cards{
+  position:absolute!important;
+  left:50%!important;
+  top:calc(100% - 2px)!important;
+  right:auto!important;
+  width:max-content!important;
+  max-width:100%!important;
+  margin:0!important;
+  transform:translateX(-50%)!important;
+  z-index:12!important;
+}
