@@ -1532,3 +1532,94 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
  .table-page .board .seat-avatar-wrap .seat-avatar{width:48px;height:48px;font-size:23px}
  .table-page .board .seat-avatar-wrap .avatar-countdown{inset:-6px}
 }
+
+
+/* BLT-PHP-19.9: stable card fan, clearer portraits and a larger playable board. */
+.table-page #table .board{
+  min-height:calc(100dvh - 178px);
+  grid-template-rows:minmax(56px,.72fr) minmax(120px,1.45fr) minmax(76px,.92fr) auto;
+  overflow:visible;
+}
+.table-page .board .seat-top,
+.table-page .board .seat-left,
+.table-page .board .seat-right{
+  transform:translateY(-6px);
+}
+.table-page .board .opponent-hand{
+  transform:translateY(-5px);
+  margin-bottom:-12px;
+}
+.table-page .board .seat-bottom{
+  position:relative;
+  z-index:8;
+  transform:translateY(5px);
+}
+.table-page .board .seat-bottom .seat-avatar-wrap{
+  top:-49px;
+  z-index:10;
+}
+.table-page .board .seat-bottom .seat-identity{
+  position:relative;
+  z-index:9;
+  margin-top:0!important;
+}
+.table-page .board .hand{
+  position:relative;
+  z-index:6;
+  transform:translateY(10px)!important;
+  overflow:visible!important;
+  max-height:none;
+}
+.table-page .board .hand .playing-card{
+  transform:translateY(var(--fan-y,0)) rotate(var(--fan-r,0deg))!important;
+  transform-origin:50% 100%;
+  transition:transform .16s ease,box-shadow .16s ease!important;
+  will-change:transform;
+  touch-action:manipulation;
+}
+.table-page .board .hand .playing-card.selected{
+  transform:translateY(-12px) rotate(0deg) scale(1.025)!important;
+  z-index:20;
+}
+@media(hover:hover) and (pointer:fine){
+  .table-page .board .hand .playing-card:hover{
+    transform:translateY(-12px) rotate(0deg)!important;
+    z-index:15;
+  }
+}
+@media(hover:none){
+  .table-page .board .hand .playing-card:not(.selected):active{
+    transform:translateY(-5px) rotate(0deg)!important;
+  }
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown{
+  inset:0!important;
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown::before{
+  inset:0;
+  background:conic-gradient(from -90deg,#ffe08a 0 var(--progress,100%),#ffffff30 var(--progress,100%) 100%);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));
+}
+.table-page .board .seat.active-turn .seat-avatar::after{display:none!important;content:none!important}
+.controls button.is-pending::after{display:none!important;content:none!important}
+@media(max-width:560px){
+  .table-page #table .board{
+    min-height:calc(100dvh - 168px);
+    grid-template-rows:minmax(54px,.7fr) minmax(112px,1.4fr) minmax(72px,.9fr) auto;
+    overflow:visible;
+  }
+  .table-page .board .seat-top,
+  .table-page .board .seat-left,
+  .table-page .board .seat-right{transform:translateY(-5px)}
+  .table-page .board .opponent-hand{height:40px;margin-bottom:-11px}
+  .table-page .board .seat-bottom .seat-avatar-wrap{top:-45px;width:48px;height:48px}
+  .table-page .board .seat-bottom .seat-avatar-wrap .seat-avatar{width:48px;height:48px}
+  .table-page .board .hand{max-height:none;padding:5px 2px 8px!important;transform:translateY(8px)!important}
+  .table-page .board .hand .playing-card{transform:translateY(var(--fan-y,0)) rotate(var(--fan-r,0deg))!important}
+  .table-page .board .hand .playing-card.selected{transform:translateY(-11px) rotate(0deg) scale(1.02)!important}
+}
+@media(max-height:650px) and (max-width:560px){
+  .table-page #table .board{min-height:calc(100dvh - 150px);grid-template-rows:42px minmax(82px,1fr) 66px auto}
+  .table-page .board .hand{max-height:none}
+}
