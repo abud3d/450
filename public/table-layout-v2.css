@@ -72,48 +72,24 @@
 /* Result and qaid actions must receive taps even while the timeout layer is being dismissed. */
 .table-page #resultPage:not(.hidden),.table-page #qaidPage:not(.hidden),.table-page #resultPage .round-summary-actions,.table-page #resultPage .round-summary-actions button{pointer-events:auto;touch-action:manipulation}
 
-/* BLT-PHP-19.22: center the avatar over its plaque and anchor the hand to the bottom row. */
-.table-page #table .board .seat-bottom{
-  position:relative!important;
-  z-index:8!important;
-}
+/* BLT-PHP-19.23: bring the player badge onto the table divider and lower the hand. */
 .table-page #table .board .seat-bottom .seat-avatar-wrap{
-  position:absolute!important;
-  top:-22px!important;
-  left:50%!important;
-  right:auto!important;
-  transform:translateX(-50%)!important;
-  z-index:7!important;
-  flex:none!important;
-  width:48px!important;
-  height:48px!important;
-  margin:0!important;
+  top:10px!important;
 }
 .table-page #table .board .seat-bottom .seat-identity{
-  position:relative!important;
-  z-index:9!important;
-  margin:0!important;
+  transform:translateY(-100px)!important;
 }
-/* Keep the hand in the dedicated bottom grid row, not floating over the board center. */
 .table-page #table .board>#hand{
-  grid-column:1 / -1!important;
-  grid-row:4!important;
-  align-self:end!important;
-  justify-self:stretch!important;
-  position:relative!important;
-  z-index:6!important;
-  transform:none!important;
-  margin-top:0!important;
+  transform:translateY(28px)!important;
 }
 @media(max-width:560px){
   .table-page #table .board .seat-bottom .seat-avatar-wrap{
-    top:-20px!important;
-    width:46px!important;
-    height:46px!important;
+    top:10px!important;
+  }
+  .table-page #table .board .seat-bottom .seat-identity{
+    transform:translateY(-100px)!important;
   }
   .table-page #table .board>#hand{
-    grid-column:1 / -1!important;
-    grid-row:4!important;
-    transform:none!important;
+    transform:translateY(28px)!important;
   }
 }
