@@ -231,7 +231,7 @@ final class Engine
             $count++;
         }
         if ($count > 0) $room['lastAction'] = 'اتخذ البوت قراراً تلقائياً.';
-        if (in_array($room['game']['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 30);
+        if (in_array($room['game']['phase'] ?? '', ['auction1','auction2','postPurchase','buyerConfirm','buyerSelectHukm','projectDeclaration','playing'], true)) TurnClock::arm($room, 5);
         else TurnClock::clear($room);
         self::queueBotTurn($room);
         return $count;
