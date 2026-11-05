@@ -12,12 +12,13 @@ final class TurnClock
     public static function arm(array &$roomState, int $seconds = 5, ?int $now = null): void
     {
         $seconds = max(1, min(300, $seconds));
+        $roomState['turnClockStartedAt'] = $now ?? time();
         $roomState['turnDeadlineAt'] = ($now ?? time()) + $seconds;
     }
 
     public static function clear(array &$roomState): void
     {
-        unset($roomState['turnDeadlineAt']);
+        unset($roomState['turnDeadlineAt'], $roomState['turnClockStartedAt']);
     }
 
     public static function expired(array $roomState, ?int $now = null): bool
