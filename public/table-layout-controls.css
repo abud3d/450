@@ -181,3 +181,19 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
 .table-page #table .board > #hand > .playing-card.selected {
   transform: translateY(calc(var(--fan-y, 0px) + var(--my-cards-y) - 12px)) rotate(0deg) scale(1.025) !important;
 }
+
+/* BLT-PHP-19.29: keep the hand backdrop fixed; move the real card buttons only.
+   The independent CSS translate preserves each card's fan rotation/selection transform. */
+.table-page #table #board > #hand {
+  transform: none !important;
+  translate: 0 0 !important;
+  top: auto !important;
+}
+.table-page #table #board > #hand > .playing-card {
+  translate: 0 var(--my-cards-y) !important;
+}
+@media (max-width:560px) {
+  .table-page #table #board > #hand > .playing-card {
+    translate: 0 var(--my-cards-y) !important;
+  }
+}
