@@ -1738,3 +1738,42 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
     font-size:21px !important;
   }
 }
+
+
+/* BLT-PHP-19.55: side projects float over the table felt instead of enlarging the seat/grid row. */
+.table-page .board .seat-left,
+.table-page .board .seat-right{position:relative!important;overflow:visible!important;}
+.table-page .board .seat-left .project-cards,
+.table-page .board .seat-right .project-cards{
+  position:absolute!important;left:50%!important;top:58%!important;
+  transform:translate(-50%,-50%)!important;
+  display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+  align-items:center!important;justify-content:center!important;
+  width:max-content!important;height:auto!important;max-width:none!important;
+  margin:0!important;padding:3px 5px!important;gap:0!important;
+  border-radius:8px;background:#092d22a8;
+  z-index:2!important;pointer-events:none!important;
+}
+.table-page .board .seat-left .project-card,
+.table-page .board .seat-right .project-card{
+  flex:0 0 30px!important;width:30px!important;height:44px!important;
+  margin:0 0 0 -13px!important;position:relative!important;
+}
+.table-page .board .seat-left .project-card:first-child,
+.table-page .board .seat-right .project-card:first-child{margin-left:0!important;}
+.table-page .board .seat-left .project-cards .project-card:nth-child(1),
+.table-page .board .seat-right .project-cards .project-card:nth-child(1){z-index:1}
+.table-page .board .seat-left .project-cards .project-card:nth-child(2),
+.table-page .board .seat-right .project-cards .project-card:nth-child(2){z-index:2}
+.table-page .board .seat-left .project-cards .project-card:nth-child(3),
+.table-page .board .seat-right .project-cards .project-card:nth-child(3){z-index:3}
+.table-page .board .seat-left .project-cards .project-card:nth-child(4),
+.table-page .board .seat-right .project-cards .project-card:nth-child(4){z-index:4}
+.table-page .board .seat-left .project-cards .project-card:nth-child(5),
+.table-page .board .seat-right .project-cards .project-card:nth-child(5){z-index:5}
+@media(max-width:560px){
+ .table-page .board .seat-left .project-cards,
+ .table-page .board .seat-right .project-cards{top:58%!important;padding:2px 4px!important;}
+ .table-page .board .seat-left .project-card,
+ .table-page .board .seat-right .project-card{flex-basis:25px!important;width:25px!important;height:37px!important;margin-left:-11px!important;}
+}
