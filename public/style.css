@@ -1418,3 +1418,15 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
   .table-page #table #seat0 #turnTimeout{width:min(92vw,360px);padding:10px}
   .table-page #table #seat0 #turnTimeout strong{font-size:15px}
 }
+
+
+/* Requested refinements: purchase-card flight, shrinking avatar timer, classic yellow timeout. */
+.avatar-countdown{position:absolute;inset:-7px;z-index:8;pointer-events:none}
+.avatar-countdown::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(#f4d477 var(--progress,100%),#ffffff35 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px))}
+.purchase-flight-card{position:fixed;z-index:30000;overflow:hidden;border:1px solid #d8cfbb;border-radius:7px;background:#fff;box-shadow:0 8px 20px #0008;pointer-events:none;will-change:transform,opacity}
+.purchase-flight-card .full-card-art{display:block;width:100%;height:100%;object-fit:fill}
+.table-page #table #seat0 #turnTimeout{border:2px solid #e7c76b!important;border-radius:14px!important;background:#fff7dc!important;color:#382b0c!important;box-shadow:0 8px 24px #0003!important}
+.table-page #table #seat0 #turnTimeout strong,.table-page #table #seat0 #turnTimeout span{color:#382b0c!important}
+.table-page #table #seat0 #turnTimeout button{background:#174d3c!important;color:#fff!important}
+.table-page #table #seat0 #turnTimeout button.secondary{background:#f2e4b8!important;color:#382b0c!important;border:1px solid #d5bd79!important}
+#gameNotice,.game-notice{display:none!important}
