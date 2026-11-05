@@ -1443,3 +1443,7 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
   .table-page #table #seat0 #turnTimeout{width:min(92vw,360px);padding:10px}
   .table-page #table #seat0 #turnTimeout strong{font-size:15px}
 }
+
+
+/* Compact release identifier inside the fixed game table. */
+.table-page #table .game-release-version{flex:0 0 auto;display:block;width:100%;padding:2px 0 0;margin:0;text-align:center;color:#d8c99d;font:700 9px/1.2 Tahoma,Arial,sans-serif;direction:rtl;opacity:.82;letter-spacing:.02em;pointer-events:none}
