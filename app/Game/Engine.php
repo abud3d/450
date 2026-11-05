@@ -126,13 +126,13 @@ final class Engine
             case 'timeout_return':
                 if (($room['timeoutSeat'] ?? $seat) !== $seat && empty($room['players'][$seat]['botControl'])) throw new DomainException('لا يوجد طلب عودة لهذا المقعد');
                 $room['players'][$seat]['botControl'] = false;
-                unset($room['timeoutSeat']);
+                unset($room['timeoutSeat'], $room['timeoutNoticeSeat'], $room['timeoutNoticeUntil']);
                 $room['lastAction'] = 'عاد اللاعب لمقعده.';
                 break;
             case 'timeout_bot':
                 if (($room['timeoutSeat'] ?? -1) !== $seat) throw new DomainException('انتهت مهلة الاختيار أو لم يحن وقتها');
                 $room['players'][$seat]['botControl'] = true;
-                unset($room['timeoutSeat']);
+                unset($room['timeoutSeat'], $room['timeoutNoticeSeat'], $room['timeoutNoticeUntil']);
                 $room['lastAction'] = 'البوت يكمل اللعب بدلاً من اللاعب.';
                 break;
             case 'replay':
@@ -420,6 +420,7 @@ final class Engine
             'players' => $players,
             'phase' => $g['phase'],
             'turn' => $g['turn'] ?? 0,
+            'turnClockStartedAt' => $room['turnClockStartedAt'] ?? null,
             'auctionCalls' => $g['auctionCalls'] ?? [null,null,null,null],
             'legalCardIds' => $legalCardIds,
             'contract' => $g['contract'] ?? null,
@@ -461,6 +462,7 @@ final class Engine
             'postPurchaseBuyer' => $g['postPurchase']['buyer'] ?? $g['contract']['buyer'] ?? null,
             'postPurchaseTurn' => $g['turn'] ?? null,
             'timeoutPrompt' => ($room['timeoutSeat'] ?? -1) === $seat,
+            'timeoutNoticeUntil' => (int) ($room['timeoutNoticeSeat'] ?? -1) === $seat ? ($room['timeoutNoticeUntil'] ?? null) : null,
             'qaidWindowActive' => isset($room['qaidWindow']),
             'lastAction' => $room['lastAction'] ?? '',
         ];
