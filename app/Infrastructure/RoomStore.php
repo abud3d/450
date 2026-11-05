@@ -360,7 +360,6 @@ final class RoomStore
                 $room = $this->lockedRoom($pdo, (string) $code);
                 $state = $this->decode((string) $room['state_json']);
                 $now = time();
-                if ((int) ($state['timeoutNoticeUntil'] ?? 0) <= $now) unset($state['timeoutNoticeUntil'], $state['timeoutNoticeSeat']);
                 $beforePhase = (string) ($state['game']['phase'] ?? 'lobby');
                 $beforeQaidResult = $state['game']['qaidResult'] ?? null;
                 $game =& $state['game'];
