@@ -77,16 +77,27 @@ transport.on('disconnect',()=>status('انقطع الاتصال؛ نحاول إ�
 function playCardNow(id){document.getElementById('turnTimeout')?.classList.add('hidden');if(playRequestInFlight)return;playRequestInFlight=true;selectedCardId=null;queuedCardId=null;const button=document.querySelector('[data-card="'+CSS.escape(id)+'"]');if(button){button.disabled=true;button.classList.add('is-playing','is-pending');button.setAttribute('aria-busy','true');}status('جارٍ إرسال الورقة...');transport.emit('room:play',{code:roomCode,cardId:id},result=>{playRequestInFlight=false;if(!result?.ok){if(button){button.disabled=false;button.classList.remove('is-playing','is-pending');button.removeAttribute('aria-busy');}status(result?.error||'تعذر لعب الورقة');if(latest)renderControls(latest);}else status('تم استلام الورقة.');});}
 
 function animatePurchasedUpcard(s,previous){
- if(!previous||!['postPurchase','buyerConfirm','buyerSelectHukm'].includes(previous.phase)||!['projectDeclaration','playing'].includes(s.phase)||!s.contract||!Number.isInteger(s.contract.buyer))return;
- const cardId=s.upCard?.id||previous.upCard?.id||'card',key=[s.code,s.contract.buyer,cardId].join(':');
- if(lastPurchaseAnimationKey===key)return;lastPurchaseAnimationKey=key;
- const receiver=Number.isInteger(s.contract.cardReceiver)?s.contract.cardReceiver:s.contract.buyer;const relative=(receiver-s.mySeat+4)%4,target=$('seat'+relative)?.querySelector('.seat-avatar'),board=$('board');
- const sourceCard=$('upcard')?.querySelector('.upcard-visible')||$('trick')?.querySelector('.played-card');
+ if(!previous||!s.contract||!Number.isInteger(s.contract.buyer))return;
+ const receiver=Number.isInteger(s.contract.cardReceiver)?s.contract.cardReceiver:s.contract.buyer;
+ if(!Number.isInteger(receiver)||receiver<0||receiver>3)return;
+ const cardId=s.upCard?.id||previous.upCard?.id||'card';
+ const oldReceiver=previous.contract?(Number.isInteger(previous.contract.cardReceiver)?previous.contract.cardReceiver:previous.contract.buyer):null;
+ const completed=['postPurchase','buyerConfirm','buyerSelectHukm'].includes(previous.phase)&&['projectDeclaration','playing'].includes(s.phase);
+ const handedOff=Number.isInteger(oldReceiver)&&oldReceiver!==receiver;
+ if(!completed&&!handedOff)return;
+ const key=[s.code,cardId,receiver].join(':');
+ if(lastPurchaseAnimationKey===key)return;
+ lastPurchaseAnimationKey=key;
+ const relative=(receiver-Number(s.mySeat)+4)%4;
+ const target=document.getElementById('seat'+relative)?.querySelector('.seat-avatar');
+ const board=document.getElementById('board');
  if(!target||!board)return;
- const sourceRect=(sourceCard||$('trick')||board).getBoundingClientRect(),targetRect=target.getBoundingClientRect();
- const width=sourceCard?sourceRect.width:42,height=sourceCard?sourceRect.height:59;
- const left=sourceRect.left+sourceRect.width/2-width/2,top=sourceRect.top+sourceRect.height/2-height/2;
- const dx=targetRect.left+targetRect.width/2-(left+width/2),dy=targetRect.top+targetRect.height/2-(top+height/2);
+ const sourceCard=document.getElementById('upcard')?.querySelector('.upcard-visible');
+ const source=sourceCard||document.getElementById('upcard')||document.getElementById('trick')||board;
+ const sr=source.getBoundingClientRect(),tr=target.getBoundingClientRect();
+ const width=sourceCard?sr.width:42,height=sourceCard?sr.height:59;
+ const left=sr.left+sr.width/2-width/2,top=sr.top+sr.height/2-height/2;
+ const dx=tr.left+tr.width/2-(left+width/2),dy=tr.top+tr.height/2-(top+height/2);
  const flight=document.createElement('div');flight.className='purchase-flight-card';
  flight.style.left=left+'px';flight.style.top=top+'px';flight.style.width=width+'px';flight.style.height=height+'px';
  flight.innerHTML=sourceCard?sourceCard.innerHTML:cardFace(s.upCard||previous.upCard);document.body.appendChild(flight);
