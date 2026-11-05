@@ -1,4 +1,4 @@
-/* BLT-PHP-19.14: board refinements */
+/* BLT-PHP-19.15: responsive seat/header/overlay refinements */
 .table-page .site-header{position:relative;justify-content:center}
 .table-page .site-header .header-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
 .table-page .site-header .header-center .brand{position:static;display:flex;align-items:center;gap:5px}
@@ -44,3 +44,30 @@
 }
 .table-page #table .board .board-phase{position:absolute;z-index:13;top:5px;left:50%;transform:translateX(-50%);display:block;min-height:0;width:auto;padding:2px 7px;border:0;border-radius:6px;background:#092f24aa;color:#f4e4bb;font-size:10px;line-height:1.2;pointer-events:none}
 .table-page #table .board .board-phase span{white-space:nowrap}
+
+
+/* BLT-PHP-19.15: keep the logo at the right and only the room code centered. */
+.table-page .site-header{justify-content:space-between}
+.table-page .site-header>.brand{position:absolute;right:10px;left:auto;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:5px;white-space:nowrap;z-index:4}
+.table-page .site-header>#roomShareLink{position:absolute;left:50%;right:auto;top:50%;transform:translate(-50%,-50%);z-index:4}
+.table-page .site-header>.tag{display:none!important}
+
+/* Top and bottom opponents: center the card backs on their own row, then group avatar and plaque. */
+.table-page .board .seat-top,.table-page .board .seat-bottom{display:flex;flex-wrap:wrap;align-content:center;align-items:center;justify-content:center;gap:3px 7px;direction:rtl}
+.table-page .board .seat-top .opponent-hand,.table-page .board .seat-bottom .opponent-hand{order:0;flex:0 0 100%;width:100%;max-width:100%;height:30px;margin:0 auto 2px;display:flex;align-items:center;justify-content:center;direction:ltr}
+.table-page .board .seat-top .seat-avatar-wrap,.table-page .board .seat-bottom .seat-avatar-wrap{order:1;position:relative!important;top:0!important;left:auto!important;right:auto!important;transform:none!important;flex:0 0 48px;margin:0}
+.table-page .board .seat-top .seat-identity,.table-page .board .seat-bottom .seat-identity{order:2;flex:0 1 190px;min-width:105px;max-width:190px;margin:0!important}
+.table-page .board .seat-top .project-cards,.table-page .board .seat-bottom .project-cards{order:3;flex:0 0 100%;margin:2px auto 0}
+
+/* Return-to-game prompt: a compact panel at the bottom, without a black full-screen veil. */
+.table-page #table #board>#turnTimeout.return-overlay{position:fixed;inset:auto 0 calc(8px + env(safe-area-inset-bottom)) 0;z-index:18000;display:flex!important;align-items:flex-end;justify-content:center;box-sizing:border-box;width:100vw;height:auto;min-height:0;margin:0;padding:0 12px;background:transparent!important;border:0!important;border-radius:0!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;pointer-events:none}
+.table-page #table #board>#turnTimeout .timeout-modal{width:min(340px,92vw);padding:12px 16px;gap:10px;pointer-events:auto;box-shadow:0 6px 22px #0008}
+.table-page #table #board>#turnTimeout strong{font-size:16px}
+.table-page #table #board>#turnTimeout button{min-height:40px;padding:8px 18px;font-size:14px}
+.table-page #table #board>#turnTimeout.hidden{display:none!important}
+
+/* Keep the qaid control clear of the score/points panel. */
+.table-page .board-qaid{top:42px}
+@media(max-width:560px){.table-page .board-qaid{top:39px}.table-page .board .seat-top .seat-avatar-wrap,.table-page .board .seat-bottom .seat-avatar-wrap{flex-basis:46px;width:46px;height:46px}}
+/* Result and qaid actions must receive taps even while the timeout layer is being dismissed. */
+.table-page #resultPage:not(.hidden),.table-page #qaidPage:not(.hidden),.table-page #resultPage .round-summary-actions,.table-page #resultPage .round-summary-actions button{pointer-events:auto;touch-action:manipulation}
