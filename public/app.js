@@ -78,7 +78,7 @@ function animatePurchasedUpcard(s,previous){
  if(!previous||!['postPurchase','buyerConfirm','buyerSelectHukm'].includes(previous.phase)||!['projectDeclaration','playing'].includes(s.phase)||!s.contract||!Number.isInteger(s.contract.buyer))return;
  const cardId=s.upCard?.id||previous.upCard?.id||'card',key=[s.code,s.contract.buyer,cardId].join(':');
  if(lastPurchaseAnimationKey===key)return;lastPurchaseAnimationKey=key;
- const relative=(s.contract.buyer-s.mySeat+4)%4,target=$('seat'+relative)?.querySelector('.seat-avatar'),board=$('board');
+ const receiver=Number.isInteger(s.contract.cardReceiver)?s.contract.cardReceiver:s.contract.buyer;const relative=(receiver-s.mySeat+4)%4,target=$('seat'+relative)?.querySelector('.seat-avatar'),board=$('board');
  const sourceCard=$('upcard')?.querySelector('.upcard-visible')||$('trick')?.querySelector('.played-card');
  if(!target||!board)return;
  const sourceRect=(sourceCard||$('trick')||board).getBoundingClientRect(),targetRect=target.getBoundingClientRect();
