@@ -42,3 +42,5 @@
  .table-page #score .score-teams,.table-page #score .score-points{padding:2px 5px}
  .table-page .board-qaid{top:31px;right:4px}
 }
+.table-page #table .board .board-phase{position:absolute;z-index:13;top:5px;left:50%;transform:translateX(-50%);display:block;min-height:0;width:auto;padding:2px 7px;border:0;border-radius:6px;background:#092f24aa;color:#f4e4bb;font-size:10px;line-height:1.2;pointer-events:none}
+.table-page #table .board .board-phase span{white-space:nowrap}
