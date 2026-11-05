@@ -324,3 +324,26 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
 .table-page .board #trick{
   translate:var(--trick-x) calc(var(--trick-y) + 20px) !important;
 }
+
+
+/* BLT-PHP-19.48: enlarge side project cards downward; lift side avatars 10px and hidden hands 20px. */
+.table-page #table #board .seat-left .project-card,
+.table-page #table #board .seat-right .project-card{
+  flex-basis:60px !important;
+  height:60px !important;
+}
+.table-page #table #board .seat-left .seat-avatar-wrap,
+.table-page #table #board .seat-right .seat-avatar-wrap{
+  translate:0 -10px !important;
+}
+.table-page #table #board .seat-left .opponent-hand,
+.table-page #table #board .seat-right .opponent-hand{
+  translate:var(--opponent-cards-x) calc(var(--opponent-cards-y) - 20px) !important;
+}
+@media(max-width:560px){
+  .table-page #table #board .seat-left .project-card,
+  .table-page #table #board .seat-right .project-card{
+    flex-basis:58px !important;
+    height:58px !important;
+  }
+}
