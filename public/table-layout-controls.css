@@ -172,6 +172,12 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
 }
 .table-page #table .board > #hand {
   transform: none !important;
-  translate: 0 var(--my-cards-y) !important;
+  translate: 0 0 !important;
   margin-top: 0 !important;
+}
+.table-page #table .board > #hand > .playing-card {
+  transform: translateY(calc(var(--fan-y, 0px) + var(--my-cards-y))) rotate(var(--fan-r, 0deg)) !important;
+}
+.table-page #table .board > #hand > .playing-card.selected {
+  transform: translateY(calc(var(--fan-y, 0px) + var(--my-cards-y) - 12px)) rotate(0deg) scale(1.025) !important;
 }
