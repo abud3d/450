@@ -72,24 +72,4 @@
 /* Result and qaid actions must receive taps even while the timeout layer is being dismissed. */
 .table-page #resultPage:not(.hidden),.table-page #qaidPage:not(.hidden),.table-page #resultPage .round-summary-actions,.table-page #resultPage .round-summary-actions button{pointer-events:auto;touch-action:manipulation}
 
-/* BLT-PHP-19.23: bring the player badge onto the table divider and lower the hand. */
-.table-page #table .board .seat-bottom .seat-avatar-wrap{
-  top:10px!important;
-}
-.table-page #table .board .seat-bottom .seat-identity{
-  transform:translateY(-100px)!important;
-}
-.table-page #table .board>#hand{
-  transform:translateY(28px)!important;
-}
-@media(max-width:560px){
-  .table-page #table .board .seat-bottom .seat-avatar-wrap{
-    top:10px!important;
-  }
-  .table-page #table .board .seat-bottom .seat-identity{
-    transform:translateY(-100px)!important;
-  }
-  .table-page #table .board>#hand{
-    transform:translateY(28px)!important;
-  }
-}
+/* BLT-PHP-19.24: positioning is managed by table-layout-controls.css. */
