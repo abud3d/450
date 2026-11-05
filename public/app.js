@@ -233,8 +233,11 @@ async function loadBuildInfo(){
  try{const r=await fetch('/build.json',{cache:'no-store'});if(!r.ok)throw new Error('build info unavailable');const b=await r.json();$('buildVersion').textContent='نسخة '+b.version+' · Build '+b.commit;}
  catch{$('buildVersion').textContent='نسخة 0.3.0-preview · Build preview-2026-11-02.2 (واجهة)';}
 }
-$('timeoutReturn')?.addEventListener('click',()=>{document.getElementById('turnTimeout')?.classList.add('hidden');sendButtonAction($('timeoutReturn'),'room:timeout-return');});
-document.addEventListener('click',event=>{if(event.target.closest('button,a,[role="button"]'))document.getElementById('turnTimeout')?.classList.add('hidden');},true);
+async function returnToGame(event){event?.preventDefault();event?.stopPropagation();const prompt=$('turnTimeout'),button=$('timeoutReturn');if(!prompt||prompt.classList.contains('hidden')||button?.dataset.sending==='1')return;if(button){button.dataset.sending='1';button.disabled=true;button.classList.add('is-pending');}status('جارٍ إعادتك إلى اللعب...');transport.emit('room:timeout-return',{code:roomCode},result=>{if(button){button.disabled=false;button.classList.remove('is-pending');button.removeAttribute('aria-busy');delete button.dataset.sending;}if(result?.ok){prompt.classList.add('hidden');status('عدت إلى اللعب.');}else{status(result?.error||'تعذرت العودة؛ حاول مرة أخرى.');}});}
+$('timeoutReturn')?.addEventListener('click',returnToGame);
+$('turnTimeout')?.addEventListener('click',event=>{if(!event.target.closest('button'))returnToGame(event);});
+document.addEventListener('click',event=>{if(event.target.closest('button,a,[role="button"]')&&!event.target.closest('#turnTimeout'))document.getElementById('turnTimeout')?.classList.add('hidden');},true);
+$('roomShareLink')?.addEventListener('click',async()=>{const url=location.href;try{if(navigator.share)await navigator.share({title:'بلوت 400 - غرفة '+roomCode,text:'انضم إلى لعبة بلوت 400',url});else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url);status('تم نسخ رابط صفحة الغرفة.');}else{const field=document.createElement('textarea');field.value=url;document.body.appendChild(field);field.select();document.execCommand('copy');field.remove();status('تم نسخ رابط صفحة الغرفة.');}}catch(e){if(e.name!=='AbortError')status('تعذرت مشاركة الرابط.');}});
 
 // Keep modal layers outside the scrolling table so touch/click targets are never clipped by table ancestors.
 const resultLayer=$('resultPage'),qaidLayer=$('qaidPage');
