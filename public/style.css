@@ -1801,3 +1801,21 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
     top:calc(58% - 55px)!important;
   }
 }
+
+
+/* BLT-PHP-19.61: project cards use the original card artwork without a second white frame. */
+.table-page .board .project-card{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+  padding:0!important;
+}
+.table-page .board .project-card .full-card-art{
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:fill!important;
+  border:0!important;
+  border-radius:0!important;
+}
