@@ -101,12 +101,6 @@ function updateAvatarCountdowns(){
   const avatar=node.closest('.seat-avatar-wrap')?.querySelector('.seat-avatar');
   if(avatar)avatar.style.setProperty('--turn-ring-progress',(progress*100)+'%');
  });
- if(latest?.timeoutPrompt&&latest.timeoutDeadlineAt){
-  const remaining=Number(latest.timeoutDeadlineAt)*1000-Date.now(),seconds=Math.max(0,Math.ceil(remaining/1000));
-  const number=$('timeoutCountdownText'),message=$('timeoutMessage');
-  if(number)number.textContent=String(seconds);
-  if(message)message.textContent=seconds>0?'سيستلم البوت المقعد بعد '+seconds+' ثوانٍ. يمكنك العودة الآن.':'جارٍ تسليم المقعد للبوت...';
- }
 }
 
 
@@ -139,10 +133,10 @@ transport.on('room:update',s=>{if(!$('table'))return;trackAuctionCalls(s);if(s.q
  $('myProjects').innerHTML='';
  document.querySelectorAll('[data-card]').forEach(b=>{b.disabled=!!s.players[s.mySeat]?.botControl;b.onclick=()=>{if(s.phase!=='playing'||s.players[s.mySeat]?.botControl)return;const id=b.dataset.card;const mobile=window.matchMedia('(max-width: 560px)').matches;if(s.turn!==s.mySeat){if(selectedCardId!==id){selectedCardId=id;queuedCardId=null;document.querySelectorAll('[data-card]').forEach(x=>x.classList.toggle('selected',x.dataset.card===id));}else{queuedCardId=id;status('تم اعتماد الورقة المحددة؛ ستنزل تلقائياً عند وصول دورك إذا كانت نظامية.');}return;}if(mobile&&selectedCardId!==id){selectedCardId=id;document.querySelectorAll('[data-card]').forEach(x=>x.classList.toggle('selected',x.dataset.card===id));return;}playCardNow(id);};});
  if(queuedCardId&&s.phase==='playing'&&s.turn===s.mySeat&&handCards.some(card=>card.id===queuedCardId)){const queued=queuedCardId;if((s.legalCardIds||[]).includes(queued)){playCardNow(queued);}else{queuedCardId=null;status('الورقة المحددة مخالفة؛ اختر ورقة مسموحاً بها حسب قواعد اللعب.');}}
- const timeout=$('turnTimeout');if(timeout){const botNow=!!s.players[s.mySeat]?.botControl;const noticeUntil=Number(s.timeoutNoticeUntil||0)*1000;const showTimeout=!!s.timeoutPrompt||noticeUntil>Date.now();timeout.classList.toggle('hidden',!showTimeout);const message=timeout.querySelector('span');if(message)message.textContent=botNow?'الكمبيوتر يكمل اللعب الآن. يمكنك العودة فوراً.':'سيكمل الكمبيوتر اللعب بعد 10 ثوانٍ.';const botButton=$('timeoutBot');if(botButton)botButton.hidden=botNow;const returnButton=$('timeoutReturn');if(returnButton)returnButton.hidden=botNow;}renderControls(s);
+ const timeout=$('turnTimeout');if(timeout){const botNow=!!s.players[s.mySeat]?.botControl;timeout.classList.toggle('hidden',!s.timeoutPrompt&&!botNow);}renderControls(s);
 });
 function renderControls(s){const el=$('controls');el.innerHTML='';const top=$('qaidTopControl');if(top)top.innerHTML='';if(qaidState&&s.qaidEnabled&&['playing','roundEnd','gameEnd'].includes(s.phase)&&!s.qaidResult){renderQaidChooser(s,$('qaidPage'));$('board').classList.add('hidden');$('controls').classList.add('hidden');return;}else if(s.qaidResult&&qaidState){qaidState=null;if(qaidTimer)clearInterval(qaidTimer);qaidTimer=null;$('qaidPage').classList.add('hidden');$('resultPage').classList.remove('hidden');}
- if(s.players[s.mySeat]?.botControl){const back=document.createElement('button');back.textContent='العودة للعب';back.className='secondary bot-return';back.onclick=()=>sendButtonAction(back,'room:timeout-return');el.appendChild(back);return;}
+ if(s.players[s.mySeat]?.botControl)return;
  if(s.phase==='lobby')return;
  if(s.phase==='projectDeclaration'&&!s.projectDeclared?.[s.mySeat]){
   const labels={'20':'سرا','50':'خمسين','100-run':'مائة متسلسلة','100-set':'مائة ورق','400':'أربعمائة'};
@@ -239,7 +233,6 @@ async function loadBuildInfo(){
  catch{$('buildVersion').textContent='نسخة 0.3.0-preview · Build preview-2026-11-02.2 (واجهة)';}
 }
 $('timeoutReturn')?.addEventListener('click',()=>sendButtonAction($('timeoutReturn'),'room:timeout-return'));
-$('timeoutBot')?.addEventListener('click',()=>sendButtonAction($('timeoutBot'),'room:timeout-bot'));
 
 // Keep modal layers outside the scrolling table so touch/click targets are never clipped by table ancestors.
 const resultLayer=$('resultPage'),qaidLayer=$('qaidPage');
