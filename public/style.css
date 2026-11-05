@@ -1501,3 +1501,34 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
  inset:auto 0 5px;width:22px;height:17px;margin:0 auto;
  border-radius:9px;font-size:11px;background:#0b3d2deF;
 }
+
+/* BLT-PHP-19.7: keep the active avatar between the card fan and player plaque. */
+.table-page .board .seat-avatar-wrap{
+ position:absolute;left:50%;top:8px;transform:translateX(-50%);
+ z-index:3;width:54px;height:54px;pointer-events:none;
+}
+.table-page .board .seat-avatar-wrap .seat-avatar{
+ position:absolute;top:0;left:0;transform:none;z-index:1;
+ pointer-events:auto;
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown{
+ position:absolute;inset:-7px;z-index:2;pointer-events:none;
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown::before{
+ content:"";position:absolute;inset:0;border-radius:50%;
+ background:conic-gradient(#ffe08a var(--progress,100%),#ffffff35 0);
+ -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));
+ mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown b{
+ position:absolute;inset:auto 0 0;width:22px;height:17px;margin:0 auto;
+ display:grid;place-items:center;border-radius:9px;
+ background:#0b3d2deF;color:#fff;font-size:11px;font-weight:900;
+ box-shadow:0 1px 4px #0008;
+}
+.table-page .board .seat-avatar-wrap .avatar-countdown.is-expired b{background:#7c2d25dd}
+@media(max-width:560px){
+ .table-page .board .seat-avatar-wrap{top:1px;width:48px;height:48px}
+ .table-page .board .seat-avatar-wrap .seat-avatar{width:48px;height:48px;font-size:23px}
+ .table-page .board .seat-avatar-wrap .avatar-countdown{inset:-6px}
+}
