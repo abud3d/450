@@ -1,6 +1,6 @@
 /*
 ============================================================
-BLT TABLE LAYOUT CONTROLS — 19.24
+BLT TABLE LAYOUT CONTROLS — 19.25
 ملف مستقل للتحكم في مواقع عناصر الطاولة وطبقاتها وأحجامها.
 X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
 لا نغيّر transform الخاص بأوراق اللعب الفردية أو حركة الاختيار.
@@ -17,8 +17,8 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
 
   /* اللاعب السفلي */
-  --bottom-avatar-x: 0px; --bottom-avatar-y: 0px; --bottom-avatar-z: 10; --bottom-avatar-s: 1;
-  --bottom-info-x: 0px; --bottom-info-y: 0px; --bottom-info-z: 11; --bottom-info-s: 1;
+  --bottom-avatar-x: 0px; --bottom-avatar-y: 16px; --bottom-avatar-z: 9; --bottom-avatar-s: 1;
+  --bottom-info-x: 0px; --bottom-info-y: 16px; --bottom-info-z: 11; --bottom-info-s: 1;
 
   /* اللاعب الأيسر */
   --left-seat-x: 0px; --left-seat-y: 0px; --left-seat-z: 5;
@@ -33,7 +33,7 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
   --opponent-cards-z: 4; --opponent-cards-s: 1;
 
   /* أوراق اللاعب الحالي */
-  --my-cards-x: 0px; --my-cards-y: 0px;
+  --my-cards-x: 0px; --my-cards-y: 12px;
   --my-cards-z: 8; --my-cards-s: 1;
 
   /* الأوراق الملعوبة في الوسط */
@@ -54,8 +54,8 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
     --top-avatar-x: 0px; --top-avatar-y: 0px; --top-avatar-z: 10; --top-avatar-s: 1;
     --top-info-x: 0px; --top-info-y: 0px; --top-info-z: 11; --top-info-s: 1;
 
-    --bottom-avatar-x: 0px; --bottom-avatar-y: 0px; --bottom-avatar-z: 10; --bottom-avatar-s: 1;
-    --bottom-info-x: 0px; --bottom-info-y: 0px; --bottom-info-z: 11; --bottom-info-s: 1;
+    --bottom-avatar-x: 0px; --bottom-avatar-y: 12px; --bottom-avatar-z: 9; --bottom-avatar-s: 1;
+    --bottom-info-x: 0px; --bottom-info-y: 12px; --bottom-info-z: 11; --bottom-info-s: 1;
 
     --left-seat-x: 0px; --left-seat-y: 0px; --left-seat-z: 5;
     --left-avatar-s: 1; --left-info-s: 1;
@@ -66,7 +66,7 @@ X أفقي | Y رأسي | Z ترتيب الطبقة | S الحجم
     --opponent-cards-x: 0px; --opponent-cards-y: 0px;
     --opponent-cards-z: 4; --opponent-cards-s: 1;
 
-    --my-cards-x: 0px; --my-cards-y: 0px;
+    --my-cards-x: 0px; --my-cards-y: 10px;
     --my-cards-z: 8; --my-cards-s: 1;
 
     --trick-x: 0px; --trick-y: 0px; --trick-z: 12; --trick-s: 1;
