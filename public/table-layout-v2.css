@@ -116,3 +116,10 @@
   .table-page .board .seat-bottom .seat-identity{margin-top:16px!important}
   .table-page .board .hand{transform:translateY(41px)!important}
 }
+
+
+/* BLT-PHP-19.17: move only the bottom player's open hand closer to the player plaque. Card dimensions and overlap remain unchanged. */
+.table-page .board .hand{transform:translateY(57px)!important}
+@media(max-width:560px){
+  .table-page .board .hand{transform:translateY(55px)!important}
+}
