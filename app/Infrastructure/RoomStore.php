@@ -445,8 +445,6 @@ final class RoomStore
                             $turnClockStartedAt = (int) ($state['turnClockStartedAt'] ?? max(0, (int) ($state['turnDeadlineAt'] ?? $now) - 5));
                             \Baloot\Game\TurnClock::arm($state, 10, $now);
                             $state['turnClockStartedAt'] = $turnClockStartedAt;
-                            $state['timeoutNoticeSeat'] = $seat;
-                            $state['timeoutNoticeUntil'] = $now + 10;
                             $state['lastAction'] = 'تأخر اللاعب؛ سيُعرض خيار تولي البوت للمقعد.';
                             $didChange = true;
                         }
