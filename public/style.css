@@ -1349,30 +1349,31 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
 .table-page .board .seat-badges .seat-call.pulse-b{animation:auction-call-float-b .65s ease-in-out 2}
 @keyframes auction-call-float-a{50%{transform:translate(-50%,-7px);box-shadow:0 0 0 4px #f4d46b66,0 7px 18px #0009}}
 @keyframes auction-call-float-b{50%{transform:translate(-50%,7px);box-shadow:0 0 0 4px #8ebeff66,0 7px 18px #0009}}
-/* Timeout notice: the element is a direct child of #board, not #seat0. */
+/* Full-width timeout notice: direct child of #board, pinned to the viewport. */
 .table-page #table #board > #turnTimeout{
-  position:absolute;left:50%;right:auto;top:auto;bottom:12px;
-  inset-inline-start:auto;inset-inline-end:auto;
-  transform:translateX(-50%);z-index:80;
+  position:fixed;left:0;right:0;top:auto;bottom:0;
+  inset-inline-start:0;inset-inline-end:0;
+  transform:none;z-index:10000;
   display:flex!important;flex-direction:column;align-items:center;justify-content:center;
   box-sizing:border-box;
-  width:min(92vw,440px);max-width:none;min-height:clamp(118px,22vh,170px);
-  margin:0;padding:16px 14px;
-  border:2px solid #e7c76b!important;border-radius:14px;
+  width:100vw;max-width:none;min-height:clamp(118px,22vh,170px);
+  margin:0;padding:16px 14px calc(16px + env(safe-area-inset-bottom));
+  border:2px solid #e7c76b!important;border-bottom:0!important;border-radius:16px 16px 0 0;
   background:#fff7dc!important;color:#382b0c!important;text-align:center;
-  box-shadow:0 8px 24px #0008;
+  box-shadow:0 -8px 24px #0008;
 }
 .table-page #table #board > #turnTimeout:not(.hidden){animation:timeout-rise .38s cubic-bezier(.2,.8,.25,1) both}
 @keyframes timeout-rise{
-  from{opacity:0;transform:translate(-50%,28px)}
-  to{opacity:1;transform:translate(-50%,0)}
+  from{opacity:0;transform:translateY(28px)}
+  to{opacity:1;transform:translateY(0)}
 }
 .table-page #table #board > #turnTimeout strong{color:#382b0c!important;font-size:17px}
 .table-page #table #board > #turnTimeout span{color:#51421d!important}
 .table-page #table #board > #turnTimeout button{background:#8b6a1c!important;color:#fff!important}
 .table-page #table #board > #turnTimeout button.secondary{background:#f4e7bd!important;color:#59451a!important;border:1px solid #d8bd70!important}
+.table-page #table #board > #turnTimeout button[hidden]{display:none!important}
 .table-page #table #board > #turnTimeout.hidden{display:none!important}
-@media(prefers-reduced-motion:reduce){.table-page #table #seat0 #turnTimeout:not(.hidden){animation:none}}
+@media(prefers-reduced-motion:reduce){.table-page #table #board > #turnTimeout:not(.hidden){animation:none}}
 
 /* The lower strip reports the current player's real record or the active call. */
 .table-page #table #gameNotice{
