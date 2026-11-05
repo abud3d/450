@@ -25,7 +25,8 @@ const name=()=> $('playerName').value.trim()||'ضيف';
 $('playerName').addEventListener('input',()=>localStorage.setItem('baloot400PlayerName',$('playerName').value));
 const status=m=>{$('status').textContent=m;};
 const emit=(event,data)=>transport.emit(event,data,r=>{if(!r?.ok)status(r?.error||'تعذر الطلب');else status('تم');});
-function sendButtonAction(button,event,data={}){if(!button||button.disabled)return;button.disabled=true;button.classList.add('is-pending');button.setAttribute('aria-busy','true');status('جارٍ إرسال الأمر...');transport.emit(event,{code:roomCode,...data},result=>{if(!result?.ok){button.disabled=false;button.classList.remove('is-pending');button.removeAttribute('aria-busy');status(result?.error||'تعذر تنفيذ الأمر');}else status('تم استلام الأمر.');});}
+function hideTimeoutPrompt(){document.getElementById('turnTimeout')?.classList.add('hidden');}
+function sendButtonAction(button,event,data={}){hideTimeoutPrompt();if(!button||button.disabled)return;button.disabled=true;button.classList.add('is-pending');button.setAttribute('aria-busy','true');status('جارٍ إرسال الأمر...');transport.emit(event,{code:roomCode,...data},result=>{if(!result?.ok){button.disabled=false;button.classList.remove('is-pending');button.removeAttribute('aria-busy');status(result?.error||'تعذر تنفيذ الأمر');}else status('تم استلام الأمر.');});}
 async function authRequest(url,body={}){
  const headers={'Content-Type':'application/json'};const action=new URL(url,location.href).searchParams.get('action');
  if(['profile','logout','logout_all'].includes(action)&&csrfToken)headers['X-CSRF-Token']=csrfToken;
