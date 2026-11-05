@@ -1698,3 +1698,16 @@ body:not(.profile-page) #account{display:none!important}body:not(.create-room-pa
     font-size:7px !important;
   }
 }
+
+
+/* BLT-PHP-19.46: show 20px of each vertically stacked side project card. */
+.table-page .board .seat-left .project-card,
+.table-page .board .seat-right .project-card{
+  margin-bottom:-20px !important;
+}
+@media(max-width:560px){
+  .table-page .board .seat-left .project-card,
+  .table-page .board .seat-right .project-card{
+    margin-bottom:-19px !important;
+  }
+}
